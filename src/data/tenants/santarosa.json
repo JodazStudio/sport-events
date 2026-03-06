@@ -1,0 +1,16 @@
+{
+  "id": "santarosa",
+  "name": "Santa Rosa 10K",
+  "title": "Carrera y Caminata a Santa Rosa de Lima 2025",
+  "description": "Únete a la 1ª Carrera y Caminata a Santa Rosa de Lima el 30 de agosto en Carúpano. 10K y 5K con premios. ¡Vive la pasión del deporte!",
+  "heroImage": "/tenants/santarosa/hero.jpg",
+  "logo": "/tenants/santarosa/logo.png",
+  "primaryColor": "#ff0000",
+  "registrationLink": "https://wa.me/584120000000",
+  "eventDate": "30 de agosto de 2025",
+  "location": "Carúpano, Venezuela",
+  "metadata": {
+    "keywords": ["Carrera", "Santa Rosa", "10K", "Carúpano"],
+    "ogImage": "/tenants/santarosa/og-image.jpg"
+  }
+}
