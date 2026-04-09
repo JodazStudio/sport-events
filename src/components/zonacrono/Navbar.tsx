@@ -5,14 +5,9 @@ import { Menu, X, Timer, Activity } from "lucide-react";
 import Link from "next/link";
 
 const navLinks = [
-  { label: "Inicio", href: "/#inicio" },
-  { label: "Servicios", href: "/#servicios" },
-  { label: "Nosotros", href: "/#nosotros" },
   { label: "Eventos", href: "/#eventos" },
-  // These might need updating depending on where those pages are
-  { label: "Inscripción", href: "/inscripcion", isHighlight: true },
+  { label: "Soluciones", href: "/#servicios" },
   { label: "Live Dashboard", href: "/dashboard", isLive: true },
-  { label: "Contacto", href: "/#contacto" },
 ];
 
 const Navbar = () => {
@@ -45,13 +40,21 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* CTA */}
-        <Link
-          href="/#contacto"
-          className="btn-mechanical hidden bg-primary text-primary-foreground md:inline-flex"
-        >
-          Cotizar
-        </Link>
+        {/* Desktop Actions */}
+        <div className="hidden items-center gap-3 md:flex">
+          <Link
+            href="/login"
+            className="px-4 py-2 font-mono text-xs uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary"
+          >
+            Login
+          </Link>
+          <Link
+            href="/#contacto"
+            className="btn-mechanical bg-primary text-primary-foreground"
+          >
+            Cotiza Aquí
+          </Link>
+        </div>
 
         {/* Mobile toggle */}
         <button
@@ -81,11 +84,18 @@ const Navbar = () => {
               </Link>
             ))}
             <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className="px-3 py-3 font-mono text-xs uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary"
+            >
+              Login
+            </Link>
+            <Link
               href="/#contacto"
               onClick={() => setOpen(false)}
               className="btn-mechanical mt-2 bg-primary text-center text-primary-foreground"
             >
-              Cotizar
+              Cotiza Aquí
             </Link>
           </div>
         </div>

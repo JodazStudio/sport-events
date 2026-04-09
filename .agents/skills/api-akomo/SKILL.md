@@ -1,21 +1,21 @@
 ---
 name: api-akomo-docs
-description: provides detailed technical documentation and interaction guidelines for the akomo backend api (api.akomo.jodaz.xyz).
+description: provides detailed technical documentation and interaction guidelines for the akomo backend api (api.akomo.xyz).
 ---
 # AKomo API Documentation Skill
 
 ## When to use this skill
 - when a user or another agent needs to interact with the AKomo backend API.
 - when exploring the available endpoints for exchange rates and mobile app builds.
-- when planning a new application that consumes data from `api.akomo.jodaz.xyz`.
+- when planning a new application that consumes data from `api.akomo.xyz`.
 - when debugging issues related to fetching BCV, Binance rates, or app builds from the AKomo server.
 
 ## Overview
-The AKomo API serves as the centralized backend for the AKomo mobile application (market tracking / currency exchange). The root domain is `https://api.akomo.jodaz.xyz/api`. It mainly handles:
+The AKomo API serves as the centralized backend for the AKomo mobile application (market tracking / currency exchange). The root domain is `https://api.akomo.xyz/api`. It mainly handles:
 1. **Exchange Rates**: Syncing and providing latest currency rates (USD, EUR, USDT) from sources like BCV and Binance P2P.
 2. **Builds**: Managing the download URLs and versions of the mobile application across platforms.
 
-Interactive documentation is available via Swagger at: `https://api.akomo.jodaz.xyz/api/docs`
+Interactive documentation is available via Swagger at: `https://api.akomo.xyz/api/docs`
 
 ## Necessary Inputs
 None. This skill provides documentation. If making requests, the HTTP client must respect the base URL and standard headers (e.g., `Content-Type: application/json` for POST requests). Standard REST conventions apply. Authentication/Authorization currently relies on environment secrets for protected operations (e.g., Supabase service role), but public `GET` endpoints are open.
