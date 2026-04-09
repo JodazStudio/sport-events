@@ -26,9 +26,9 @@ function getTenantData(tenantId: string): TenantData | null {
   }
 }
 
-export async function generateMetadata(props: { params: Promise<{ tenant: string }> }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ event: string }> }): Promise<Metadata> {
   const params = await props.params;
-  const data = getTenantData(params.tenant);
+  const data = getTenantData(params.event);
   if (!data) return { title: "Not Found" };
 
   return {
@@ -43,9 +43,9 @@ export async function generateMetadata(props: { params: Promise<{ tenant: string
   };
 }
 
-export default async function TenantPage(props: { params: Promise<{ tenant: string }> }) {
+export default async function EventPage(props: { params: Promise<{ event: string }> }) {
   const params = await props.params;
-  const data = getTenantData(params.tenant);
+  const data = getTenantData(params.event);
 
   if (!data) {
     notFound();

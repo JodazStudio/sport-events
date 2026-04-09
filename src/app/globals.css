@@ -1,3 +1,6 @@
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@700,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
@@ -5,8 +8,10 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Poppins", "sans-serif";
+  --font-sans: "Inter", "sans-serif";
   --font-permanent: "Permanent Marker", "cursive";
+  --font-satoshi: "Satoshi", "sans-serif";
+  --font-mono: "Geist Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "liberation mono", "courier new", "monospace";
 
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
@@ -35,6 +40,15 @@
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
 
+  --color-sidebar-background: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
   --color-brand-dark-purple: #0d164d;
   --color-brand-white: #ffffff;
   --color-brand-light-purple: #384594;
@@ -53,10 +67,13 @@
   --animate-scale-in: scale-in 0.5s ease-out;
   --animate-slide-in-right: slide-in-right 0.6s ease-out;
   --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
+  --animate-needle: needle-sweep 2s ease-in-out infinite;
+  --animate-count-up: count-up 0.6s ease-out forwards;
 
   --background-image-gradient-hero: var(--gradient-hero);
   --background-image-gradient-card: var(--gradient-card);
   --background-image-gradient-cta: var(--gradient-cta);
+  --background-image-hero: var(--hero-bg);
 
   @keyframes accordion-down {
     from { height: 0; }
@@ -86,66 +103,117 @@
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.8; transform: scale(1.05); }
   }
+  @keyframes needle-sweep {
+    0% { transform: scaleX(0); transform-origin: left; }
+    50% { transform: scaleX(1); transform-origin: left; }
+    50.01% { transform-origin: right; }
+    100% { transform: scaleX(0); transform-origin: right; }
+  }
+  @keyframes count-up {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
 }
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 200 15% 15%;
+    --background: 0 0% 97%;
+    --foreground: 220 20% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 200 15% 15%;
+    --card-foreground: 220 20% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 200 15% 15%;
-    --primary: 271 81% 56%;
+    --popover-foreground: 220 20% 12%;
+    --primary: 12 90% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 48 96% 53%;
-    --secondary-foreground: 271 81% 20%;
-    --muted: 200 10% 96%;
-    --muted-foreground: 200 10% 45%;
-    --accent: 271 81% 56%;
+    --secondary: 220 14% 92%;
+    --secondary-foreground: 220 20% 12%;
+    --muted: 220 14% 95%;
+    --muted-foreground: 220 10% 46%;
+    --accent: 12 90% 50%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 200 15% 90%;
-    --input: 200 15% 90%;
-    --ring: 271 81% 56%;
-    --radius: 0.75rem;
-    --gradient-hero: linear-gradient(135deg, hsl(271 81% 56%) 0%, hsl(271 70% 45%) 50%, hsl(271 60% 35%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(271 81% 56% / 0.05) 0%, hsl(48 96% 53% / 0.05) 100%);
-    --gradient-cta: linear-gradient(135deg, hsl(48 96% 53%) 0%, hsl(45 95% 50%) 100%);
+    --border: 220 14% 86%;
+    --input: 220 14% 86%;
+    --ring: 12 90% 50%;
+    --radius: 0rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 12 90% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 95%;
+    --sidebar-accent-foreground: 220 20% 12%;
+    --sidebar-border: 220 14% 86%;
+    --sidebar-ring: 12 90% 50%;
+    --hero-bg: 220 20% 10%;
+    --hero-foreground: 0 0% 98%;
   }
 
   .dark {
-    --background: 200 20% 8%;
-    --foreground: 0 0% 98%;
-    --card: 200 18% 12%;
-    --card-foreground: 0 0% 98%;
-    --popover: 200 18% 12%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 271 81% 65%;
+    --background: 220 20% 8%;
+    --foreground: 0 0% 95%;
+    --card: 220 20% 12%;
+    --card-foreground: 0 0% 95%;
+    --popover: 220 20% 12%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 12 90% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 48 96% 60%;
-    --secondary-foreground: 271 81% 20%;
-    --muted: 200 15% 18%;
-    --muted-foreground: 200 10% 65%;
-    --accent: 271 81% 65%;
+    --secondary: 220 14% 18%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 220 14% 18%;
+    --muted-foreground: 220 10% 60%;
+    --accent: 12 90% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 200 15% 20%;
-    --input: 200 15% 20%;
-    --ring: 271 81% 65%;
-    --gradient-hero: linear-gradient(135deg, hsl(271 81% 45%) 0%, hsl(271 70% 35%) 50%, hsl(271 60% 25%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(271 81% 65% / 0.08) 0%, hsl(48 96% 60% / 0.08) 100%);
-    --gradient-cta: linear-gradient(135deg, hsl(48 96% 60%) 0%, hsl(45 95% 55%) 100%);
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 220 14% 20%;
+    --input: 220 14% 20%;
+    --ring: 12 90% 50%;
   }
-}
 
-@layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-satoshi font-black uppercase tracking-tight italic;
+  }
+}
+
+@layer components {
+  .font-mono-data {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .btn-mechanical {
+    @apply relative inline-flex items-center justify-center px-6 py-3 font-bold uppercase tracking-wider text-sm transition-all duration-150;
+    box-shadow: 4px 4px 0px 0px hsl(var(--primary));
+  }
+  .btn-mechanical:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px 0px hsl(var(--primary));
+  }
+  .btn-mechanical:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0px 0px 0px 0px hsl(var(--primary));
+  }
+
+  .btn-mechanical-outline {
+    @apply relative inline-flex items-center justify-center px-6 py-3 font-bold uppercase tracking-wider text-sm transition-all duration-150 border-2;
+    box-shadow: 4px 4px 0px 0px hsl(var(--foreground));
+  }
+  .btn-mechanical-outline:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px 0px hsl(var(--foreground));
+  }
+
+  .blueprint-grid {
+    background-image:
+      linear-gradient(hsl(var(--border)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 40px 40px;
   }
 }
