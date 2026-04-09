@@ -27,6 +27,10 @@ interface AuthState {
   stopImpersonation: () => void;
 }
 
+/**
+ * Zustand store to manage platform authentication and roles.
+ * Fetches the user profile via an internal API route for security.
+ */
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   session: null,
@@ -39,20 +43,42 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setRole: (role) => set({ role }),
   setLoading: (isLoading) => set({ isLoading }),
 
+  /**
+   * Helper to fetch the user profile from the internal API
+   */
+  fetchUserProfile: async (session: Session) => {
+    try {
+      const response = await fetch('/api/auth/profile', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+
+      const profile = await response.json();
+      return profile;
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error);
+      return null;
+    }
+  },
+
   initializeAuth: async () => {
     set({ isLoading: true });
     
-    // Get initial session
+    // 1. Get initial session
     const { data: { session } } = await supabase.auth.getSession();
     
     if (session) {
-      const user = session.user;
-      // Extract role from app_metadata or user_metadata
-      const role = (user.app_metadata?.role as Role) || (user.user_metadata?.role as Role) || 'admin';
+      const profile = await get().fetchUserProfile(session);
+      const role = profile?.role as Role || (session.user.app_metadata?.role as Role) || 'admin';
       
       set({ 
         session, 
-        user, 
+        user: session.user, 
         role,
         isLoading: false 
       });
@@ -60,12 +86,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isLoading: false });
     }
 
-    // Listen for auth changes
+    // 2. Listen for auth changes
     supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
-        const user = session.user;
-        const role = (user.app_metadata?.role as Role) || (user.user_metadata?.role as Role) || 'admin';
-        set({ session, user, role, isLoading: false });
+        const profile = await get().fetchUserProfile(session);
+        const role = profile?.role as Role || (session.user.app_metadata?.role as Role) || 'admin';
+        set({ session, user: session.user, role, isLoading: false });
       } else {
         set({ session: null, user: null, role: null, impersonatedAdminId: null, isLoading: false });
       }
@@ -86,12 +112,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     if (data.session) {
-      const user = data.user;
-      const role = (user.app_metadata?.role as Role) || (user.user_metadata?.role as Role) || 'admin';
+      const profile = await get().fetchUserProfile(data.session);
+      const role = profile?.role as Role || (data.user.app_metadata?.role as Role) || 'admin';
       
       set({ 
         session: data.session, 
-        user, 
+        user: data.user, 
         role, 
         isLoading: false,
         impersonatedAdminId: null 
@@ -104,7 +130,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: async () => {
     set({ isLoading: true });
     await supabase.auth.signOut();
-    // onAuthStateChange will handle the state reset
   },
 
   startImpersonation: (adminId) => {

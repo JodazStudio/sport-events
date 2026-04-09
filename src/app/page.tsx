@@ -8,13 +8,35 @@ import ContactCTA from "@/components/zonacrono/ContactCTA";
 import Footer from "@/components/zonacrono/Footer";
 import Link from "next/link";
 import { Metadata } from "next";
+import { supabase } from "@/lib/supabase";
 
 export const metadata: Metadata = {
   title: "Zonacrono | Cronometraje Deportivo Profesional",
   description: "Soluciones de cronometraje deportivo con tecnología RFID de última generación. Resultados en tiempo real para carreras, triatlones, ciclismo y más.",
 };
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  let eventsData = [];
+  
+  try {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*, categories(*)')
+      .order('created_at', { ascending: false });
+    
+    if (!error && data) {
+      eventsData = data.map((event: any) => ({
+        id: event.slug,
+        date: event.event_date || event.created_at,
+        name: event.name,
+        location: "Venezuela",
+        categories: event.categories?.map((c: any) => c.name).join(" · ") || "Próximamente",
+      }));
+    }
+  } catch (err) {
+    console.error("Error fetching landing events:", err);
+  }
+
   return (
     <div className="min-h-screen bg-background font-sans selection:bg-primary selection:text-primary-foreground">
       <Navbar />
@@ -23,10 +45,10 @@ export default function LandingPage() {
         <StatsBar />
         <AboutSection />
         <ServicesSection />
-        <EventsSection />
+        <EventsSection events={eventsData} />
         <ContactCTA />
         
-        {/* Resultados Section directly here as in source */}
+        {/* Resultados Section */}
         <section id="resultados" className="bg-card py-24">
           <div className="mx-auto max-w-7xl px-4 text-center lg:px-8">
             <div className="mb-6 inline-flex items-center gap-2 border px-4 py-1.5 bg-background">
