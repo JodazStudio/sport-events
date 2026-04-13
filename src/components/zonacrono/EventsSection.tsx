@@ -30,17 +30,17 @@ const EventsSection = ({ events = [] }: EventsSectionProps) => {
   const displayEvents = events.length > 0 ? events : [
     {
       id: "santarosa10k",
-      date: "2026-05-15",
+      date: "2026-08-30",
       name: "Santa Rosa 10K",
       location: "Carúpano, VE",
       categories: "10K · 5K Caminata",
     },
     {
       id: "bici-race",
-      date: "2026-06-22",
+      date: "2026-10-18",
       name: "Bici Race Carúpano",
       location: "Carúpano, VE",
-      categories: "80K Ruta · 40K MTB",
+      categories: "20KM Uphill · 20KM Downhill",
     },
   ];
 
