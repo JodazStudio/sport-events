@@ -11,11 +11,25 @@ import { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 
 export const metadata: Metadata = {
-  title: "Zonacrono | Cronometraje Deportivo Profesional",
-  description: "Soluciones de cronometraje deportivo con tecnología RFID de última generación. Resultados en tiempo real para carreras, triatlones, ciclismo y más.",
+  title: "Zonacrono | Software y Promoción para Eventos Deportivos",
+  description: "Plataforma integral para inscripciones, gestión de resultados en tiempo real y estrategias de promoción para carreras, triatlones y eventos deportivos.",
+  alternates: {
+    canonical: '/',
+  }
 };
 
 export default async function LandingPage() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Zonacrono',
+    url: 'https://zonacrono.com',
+    description: 'Plataforma integral para gestión, software y promoción de eventos deportivos.',
+    sameAs: [
+      'https://instagram.com/zonacrono',
+    ]
+  };
+
   let eventsData = [];
   
   try {
@@ -41,6 +55,10 @@ export default async function LandingPage() {
     <div className="min-h-screen bg-background font-sans selection:bg-primary selection:text-primary-foreground">
       <Navbar />
       <main>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <HeroSection />
         <StatsBar />
         <AboutSection />
