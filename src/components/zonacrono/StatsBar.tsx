@@ -1,11 +1,11 @@
 "use client";
 
-import { Signal, Cpu, Radio, HeadphonesIcon } from "lucide-react";
+import { Signal, Laptop, Radio, HeadphonesIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const stats = [
   { icon: Signal, value: "100%", label: "Cobertura", suffix: "" },
-  { icon: Cpu, value: "RFID", label: "Tecnología", suffix: "" },
+  { icon: Laptop, value: "WEB", label: "Plataforma", suffix: "" },
   { icon: Radio, value: "LIVE", label: "Resultados", suffix: "" },
   { icon: HeadphonesIcon, value: "24/7", label: "Soporte", suffix: "" },
 ];

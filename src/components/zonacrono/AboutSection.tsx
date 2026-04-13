@@ -1,10 +1,10 @@
 import { CheckCircle } from "lucide-react";
 
 const points = [
-  "Tecnología RFID con chips desechables y reutilizables",
-  "Resultados en tiempo real publicados al instante",
-  "Equipo técnico certificado en eventos internacionales",
-  "Cobertura completa desde inscripción hasta resultados",
+  "Plataforma integral de inscripciones y pagos",
+  "Publicación inmediata de resultados en tiempo real",
+  "Promoción de tu evento para maximizar asistencia",
+  "Software en la nube accesible desde cualquier dispositivo",
 ];
 
 const AboutSection = () => {
@@ -27,9 +27,9 @@ const AboutSection = () => {
           </h2>
 
           <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-            Somos una empresa dedicada al cronometraje profesional de eventos deportivos.
-            Combinamos la última tecnología con un equipo apasionado por el deporte para
-            entregar resultados precisos, confiables y en tiempo real.
+            Somos profesionales dedicados a la gestión y promoción de eventos deportivos.
+            Combinamos software avanzado con un equipo experto para entregarte la mejor
+            plataforma de inscripciones, difusión y resultados en tiempo real.
           </p>
 
           {/* Bullet points */}

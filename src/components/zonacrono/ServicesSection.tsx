@@ -1,19 +1,10 @@
 import {
-  Timer,
   ClipboardList,
   BarChart3,
-  Clock,
-  Truck,
-  Award,
+  Megaphone,
 } from "lucide-react";
 
 const services = [
-  {
-    icon: Timer,
-    title: "Cronometraje Digital",
-    description:
-      "Sistema RFID de alta precisión con chips desechables y reutilizables para todo tipo de competencias.",
-  },
   {
     icon: ClipboardList,
     title: "Plataforma de Inscripción",
@@ -22,27 +13,15 @@ const services = [
   },
   {
     icon: BarChart3,
-    title: "Resultados Online",
+    title: "Gestión de Resultados",
     description:
-      "Publicación instantánea de resultados en tiempo real accesibles desde cualquier dispositivo.",
+      "Centralización y publicación de resultados en tiempo real accesibles desde cualquier dispositivo.",
   },
   {
-    icon: Clock,
-    title: "Cronometraje Manual",
+    icon: Megaphone,
+    title: "Difusión y Promoción",
     description:
-      "Solución económica con cronómetros profesionales para eventos de menor escala.",
-  },
-  {
-    icon: Truck,
-    title: "Logística Integral",
-    description:
-      "Montaje completo de arcos de meta, señalización de ruta y puntos de control.",
-  },
-  {
-    icon: Award,
-    title: "Certificación Profesional",
-    description:
-      "Certificados digitales y físicos de finalización con tiempos oficiales verificados.",
+      "Estrategias de marketing y promoción para destacar tu evento y llegar a más atletas.",
   },
 ];
 
@@ -63,7 +42,7 @@ const ServicesSection = () => {
             <span className="text-primary">INTEGRALES</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Todo lo que necesitas para un evento cronometrado de clase mundial.
+            Todo lo que necesitas para potenciar y organizar tu evento de clase mundial.
           </p>
         </div>
 

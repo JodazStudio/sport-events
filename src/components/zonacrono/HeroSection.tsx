@@ -26,23 +26,23 @@ const HeroSection = () => {
         <div className="mb-6 inline-flex items-center gap-2 border border-primary/30 px-4 py-1.5">
           <span className="h-2 w-2 bg-primary animate-pulse" />
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-            Cronometraje Profesional
+            Software de Gestión Total
           </span>
         </div>
 
         {/* Headline */}
         <h1 className="font-satoshi text-5xl font-black leading-[0.95] tracking-tight md:text-7xl lg:text-8xl italic">
-          PRECISIÓN EN
+          IMPULSA TUS
           <br />
-          <span className="text-primary">LA LÍNEA</span>
+          <span className="text-primary">EVENTOS</span>
           <br />
-          DE META
+          DEPORTIVOS
         </h1>
 
         {/* Subheadline */}
         <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-hero-foreground/70 md:text-xl font-medium">
-          Soluciones de cronometraje deportivo con tecnología RFID de última generación.
-          Resultados en tiempo real para carreras, triatlones, ciclismo y más.
+          Soluciones de software y promoción para eventos deportivos.
+          Inscripciones, gestión y publicación de resultados en un solo lugar.
         </p>
 
         {/* CTA Buttons */}
