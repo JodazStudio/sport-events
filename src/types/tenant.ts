@@ -65,5 +65,6 @@ export interface TenantData {
   metadata: {
     keywords: string[];
     ogImage: string;
+    gallery?: string[];
   };
 }

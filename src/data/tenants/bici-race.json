@@ -5,7 +5,7 @@
   "year": "2026",
   "subtitle": "Desafío de Ciclismo de Ruta",
   "description": "El evento de ciclismo más importante del oriente venezolano. Pon a prueba tus piernas en un recorrido de 40 kilómetros (20KM Uphill, 20KM Downhill) por la costa del Caribe, con paisajes espectaculares y un nivel competitivo de primer orden.",
-  "heroImage": "https://images.unsplash.com/photo-1541625602330-2277a1cd1f59?q=80&w=2070&auto=format&fit=crop",
+  "heroImage": "/tenants/bici-race/assets/hero.png",
   "logo": "",
   "primaryColor": "#3b82f6",
   "secondaryColor": "#1e40af",

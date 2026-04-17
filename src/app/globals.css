@@ -135,6 +135,12 @@
   --color-brand-yellow: #ffdb4a;
   --color-brand-dark-green: #000f00;
 
+  --color-ember: hsl(14 78% 57%);
+  --color-ember-foreground: hsl(0 0% 100%);
+  --color-charcoal: hsl(0 0% 10%);
+  --color-charcoal-light: hsl(0 0% 18%);
+  --color-charcoal-lighter: hsl(0 0% 25%);
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -226,6 +232,12 @@
     --sidebar-ring: 12 90% 50%;
     --hero-bg: 220 20% 10%;
     --hero-foreground: 0 0% 98%;
+
+    --ember: 14 78% 57%;
+    --ember-foreground: 0 0% 100%;
+    --charcoal: 0 0% 10%;
+    --charcoal-light: 0 0% 18%;
+    --charcoal-lighter: 0 0% 25%;
   }
 
   .dark {
@@ -259,6 +271,12 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-satoshi font-black uppercase tracking-tight italic;
   }
+  button, [role="button"], a {
+    @apply cursor-pointer;
+  }
+  button:disabled, [role="button"][aria-disabled="true"] {
+    @apply cursor-not-allowed;
+  }
 }
 
 @layer components {
@@ -268,7 +286,7 @@
   }
 
   .btn-mechanical {
-    @apply relative inline-flex items-center justify-center px-6 py-3 font-bold uppercase tracking-wider text-sm transition-all duration-150;
+    @apply relative inline-flex items-center justify-center px-6 py-3 font-bold uppercase tracking-wider text-sm transition-all duration-150 cursor-pointer;
     box-shadow: 4px 4px 0px 0px hsl(var(--primary));
   }
   .btn-mechanical:hover {
@@ -281,7 +299,7 @@
   }
 
   .btn-mechanical-outline {
-    @apply relative inline-flex items-center justify-center px-6 py-3 font-bold uppercase tracking-wider text-sm transition-all duration-150 border-2;
+    @apply relative inline-flex items-center justify-center px-6 py-3 font-bold uppercase tracking-wider text-sm transition-all duration-150 border-2 cursor-pointer;
     box-shadow: 4px 4px 0px 0px hsl(var(--foreground));
   }
   .btn-mechanical-outline:hover {

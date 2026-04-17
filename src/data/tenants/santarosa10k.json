@@ -5,7 +5,7 @@
   "year": "2026",
   "subtitle": "Carrera & Caminata Solidaria",
   "description": "La edición 2026 de la Santa Rosa 10K regresa a Carúpano. Un evento diseñado para corredores de todos los niveles, recorriendo las calles históricas y la brisa marina de nuestra ciudad. Únete a cientos de atletas en esta celebración deportiva única.",
-  "heroImage": "https://images.unsplash.com/photo-1532444458054-015fddf2b2cd?q=80&w=2070&auto=format&fit=crop",
+  "heroImage": "/tenants/santarosa10k/assets/hero.png",
   "logo": "/tenants/santarosa/assets/logos/SANTAROSA3_transparent.png",
   "primaryColor": "#D50F17",
   "secondaryColor": "#FFDB4A",
