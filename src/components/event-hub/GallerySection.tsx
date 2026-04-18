@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, ImageIcon } from "lucide-react";
 import type { GalleryImage } from "./types";
+import AnimatedContent from "../AnimatedContent";
 
 interface GallerySectionProps {
   images?: GalleryImage[];
@@ -12,27 +13,36 @@ const GallerySection = ({ images }: GallerySectionProps) => {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
   return (
-    <section id="galeria" className="py-20 bg-background">
+    <section id="galeria" className="py-20 bg-background overflow-hidden">
       <div className="container mx-auto px-4">
-        <h2 className="font-satoshi font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-foreground mb-12 text-center italic uppercase tracking-tighter">
-          Galería
-        </h2>
+        <AnimatedContent>
+          <h2 className="font-satoshi font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-foreground mb-12 text-center italic uppercase tracking-tighter">
+            Galería
+          </h2>
+        </AnimatedContent>
         {images && images.length > 0 ? (
           <>
             <div className="columns-2 md:columns-3 lg:columns-4 gap-4 max-w-6xl mx-auto">
               {images.map((img, idx) => (
-                <div
-                  key={img.id}
-                  className="mb-4 break-inside-avoid cursor-pointer group"
-                  onClick={() => setLightboxIdx(idx)}
+                <AnimatedContent 
+                  key={img.id} 
+                  delay={0.1 + (idx % 8) * 0.05} 
+                  distance={30} 
+                  scale={0.95}
+                  className="mb-4 break-inside-avoid"
                 >
-                  <img
-                    src={img.url}
-                    alt={img.alt}
-                    className="w-full cursor-pointer rounded-none border-2 border-border group-hover:border-ember transition-all group-hover:opacity-90"
-                    loading="lazy"
-                  />
-                </div>
+                  <div
+                    className="cursor-pointer group"
+                    onClick={() => setLightboxIdx(idx)}
+                  >
+                    <img
+                      src={img.url}
+                      alt={img.alt}
+                      className="w-full cursor-pointer rounded-none border-2 border-border group-hover:border-ember transition-all group-hover:opacity-90"
+                      loading="lazy"
+                    />
+                  </div>
+                </AnimatedContent>
               ))}
             </div>
 

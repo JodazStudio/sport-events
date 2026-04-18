@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import AnimatedContent from "../AnimatedContent";
 
 const navLinks = [
   { label: "Detalles", href: "#detalles" },
@@ -64,26 +65,30 @@ const StickyNav = ({ eventSlug }: StickyNavProps) => {
         </button>
 
         {/* Desktop Links - hidden on mobile */}
-        <div className="hidden lg:flex items-center gap-2">
-          {navLinks.map((link) => (
-            <button
-              key={link.href}
-              onClick={() => scrollTo(link.href)}
-              className="px-4 py-1 cursor-pointer text-xs font-satoshi font-bold uppercase tracking-widest text-muted-foreground hover:text-ember transition-colors rounded-none"
-            >
-              {link.label}
-            </button>
-          ))}
-        </div>
+        <AnimatedContent distance={20} direction="horizontal" delay={0.2}>
+          <div className="hidden lg:flex items-center gap-2">
+            {navLinks.map((link) => (
+              <button
+                key={link.href}
+                onClick={() => scrollTo(link.href)}
+                className="px-4 py-1 cursor-pointer text-xs font-satoshi font-bold uppercase tracking-widest text-muted-foreground hover:text-ember transition-colors rounded-none"
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
+        </AnimatedContent>
 
         {eventSlug && (
-          <Link href={`/${eventSlug}/inscripciones`}>
-            <Button
-              className="bg-ember text-ember-foreground hover:bg-ember/90 font-satoshi font-bold uppercase tracking-widest text-[10px] sm:text-xs rounded-none shadow-[2px_2px_0px_0px_rgba(255,255,255,0.3)] hover:shadow-none transition-all px-3 sm:px-4"
-            >
-              Inscribirse
-            </Button>
-          </Link>
+          <AnimatedContent distance={20} direction="horizontal" reverse delay={0.4}>
+            <Link href={`/${eventSlug}/inscripciones`}>
+              <Button
+                className="bg-ember text-ember-foreground hover:bg-ember/90 font-satoshi font-bold uppercase tracking-widest text-[10px] sm:text-xs rounded-none shadow-[2px_2px_0px_0px_rgba(255,255,255,0.3)] hover:shadow-none transition-all px-3 sm:px-4"
+              >
+                Inscribirse
+              </Button>
+            </Link>
+          </AnimatedContent>
         )}
       </div>
 

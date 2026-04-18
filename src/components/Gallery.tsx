@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { X } from "lucide-react";
 import race1 from "@/assets/gallery/race-1.jpg";
