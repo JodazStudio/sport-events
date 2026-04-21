@@ -1,4 +1,4 @@
-import PaymentsView from "@/components/dashboard/payments-view";
+import { PaymentsView } from "@/components/dashboard";
 
 export default function PaymentsPage() {
   return <PaymentsView />;

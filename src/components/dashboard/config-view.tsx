@@ -11,7 +11,7 @@ import {
   Check,
   X
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { 
   Table, 
   TableBody, 
@@ -19,17 +19,17 @@ import {
   TableHead, 
   TableHeader, 
   TableRow 
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+} from "../ui/table";
+import { Button } from "../ui/button";
+import { Switch } from "../ui/switch";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
+} from "../ui/dropdown-menu";
+import { Badge } from "../ui/badge";
 
 const stages = [
   { id: 1, name: "Preventa 1", price: "25.00", capacity: 100, active: true },
@@ -44,7 +44,7 @@ const categories = [
   { id: 4, name: "Master B Femenino", gender: "Femenino", minAge: 40, maxAge: 49 },
 ];
 
-export default function ConfigView() {
+export function ConfigView() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -187,3 +187,4 @@ export default function ConfigView() {
     </div>
   );
 }
+

@@ -1,5 +1,4 @@
-import OverviewView from "@/components/dashboard/overview-view";
-import LiveResultsView from "@/components/dashboard/live-results-view";
+import { OverviewView, LiveResultsView } from "@/components/dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LayoutDashboard, Activity } from "lucide-react";
 

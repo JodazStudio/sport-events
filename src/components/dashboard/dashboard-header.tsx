@@ -21,11 +21,11 @@ import {
   DropdownMenuLabel, 
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useAuthStore } from "@/store/useAuthStore";
+} from "../ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { useAuthStore } from "@/store";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 
@@ -42,12 +42,11 @@ export function DashboardHeader() {
   const [lastUpdate, setLastUpdate] = useState<string>("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  const { role, impersonatedAdminId, logout, stopImpersonation } = useAuthStore();
+  const { role, logout } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
 
-  const isImpersonating = !!impersonatedAdminId;
-  const showSuperadminUI = role === 'superadmin' && !isImpersonating;
+  const showSuperadminUI = role === 'superadmin';
 
   const adminNavItems = [
     { title: "Resumen", url: "/dashboard/overview", icon: LayoutDashboard },
@@ -96,15 +95,15 @@ export function DashboardHeader() {
         {/* Logo Section */}
         <Link href="/dashboard" className="flex items-center gap-3 mr-8 shrink-0">
           <div className="h-9 w-9 bg-black flex items-center justify-center font-black text-white italic shadow-[3px_3px_0px_0px_hsl(var(--primary))]">
-            {showSuperadminUI || isImpersonating ? <ShieldCheck className="size-5 text-primary" /> : "ZC"}
+            {showSuperadminUI ? <ShieldCheck className="size-5 text-primary" /> : "ZC"}
           </div>
           <div className="flex flex-col">
             <span className="font-satoshi font-black uppercase tracking-tight text-xl italic leading-none">
               Zona<span className="text-primary">crono</span>
             </span>
-            {(showSuperadminUI || isImpersonating) && (
+            {showSuperadminUI && (
               <span className="font-mono text-[7px] uppercase tracking-[0.2em] text-primary font-bold">
-                {isImpersonating ? "MODO DIOS" : "Superadmin"}
+                Superadmin
               </span>
             )}
           </div>
@@ -139,18 +138,6 @@ export function DashboardHeader() {
 
         {/* Right Section: Rates + Profile + Hamburger */}
         <div className="flex items-center gap-3 ml-auto">
-          {/* Stop Impersonation Button */}
-          {isImpersonating && (
-            <Button 
-              variant="destructive" 
-              size="sm" 
-              onClick={stopImpersonation}
-              className="h-9 rounded-none bg-red-600 hover:bg-red-700 font-black italic uppercase text-[10px] tracking-widest px-4 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all gap-2"
-            >
-              <RefreshCw className="h-3 w-3 animate-spin-slow" />
-              SALIR MODO DIOS
-            </Button>
-          )}
 
           <Badge 
             variant="outline" 
@@ -269,8 +256,8 @@ export function DashboardHeader() {
             </div>
             
             <div className="p-4 border-t flex items-center gap-2 font-mono text-[9px] text-muted-foreground uppercase bg-muted/20">
-              <div className={`h-1.5 w-1.5 rounded-full ${isImpersonating ? 'bg-amber-500 animate-bounce' : 'bg-green-500 animate-pulse'}`} />
-              {isImpersonating ? 'Modo Dios Activo' : 'Sistema Operacional'}
+              <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+              Sistema Operacional
             </div>
           </nav>
         </div>

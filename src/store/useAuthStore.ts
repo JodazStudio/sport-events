@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib';
 import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 export type Role = 'superadmin' | 'admin';
@@ -9,7 +9,6 @@ interface AuthState {
   session: Session | null;
   isLoading: boolean;
   role: Role | null;
-  impersonatedAdminId: string | null;
   
   // Actions
   setSession: (session: Session | null) => void;
@@ -22,10 +21,6 @@ interface AuthState {
   login: (email: string, password: string) => Promise<{ error: string | null }>;
   logout: () => Promise<void>;
   fetchUserProfile: (session: Session) => Promise<any>;
-  
-  // God Mode (Impersonation)
-  startImpersonation: (adminId: string) => void;
-  stopImpersonation: () => void;
 }
 
 /**
@@ -37,7 +32,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   session: null,
   isLoading: true,
   role: null,
-  impersonatedAdminId: null,
 
   setSession: (session) => set({ session }),
   setUser: (user) => set({ user }),
@@ -94,7 +88,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         const role = profile?.role as Role || (session.user.app_metadata?.role as Role) || 'admin';
         set({ session, user: session.user, role, isLoading: false });
       } else {
-        set({ session: null, user: null, role: null, impersonatedAdminId: null, isLoading: false });
+        set({ session: null, user: null, role: null, isLoading: false });
       }
     });
   },
@@ -120,8 +114,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         session: data.session, 
         user: data.user, 
         role, 
-        isLoading: false,
-        impersonatedAdminId: null 
+        isLoading: false
       });
     }
     
@@ -131,16 +124,5 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   logout: async () => {
     set({ isLoading: true });
     await supabase.auth.signOut();
-  },
-
-  startImpersonation: (adminId) => {
-    set((state) => {
-      if (state.role !== 'superadmin') return state;
-      return { impersonatedAdminId: adminId };
-    });
-  },
-
-  stopImpersonation: () => {
-    set({ impersonatedAdminId: null });
   },
 }));

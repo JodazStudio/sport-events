@@ -15,7 +15,7 @@ import {
   KeyRound,
   Trash2
 } from "lucide-react";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore } from "@/store";
 import { 
   Table, 
   TableBody, 
@@ -23,7 +23,7 @@ import {
   TableHead, 
   TableHeader, 
   TableRow 
-} from "@/components/ui/table";
+} from "@/components/ui";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -31,9 +31,9 @@ import {
   DropdownMenuLabel, 
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui";
+import { Button } from "@/components/ui";
+import { Badge } from "@/components/ui";
 import {
   Dialog,
   DialogContent,
@@ -42,16 +42,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/components/ui";
+import { Input } from "@/components/ui";
+import { Label } from "@/components/ui";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Manager } from "@/app/api/managers/route";
 
 export default function ManagersPage() {
-  const startImpersonation = useAuthStore((state) => state.startImpersonation);
+  const startImpersonation = useAuthStore((state: any) => state.startImpersonation);
   const [managers, setManagers] = useState<Manager[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);

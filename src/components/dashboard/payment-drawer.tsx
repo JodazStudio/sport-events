@@ -17,10 +17,10 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter
-} from "@/components/ui/sheet"; // Using Sheet for the right-side slide-out drawer
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+} from "../ui/sheet";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Separator } from "../ui/separator";
 
 interface Payment {
   id: string;

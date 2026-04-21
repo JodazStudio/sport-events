@@ -18,12 +18,12 @@ import {
   Layout
 } from 'lucide-react';
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui';
+import { Input } from '@/components/ui';
+import { Textarea } from '@/components/ui';
+import { Button } from '@/components/ui';
+import { Switch } from '@/components/ui';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui';
 import { 
   Dialog, 
   DialogContent, 
@@ -31,8 +31,8 @@ import {
   DialogFooter, 
   DialogHeader, 
   DialogTitle 
-} from '@/components/ui/dialog';
-import { useAuthStore } from '@/store/useAuthStore';
+} from '@/components/ui';
+import { useAuthStore } from '@/store';
 
 // --- ZOD SCHEMA ---
 const eventSchema = z.object({

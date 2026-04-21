@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { notFound, useParams } from 'next/navigation';
-import { TenantData } from "@/types/tenant";
-import EventHubTemplate from "@/components/event-hub/EventHubTemplate";
+import { TenantData } from "@/types";
+import { EventHubTemplate } from "@/components/events";
 import { Loader2 } from 'lucide-react';
 
 export default function EventPage() {

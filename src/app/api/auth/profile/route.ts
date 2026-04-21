@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin, supabase } from '@/lib/supabase';
+import { supabaseAdmin, supabase } from '@/lib';
 
 /**
  * GET: Fetch the user's role and profile data from the managers table.

@@ -1,14 +1,7 @@
-import Navbar from "@/components/zonacrono/Navbar";
-import HeroSection from "@/components/zonacrono/HeroSection";
-import StatsBar from "@/components/zonacrono/StatsBar";
-import AboutSection from "@/components/zonacrono/AboutSection";
-import ServicesSection from "@/components/zonacrono/ServicesSection";
-import EventsSection from "@/components/zonacrono/EventsSection";
-import ContactCTA from "@/components/zonacrono/ContactCTA";
-import Footer from "@/components/zonacrono/Footer";
+import { Navbar, HeroSection, StatsBar, AboutSection, ServicesSection, EventsSection, ContactCTA, Footer } from "@/components/landing";
 import Link from "next/link";
 import { Metadata } from "next";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib";
 
 export const metadata: Metadata = {
   title: "Zonacrono | Software y Promoción para Eventos Deportivos",

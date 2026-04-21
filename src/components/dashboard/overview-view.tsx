@@ -9,10 +9,10 @@ import {
   AlertCircle,
   Activity
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Progress } from "../ui/progress";
 
-export default function OverviewView() {
+export function OverviewView() {
   const kpis = [
     {
       title: "Inscripciones Totales",
@@ -144,3 +144,4 @@ export default function OverviewView() {
     </div>
   );
 }
+

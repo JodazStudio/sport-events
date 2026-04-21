@@ -1,19 +1,19 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import RaceStats from "@/components/zonacrono/dashboard/RaceStats";
-import LiveLeaderboard from "@/components/zonacrono/dashboard/LiveLeaderboard";
-import FinishLineTicker from "@/components/zonacrono/dashboard/FinishLineTicker";
-import CourseProgress from "@/components/zonacrono/dashboard/CourseProgress";
-import AthleteModal from "@/components/zonacrono/dashboard/AthleteModal";
-import { Athlete, INITIAL_ATHLETES } from "@/lib/mock-race-data";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { RaceStats } from "./RaceStats";
+import { LiveLeaderboard } from "./LiveLeaderboard";
+import { FinishLineTicker } from "./FinishLineTicker";
+import { CourseProgress } from "./CourseProgress";
+import { AthleteModal } from "./AthleteModal";
+import { Athlete, INITIAL_ATHLETES } from "@/lib";
+import { Switch } from "../ui/switch";
+import { Label } from "../ui/label";
 import { toast } from "sonner";
 
 const MAX_DISTANCE = 42.195;
 
-export default function LiveResultsView() {
+export function LiveResultsView() {
   const [athletes, setAthletes] = useState<Athlete[]>(INITIAL_ATHLETES);
   const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
   const [isAnnouncerMode, setIsAnnouncerMode] = useState(false);
@@ -161,3 +161,4 @@ export default function LiveResultsView() {
     </div>
   );
 }
+

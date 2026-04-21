@@ -19,15 +19,15 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib";
+import { Input } from "@/components/ui";
+import { Label } from "@/components/ui";
+import { RadioGroup, RadioGroupItem } from "@/components/ui";
+import { Button } from "@/components/ui";
+import { Calendar } from "@/components/ui";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui";
 import { toast } from "sonner";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/ui";
 
 // --- Types ---
 interface EventData {

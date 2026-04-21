@@ -1,8 +1,8 @@
 "use client";
 
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore } from "@/store";
 import { AlertCircle, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../ui/button";
 
 export function GodModeBanner() {
   const { impersonatedAdminId, stopImpersonation, role } = useAuthStore();

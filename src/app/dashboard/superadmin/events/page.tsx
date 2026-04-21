@@ -9,8 +9,8 @@ import {
   TableHead, 
   TableHeader, 
   TableRow 
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+} from '@/components/ui';
+import { Button } from '@/components/ui';
 import { 
   Dialog, 
   DialogContent, 
@@ -19,7 +19,7 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogTrigger 
-} from '@/components/ui/dialog';
+} from '@/components/ui';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -27,19 +27,19 @@ import {
   DropdownMenuLabel, 
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from '@/components/ui';
+import { Input } from '@/components/ui';
+import { Label } from '@/components/ui';
 import { 
   Select, 
   SelectContent, 
   SelectItem, 
   SelectTrigger, 
   SelectValue 
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+} from '@/components/ui';
+import { Badge } from '@/components/ui';
 import { toast } from 'sonner';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthStore } from '@/store';
 import { 
   MoreHorizontal, 
   Plus, 

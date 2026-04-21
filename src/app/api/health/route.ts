@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib';
 
 // Ensure the route is always treated as dynamic and not pre-rendered
 export const dynamic = 'force-dynamic';

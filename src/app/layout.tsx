@@ -47,8 +47,8 @@ export const metadata: Metadata = {
   },
 };
 
-import { AuthInitializer } from "@/components/auth/auth-initializer";
-import { Toaster } from "@/components/ui/sonner";
+import { AuthInitializer } from "@/components/auth";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 
 export default function RootLayout({
   children,
@@ -62,7 +62,7 @@ export default function RootLayout({
       >
         <AuthInitializer>
           {children}
-          <Toaster position="top-right" richColors />
+          <SonnerToaster position="top-right" richColors />
         </AuthInitializer>
       </body>
     </html>
