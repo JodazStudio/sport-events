@@ -9,6 +9,7 @@ description: provides detailed technical documentation and interaction guideline
 - when exploring the available endpoints for exchange rates and mobile app builds.
 - when planning a new application that consumes data from `api.akomo.xyz`.
 - when debugging issues related to fetching BCV, Binance rates, or app builds from the AKomo server.
+- **Note**: For event-specific data (results, participant counts, etc.), prioritize the project's internal `/api/events` layer, which may consume Akomo API data internally.
 
 ## Overview
 The AKomo API serves as the centralized backend for the AKomo mobile application (market tracking / currency exchange). The root domain is `https://api.akomo.xyz/api`. It mainly handles:

@@ -31,8 +31,8 @@ Does it need...?
 
 | Type | Use |
 |------|-----|
-| **Server** | Data fetching, layout, static content |
-| **Client** | Forms, buttons, interactive UI |
+| **Server** | Data fetching, layout, static content (**Default**) |
+| **Client** | Interactive UI elements (**Leaves only**: buttons, inputs, hooks) |
 
 ---
 
@@ -100,6 +100,12 @@ Does it need...?
 
 ## 5. Performance Principles
 
+### Core Pillars
+
+- **Streaming**: Use `Suspense` for progressive loading of slow data.
+- **Image Optimization**: Always use `next/image` with proper priority/sizes.
+- **Server Components**: Keep logic on the server to reduce client bundle size.
+
 ### Image Optimization
 
 - Use next/image component
@@ -122,7 +128,7 @@ Does it need...?
 | Type | Use |
 |------|-----|
 | Static export | Fixed metadata |
-| generateMetadata | Dynamic per-route |
+| **generateMetadata** | Dynamic per-route (Standard for events/dynamic content) |
 
 ### Essential Tags
 
@@ -164,13 +170,31 @@ Does it need...?
 ### Best Practices
 
 - Mark with 'use server'
-- Validate all inputs
+- **Validate all inputs with Zod**
+- **End-to-End Type Safety**: Use Server Actions to eliminate manual fetch types.
 - Return typed responses
-- Handle errors
+- Handle errors gracefully
 
 ---
 
-## 9. Anti-Patterns
+### Maintainability
+
+### Barrel Exports (Mandatory by Default)
+- **Always** use `index.ts` files in every directory under `src/components/` and `src/features/`.
+- Re-export all public components, hooks, and utilities.
+- Standardize imports using the root alias: `import { Button, Input } from '@/components/ui'`.
+
+### Features Directory
+- Organize by **features** rather than technical layers (e.g., `src/features/auth`, `src/features/events`).
+- Each feature must contain an `index.ts` re-exporting its public API.
+
+### Data Validation
+- **Always validate data with Zod** (API responses, form inputs, server action arguments).
+- Create shared schemas for reuse across client and server.
+
+---
+
+## 10. Anti-Patterns
 
 | ❌ Don't | ✅ Do |
 |----------|-------|
@@ -182,20 +206,35 @@ Does it need...?
 
 ---
 
-## 10. Project Structure
+## 10. Styling & Aesthetic Principles
+
+**CRITICAL**: All styling must follow these project-specific rules.
+
+### Tailwind-Only
+- **Utility Classes Only**: Use Tailwind utility classes for all styling.
+- **No Custom CSS**: Avoid custom CSS files or inline styles unless for dynamic values.
+- **Consistency**: Use predefined design tokens (colors, spacing, typography).
+
+### Premium Aesthetics
+- **Rich Design**: Implement vibrant colors, dark modes, and glassmorphism.
+- **Visual Excellence**: Avoid generic colors. Use curated, harmonious palettes.
+- **Animations**: Use smooth gradients and subtle micro-animations for interactions.
+- **Dynamic UI**: Ensure the interface feels responsive and alive with hover effects.
+
+---
+
+## 11. Project Structure
 
 ```
-app/
-├── (marketing)/     # Route group
-│   └── page.tsx
-├── (dashboard)/
-│   ├── layout.tsx   # Dashboard layout
-│   └── page.tsx
-├── api/
-│   └── [resource]/
-│       └── route.ts
-└── components/
-    └── ui/
+src/
+├── app/             # Routing and pages
+├── features/        # Feature-based logic (Standard)
+│   ├── events/
+│   └── auth/
+├── components/      # Shared UI components
+│   └── ui/
+├── lib/             # Shared utilities
+└── types/           # Shared global types
 ```
 
 ---
