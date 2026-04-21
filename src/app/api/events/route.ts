@@ -1,39 +1,68 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * GET: Fetch events for the logged-in manager or a specific event by slug/id.
+ * Supports impersonation for superadmins.
+ */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get('slug');
+    const id = searchParams.get('id');
+    const impersonateId = request.headers.get('x-impersonate-id');
+
+    const authHeader = request.headers.get('Authorization');
+    let userId: string | null = null;
+    let isSuperadmin = false;
+
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      const { data: { user } } = await supabase.auth.getUser(token);
+      userId = user?.id || null;
+
+      if (userId) {
+        // Check if user is superadmin
+        const { data: profile } = await supabaseAdmin!
+          .from('managers')
+          .select('role')
+          .eq('id', userId)
+          .single();
+        isSuperadmin = profile?.role === 'superadmin';
+      }
+    }
+
+    // Determine target manager ID
+    const targetManagerId = (isSuperadmin && impersonateId) ? impersonateId : userId;
 
     let query = supabase.from('events').select('*');
 
-    if (slug) {
-      query = query.eq('id', slug).single();
-    } else {
-      query = query.order('created_at', { ascending: true });
+    if (id) {
+      query = query.eq('id', id);
+    } else if (slug) {
+      query = query.eq('slug', slug);
+    } else if (targetManagerId) {
+      query = query.eq('manager_id', targetManagerId);
     }
 
-    const { data, error } = await query;
-
-    if (error) {
-      // If client is unconfigured or table missing, handle gracefully
-      if (error.code === 'PGRST116') { // Not found for single query
-        return NextResponse.json({
-          status: 'error',
-          message: 'Event not found',
-        }, { status: 404 });
+    // If it's a specific request, we want a single object
+    if (id || slug) {
+      const { data, error } = await query.single();
+      if (error) {
+        if (error.code === 'PGRST116') return NextResponse.json({ error: 'Event not found' }, { status: 404 });
+        throw error;
       }
-
-      throw error;
+      return NextResponse.json({ status: 'success', data });
     }
 
-    return NextResponse.json({
-      status: 'success',
-      data: data,
-    });
+    // Otherwise return list
+    const { data, error } = await query.order('created_at', { ascending: false });
+    if (error) throw error;
+
+    return NextResponse.json({ status: 'success', data });
+
   } catch (err) {
     console.error('Error fetching events:', err);
     return NextResponse.json({
@@ -72,7 +101,6 @@ export async function POST(request: Request) {
       strava_url 
     } = body;
 
-    // Basic server-side validation
     if (!name || !slug || !event_date || !event_time) {
       return NextResponse.json({ error: 'Name, slug, date, and time are required' }, { status: 400 });
     }
@@ -98,28 +126,75 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      if (error.code === '23505') { // Unique constraint for slug
-        return NextResponse.json({ error: 'The event slug is already in use' }, { status: 400 });
-      }
+      if (error.code === '23505') return NextResponse.json({ error: 'The event slug is already in use' }, { status: 400 });
       throw error;
     }
 
-    return NextResponse.json({
-      status: 'success',
-      data: data
-    }, { status: 201 });
+    return NextResponse.json({ status: 'success', data }, { status: 201 });
 
   } catch (err) {
     console.error('Error creating event:', err);
-    return NextResponse.json({
-      status: 'error',
-      message: 'Failed to create event',
-      details: err instanceof Error ? err.message : String(err)
-    }, { status: 500 });
+    return NextResponse.json({ status: 'error', message: 'Failed to create event' }, { status: 500 });
   }
 }
 
 export async function PUT(request: Request) {
+  try {
+    const authHeader = request.headers.get('Authorization');
+    const impersonateId = request.headers.get('x-impersonate-id');
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Missing or invalid authorization header' }, { status: 401 });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check if user is superadmin for impersonation
+    let isSuperadmin = false;
+    const { data: profile } = await supabaseAdmin!
+      .from('managers')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    isSuperadmin = profile?.role === 'superadmin';
+
+    const body = await request.json();
+    const { id, ...updates } = body;
+
+    if (!id) return NextResponse.json({ error: 'Event ID is required' }, { status: 400 });
+
+    const client = isSuperadmin ? supabaseAdmin! : supabase;
+    let query = client.from('events').update(updates).eq('id', id);
+
+    // If not superadmin, ensure they own the event
+    if (!isSuperadmin) {
+      query = query.eq('manager_id', user.id);
+    } else if (impersonateId) {
+      // If superadmin is impersonating, we can still use Admin client without manager_id check
+      // but it's safer to check if the event belongs to the impersonated user if we want strictness.
+    }
+
+    const { data, error } = await query.select().single();
+
+    if (error) {
+      if (error.code === '23505') return NextResponse.json({ error: 'The event slug is already in use' }, { status: 400 });
+      throw error;
+    }
+
+    return NextResponse.json({ status: 'success', data });
+
+  } catch (err) {
+    console.error('Error updating event:', err);
+    return NextResponse.json({ status: 'error', message: 'Failed to update event' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
   try {
     const authHeader = request.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -133,62 +208,23 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { 
-      id,
-      name, 
-      slug, 
-      description, 
-      event_date, 
-      event_time, 
-      rules_text, 
-      has_inventory, 
-      banner_url, 
-      route_image_url, 
-      strava_url 
-    } = body;
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
 
-    if (!id) {
-      return NextResponse.json({ error: 'Event ID is required for updates' }, { status: 400 });
-    }
+    if (!id) return NextResponse.json({ error: 'Event ID is required' }, { status: 400 });
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('events')
-      .update({
-        name,
-        slug,
-        description,
-        event_date,
-        event_time,
-        rules_text,
-        has_inventory,
-        banner_url,
-        route_image_url,
-        strava_url
-      })
+      .delete()
       .eq('id', id)
-      .eq('manager_id', user.id) // Ensure security
-      .select()
-      .single();
+      .eq('manager_id', user.id); // Regular managers can only delete their own
 
-    if (error) {
-      if (error.code === '23505') {
-        return NextResponse.json({ error: 'The event slug is already in use' }, { status: 400 });
-      }
-      throw error;
-    }
+    if (error) throw error;
 
-    return NextResponse.json({
-      status: 'success',
-      data: data
-    });
+    return NextResponse.json({ status: 'success', message: 'Event deleted' });
 
   } catch (err) {
-    console.error('Error updating event:', err);
-    return NextResponse.json({
-      status: 'error',
-      message: 'Failed to update event',
-      details: err instanceof Error ? err.message : String(err)
-    }, { status: 500 });
+    console.error('Error deleting event:', err);
+    return NextResponse.json({ status: 'error', message: 'Failed to delete event' }, { status: 500 });
   }
 }
