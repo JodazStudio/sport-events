@@ -79,7 +79,7 @@ interface Event {
 }
 
 export default function SuperadminEventsPage() {
-  const { session, startImpersonation } = useAuthStore();
+  const { session } = useAuthStore();
   
   // State
   const [events, setEvents] = useState<Event[]>([]);
@@ -448,17 +448,6 @@ export default function SuperadminEventsPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-[220px] rounded-none border-2 border-black font-medium italic">
                         <DropdownMenuLabel className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">Control Maestro</DropdownMenuLabel>
-                        <DropdownMenuItem 
-                          onClick={() => {
-                            startImpersonation(event.manager_id);
-                            toast.success(`Modo Dios: ${event.managers?.name}`);
-                          }}
-                          className="cursor-pointer text-blue-600 focus:bg-blue-50"
-                        >
-                          <UserCircle className="mr-2 h-4 w-4" />
-                          Impersonate Owner
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-black/10" />
                         <DropdownMenuItem onClick={() => openEditModal(event)} className="cursor-pointer">
                           <Settings className="mr-2 h-4 w-4" />
                           Override Settings

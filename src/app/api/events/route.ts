@@ -5,14 +5,12 @@ export const dynamic = 'force-dynamic';
 
 /**
  * GET: Fetch events for the logged-in manager or a specific event by slug/id.
- * Supports impersonation for superadmins.
  */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get('slug');
     const id = searchParams.get('id');
-    const impersonateId = request.headers.get('x-impersonate-id');
 
     const authHeader = request.headers.get('Authorization');
     let userId: string | null = null;
@@ -33,8 +31,6 @@ export async function GET(request: Request) {
       }
     }
 
-    const targetManagerId = (isSuperadmin && impersonateId) ? impersonateId : userId;
-
     // Use Admin client for slug/id lookups to ensure public visibility bypassing RLS if needed
     // or if the user is a superadmin.
     const client = (slug || id || isSuperadmin) ? supabaseAdmin! : supabase;
@@ -44,8 +40,12 @@ export async function GET(request: Request) {
       query = query.eq('id', id);
     } else if (slug) {
       query = query.eq('slug', slug);
-    } else if (targetManagerId) {
-      query = query.eq('manager_id', targetManagerId);
+    } else if (userId) {
+      // Superadmins can see everything in their global view, but regular admins see only their own.
+      // If we are in the regular events endpoint and not superadmin, filter by manager_id.
+      if (!isSuperadmin) {
+        query = query.eq('manager_id', userId);
+      }
     }
 
     if (id || slug) {
@@ -140,7 +140,6 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const authHeader = request.headers.get('Authorization');
-    const impersonateId = request.headers.get('x-impersonate-id');
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Missing or invalid authorization header' }, { status: 401 });
@@ -153,7 +152,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if user is superadmin for impersonation
+    // Check if user is superadmin
     let isSuperadmin = false;
     const { data: profile } = await supabaseAdmin!
       .from('managers')
@@ -173,9 +172,6 @@ export async function PUT(request: Request) {
     // If not superadmin, ensure they own the event
     if (!isSuperadmin) {
       query = query.eq('manager_id', user.id);
-    } else if (impersonateId) {
-      // If superadmin is impersonating, we can still use Admin client without manager_id check
-      // but it's safer to check if the event belongs to the impersonated user if we want strictness.
     }
 
     const { data, error } = await query.select().single();

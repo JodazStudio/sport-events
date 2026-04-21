@@ -61,7 +61,7 @@ interface Event {
 
 export default function EventConfigPage() {
   const router = useRouter();
-  const { session, impersonatedAdminId } = useAuthStore();
+  const { session } = useAuthStore();
   
   // State
   const [events, setEvents] = useState<Event[]>([]);
@@ -102,7 +102,6 @@ export default function EventConfigPage() {
       const headers: Record<string, string> = {
         'Authorization': `Bearer ${session.access_token}`
       };
-      if (impersonatedAdminId) headers['x-impersonate-id'] = impersonatedAdminId;
 
       const response = await fetch('/api/events', { headers });
       if (!response.ok) throw new Error('Error al cargar lista de eventos');
@@ -120,11 +119,11 @@ export default function EventConfigPage() {
     } finally {
       setIsLoadingList(false);
     }
-  }, [session, impersonatedAdminId, selectedEventId]);
+  }, [session, selectedEventId]);
 
   useEffect(() => {
     fetchEvents();
-  }, [session, impersonatedAdminId]);
+  }, [session]);
 
   // --- FETCH SINGLE EVENT DATA ---
   useEffect(() => {
@@ -136,7 +135,6 @@ export default function EventConfigPage() {
         const headers: Record<string, string> = {
           'Authorization': `Bearer ${session.access_token}`
         };
-        if (impersonatedAdminId) headers['x-impersonate-id'] = impersonatedAdminId;
 
         const response = await fetch(`/api/events?id=${selectedEventId}`, { headers });
         if (!response.ok) throw new Error('Error al cargar datos del evento');
@@ -166,7 +164,7 @@ export default function EventConfigPage() {
     };
 
     fetchEventData();
-  }, [selectedEventId, session, impersonatedAdminId, form]);
+  }, [selectedEventId, session, form]);
 
   // --- SLUG AUTO-GENERATION ---
   useEffect(() => {
@@ -194,7 +192,6 @@ export default function EventConfigPage() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${session.access_token}`,
       };
-      if (impersonatedAdminId) headers['x-impersonate-id'] = impersonatedAdminId;
 
       const method = values.id ? 'PUT' : 'POST';
       const response = await fetch('/api/events', {

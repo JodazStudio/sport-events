@@ -51,7 +51,6 @@ import { es } from "date-fns/locale";
 import type { Manager } from "@/app/api/managers/route";
 
 export default function ManagersPage() {
-  const startImpersonation = useAuthStore((state: any) => state.startImpersonation);
   const [managers, setManagers] = useState<Manager[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -128,13 +127,6 @@ export default function ManagersPage() {
     }
   };
 
-  const handleImpersonate = (managerId: string, managerName: string) => {
-    startImpersonation(managerId);
-    toast.success("Modo Dios activado", {
-      description: `Ahora estás visualizando el panel como ${managerName}.`
-    });
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -143,7 +135,7 @@ export default function ManagersPage() {
             Cuentas de <span className="text-primary">Manager</span>
           </h1>
           <p className="text-muted-foreground font-medium">
-            Gestiona los organizadores de eventos y accede a sus paneles en modo dios.
+            Gestiona los organizadores de eventos y sus accesos al sistema.
           </p>
         </div>
 
@@ -287,14 +279,6 @@ export default function ManagersPage() {
                             Control de Sistema
                           </DropdownMenuLabel>
                           <div className="p-1">
-                            <DropdownMenuItem 
-                              onClick={() => handleImpersonate(manager.id, manager.name)} 
-                              className="flex items-center gap-3 px-3 py-3 text-amber-600 focus:text-amber-600 focus:bg-amber-50 cursor-pointer font-black italic uppercase text-xs tracking-wider"
-                            >
-                              <ShieldAlert className="h-4 w-4" strokeWidth={3} />
-                              Impersonar (God Mode)
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-black/10 h-[2px]" />
                             <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 cursor-pointer font-bold italic uppercase text-xs tracking-wider hover:bg-primary/5">
                               <KeyRound className="h-4 w-4 text-primary" />
                               Cambiar Contraseña
