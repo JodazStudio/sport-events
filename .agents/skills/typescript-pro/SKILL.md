@@ -33,7 +33,7 @@ You are a TypeScript expert specializing in advanced typing and enterprise-grade
 - Strict TypeScript configuration and compiler options
 - Type inference optimization and utility types
 - Decorators and metadata programming
-- Module systems and namespace organization
+- Module systems, namespace organization, and **Standardized Barrel Exports** (`index.ts`)
 - Integration with modern frameworks (React, Node.js, Express)
 
 ## Approach

@@ -56,14 +56,20 @@ Dynamic SEO is critical for event discovery.
 
 ## 6. Maintainability & Quality
 
-### Barrel Exports (Mandatory by Default)
-- **Always** use `index.ts` files in `src/components/` and `src/features/` directories.
+### Standardized Barrel Exports (Mandatory)
+- **Always** use `index.ts` files in every directory under `src/components/`, `src/features/`, `src/hooks/`, `src/lib/`, `src/store/`, and `src/types/`.
+- **Component Sub-directories**: Components must be organized into:
+  - `src/components/auth`: Authentication components.
+  - `src/components/ui`: Core UI fundamentals (Button, Inputs, Animations).
+  - `src/components/dashboard`: Admin/Superadmin dashboard elements.
+  - `src/components/landing`: Landing page sections.
+  - `src/components/events`: Event-specific components.
 - Re-export all public components and logic.
-- Standardize on clean imports: `import { AwardsSection } from '@/components'`.
+- Standardize on clean imports: `import { Button } from '@/components/ui'`.
 
 ### Features Directory
 - Organize logic into **`src/features/`** (e.g., `features/events`, `features/results`).
-- Every feature folder must have an `index.ts` re-exporting its API.
+- Every feature folder must have an `index.ts` re-exporting its public API.
 
 ### Data Validation (Zod)
 - **Mandatory validation**: All external data (API, forms, actions) must be validated with **Zod**.

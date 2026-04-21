@@ -179,10 +179,13 @@ Does it need...?
 
 ### Maintainability
 
-### Barrel Exports (Mandatory by Default)
-- **Always** use `index.ts` files in every directory under `src/components/` and `src/features/`.
-- Re-export all public components, hooks, and utilities.
-- Standardize imports using the root alias: `import { Button, Input } from '@/components/ui'`.
+### Standardized Barrel Exports (Mandatory)
+- **Always** use `index.ts` files in EVERY directory under:
+  - `src/components/` (including sub-folders like `auth`, `ui`, `dashboard`, `landing`, `events`)
+  - `src/features/`
+  - `src/hooks/`, `src/lib/`, `src/store/`, `src/types/`
+- Re-export all public components, hooks, schemas, and utilities.
+- **Standardize imports** using the root alias: `import { Button } from '@/components/ui'` or `import { useAuth } from '@/hooks'`.
 
 ### Features Directory
 - Organize by **features** rather than technical layers (e.g., `src/features/auth`, `src/features/events`).
@@ -225,17 +228,21 @@ Does it need...?
 
 ## 11. Project Structure
 
-```
 src/
 ├── app/             # Routing and pages
 ├── features/        # Feature-based logic (Standard)
 │   ├── events/
 │   └── auth/
-├── components/      # Shared UI components
-│   └── ui/
-├── lib/             # Shared utilities
-└── types/           # Shared global types
-```
+├── components/      # Shared UI components (Organized by domain)
+│   ├── auth/        # Authentication UI
+│   ├── ui/          # Core fundamentals (Button, Inputs, Animations)
+│   ├── dashboard/   # Admin and Superadmin components
+│   ├── landing/     # Landing page sections
+│   └── events/      # Event-specific components (/:slug)
+├── hooks/           # Custom React hooks (with index.ts)
+├── lib/             # Shared utilities (with index.ts)
+├── store/           # State management (Zustand) (with index.ts)
+└── types/           # Shared global types (with index.ts)
 
 ---
 
