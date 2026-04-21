@@ -3,6 +3,28 @@ import { supabase } from '@/lib';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * @swagger
+ * /api/events/{slug}:
+ *   get:
+ *     summary: Fetch public event details by slug
+ *     description: Returns event information and the currently active registration stage.
+ *     tags: [Events]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique slug of the event
+ *     responses:
+ *       200:
+ *         description: Event details and active stage
+ *       404:
+ *         description: Event not found
+ *       500:
+ *         description: Server error
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }

@@ -34,7 +34,19 @@ async function checkSuperadmin(request: NextRequest) {
 }
 
 /**
- * GET: Fetch all events with their organizers, and a list of all managers.
+ * @swagger
+ * /api/superadmin/events:
+ *   get:
+ *     summary: Fetch all events and managers (Superadmin only)
+ *     description: Returns a list of all events with manager details and a list of all managers.
+ *     tags: [Superadmin Events]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ *       403:
+ *         description: Forbidden - Superadmin only
  */
 export async function GET(request: NextRequest) {
   try {
@@ -74,7 +86,29 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST: Provision a new event.
+ * @swagger
+ * /api/superadmin/events:
+ *   post:
+ *     summary: Provision a new event (Superadmin only)
+ *     tags: [Superadmin Events]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [manager_id, name, slug, event_date, event_time]
+ *             properties:
+ *               manager_id: { type: string }
+ *               name: { type: string }
+ *               slug: { type: string }
+ *               event_date: { type: string, format: date }
+ *               event_time: { type: string }
+ *     responses:
+ *       201:
+ *         description: Event created
  */
 export async function POST(request: NextRequest) {
   try {
@@ -127,7 +161,28 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * PATCH: Override event settings.
+ * @swagger
+ * /api/superadmin/events:
+ *   patch:
+ *     summary: Override event settings (Superadmin only)
+ *     tags: [Superadmin Events]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [id]
+ *             properties:
+ *               id: { type: string }
+ *               manager_id: { type: string }
+ *               name: { type: string }
+ *               slug: { type: string }
+ *     responses:
+ *       200:
+ *         description: Event updated
  */
 export async function PATCH(request: NextRequest) {
   try {
@@ -169,7 +224,23 @@ export async function PATCH(request: NextRequest) {
 }
 
 /**
- * DELETE: Delete an event.
+ * @swagger
+ * /api/superadmin/events:
+ *   delete:
+ *     summary: Delete an event (Superadmin only)
+ *     tags: [Superadmin Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event ID to delete
+ *     responses:
+ *       200:
+ *         description: Event deleted
  */
 export async function DELETE(request: NextRequest) {
   try {

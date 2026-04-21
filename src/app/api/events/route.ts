@@ -4,13 +4,33 @@ import { supabase, supabaseAdmin } from '@/lib';
 export const dynamic = 'force-dynamic';
 
 /**
- * GET: Fetch events list or a single event by slug/id.
- * - Anonymous: Returns all events (public list).
- * - Authenticated Manager: Returns events they manage.
- * - Superadmin: Returns all events.
- * 
- * @query {string} [slug] - Filter by event slug
- * @query {string} [id] - Filter by event id
+ * @swagger
+ * /api/events:
+ *   get:
+ *     summary: Fetch events list or a single event
+ *     description: |
+ *       - Anonymous: Returns all events (public list).
+ *       - Authenticated Manager: Returns events they manage.
+ *       - Superadmin: Returns all events.
+ *     tags: [Events]
+ *     parameters:
+ *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: Filter by event slug
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         description: Filter by event id
+ *     responses:
+ *       200:
+ *         description: A list of events or a single event object
+ *       404:
+ *         description: Event not found
+ *       500:
+ *         description: Server error
  */
 export async function GET(request: Request) {
   try {
@@ -81,8 +101,39 @@ export async function GET(request: Request) {
 }
 
 /**
- * POST: Create a new event.
- * Restricted to authenticated managers.
+ * @swagger
+ * /api/events:
+ *   post:
+ *     summary: Create a new event
+ *     description: Restricted to authenticated managers.
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, slug, event_date, event_time]
+ *             properties:
+ *               name: { type: string }
+ *               slug: { type: string }
+ *               description: { type: string }
+ *               event_date: { type: string, format: date }
+ *               event_time: { type: string }
+ *               rules_text: { type: string }
+ *               has_inventory: { type: boolean }
+ *               banner_url: { type: string }
+ *               route_image_url: { type: string }
+ *               strava_url: { type: string }
+ *     responses:
+ *       201:
+ *         description: Event created successfully
+ *       400:
+ *         description: Missing required fields or slug in use
+ *       401:
+ *         description: Unauthorized
  */
 export async function POST(request: Request) {
   try {
@@ -150,9 +201,40 @@ export async function POST(request: Request) {
 }
 
 /**
- * PUT: Update an existing event.
- * - Managers: Can only update their own events.
- * - Superadmins: Can update any event.
+ * @swagger
+ * /api/events:
+ *   put:
+ *     summary: Update an existing event
+ *     description: Managers can only update their own events. Superadmins can update any event.
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [id]
+ *             properties:
+ *               id: { type: string }
+ *               name: { type: string }
+ *               slug: { type: string }
+ *               description: { type: string }
+ *               event_date: { type: string, format: date }
+ *               event_time: { type: string }
+ *               rules_text: { type: string }
+ *               has_inventory: { type: boolean }
+ *               banner_url: { type: string }
+ *               route_image_url: { type: string }
+ *               strava_url: { type: string }
+ *     responses:
+ *       200:
+ *         description: Event updated successfully
+ *       400:
+ *         description: Event ID required or slug in use
+ *       401:
+ *         description: Unauthorized
  */
 export async function PUT(request: Request) {
   try {
@@ -207,9 +289,28 @@ export async function PUT(request: Request) {
 }
 
 /**
- * DELETE: Remove an event.
- * - Managers: Can only delete their own events.
- * - Superadmins: Can delete any event.
+ * @swagger
+ * /api/events:
+ *   delete:
+ *     summary: Remove an event
+ *     description: Managers can only delete their own events. Superadmins can delete any event.
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event ID to delete
+ *     responses:
+ *       200:
+ *         description: Event deleted successfully
+ *       400:
+ *         description: Event ID required
+ *       401:
+ *         description: Unauthorized
  */
 export async function DELETE(request: Request) {
   try {
