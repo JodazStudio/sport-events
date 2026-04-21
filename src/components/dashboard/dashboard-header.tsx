@@ -53,7 +53,6 @@ export function DashboardHeader() {
     { title: "Resumen", url: "/dashboard/overview", icon: LayoutDashboard },
     { title: "Configuración", url: "/dashboard/config", icon: Settings2 },
     { title: "Aprobaciones", url: "/dashboard/payments", icon: CreditCard },
-    { title: "Seguimiento", url: "/dashboard/live", icon: Activity },
   ];
 
   const superadminNavItems = [
