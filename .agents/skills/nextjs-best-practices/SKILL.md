@@ -52,6 +52,7 @@ Does it need...?
 |--------|---------|
 | Database | Server Component fetch |
 | API | fetch with caching |
+| **Feature Service** | Centralized `featureService` (e.g., `eventService`) |
 | User input | Client state + server action |
 
 ---

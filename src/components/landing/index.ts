@@ -3,6 +3,7 @@ export * from './AwardsSection';
 export * from './CategoriesSection';
 export * from './ContactCTA';
 export * from './EventsSection';
+
 export * from './Footer';
 export * from './Gallery';
 export * from './Hero';

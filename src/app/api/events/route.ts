@@ -4,7 +4,13 @@ import { supabase, supabaseAdmin } from '@/lib';
 export const dynamic = 'force-dynamic';
 
 /**
- * GET: Fetch events for the logged-in manager or a specific event by slug/id.
+ * GET: Fetch events list or a single event by slug/id.
+ * - Anonymous: Returns all events (public list).
+ * - Authenticated Manager: Returns events they manage.
+ * - Superadmin: Returns all events.
+ * 
+ * @query {string} [slug] - Filter by event slug
+ * @query {string} [id] - Filter by event id
  */
 export async function GET(request: Request) {
   try {
@@ -31,9 +37,11 @@ export async function GET(request: Request) {
       }
     }
 
-    // Use Admin client for slug/id lookups to ensure public visibility bypassing RLS if needed
-    // or if the user is a superadmin.
-    const client = (slug || id || isSuperadmin) ? supabaseAdmin! : supabase;
+    // Use Admin client for:
+    // 1. Slug/ID lookups (publicly visible details)
+    // 2. Superadmin access (view all)
+    // 3. Anonymous list requests (for the landing page)
+    const client = (slug || id || isSuperadmin || !userId) ? supabaseAdmin! : supabase;
     let query = client.from('events').select('*, categories(*), registration_stages(*)');
 
     if (id) {
@@ -41,8 +49,7 @@ export async function GET(request: Request) {
     } else if (slug) {
       query = query.eq('slug', slug);
     } else if (userId) {
-      // Superadmins can see everything in their global view, but regular admins see only their own.
-      // If we are in the regular events endpoint and not superadmin, filter by manager_id.
+      // Regular admins see only their own events.
       if (!isSuperadmin) {
         query = query.eq('manager_id', userId);
       }
@@ -62,6 +69,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ status: 'success', data });
 
+
   } catch (err) {
     console.error('Error fetching events:', err);
     return NextResponse.json({
@@ -72,6 +80,10 @@ export async function GET(request: Request) {
   }
 }
 
+/**
+ * POST: Create a new event.
+ * Restricted to authenticated managers.
+ */
 export async function POST(request: Request) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -137,6 +149,11 @@ export async function POST(request: Request) {
   }
 }
 
+/**
+ * PUT: Update an existing event.
+ * - Managers: Can only update their own events.
+ * - Superadmins: Can update any event.
+ */
 export async function PUT(request: Request) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -189,6 +206,11 @@ export async function PUT(request: Request) {
   }
 }
 
+/**
+ * DELETE: Remove an event.
+ * - Managers: Can only delete their own events.
+ * - Superadmins: Can delete any event.
+ */
 export async function DELETE(request: Request) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -203,16 +225,29 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Check if user is superadmin
+    let isSuperadmin = false;
+    const { data: profile } = await supabaseAdmin!
+      .from('managers')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    isSuperadmin = profile?.role === 'superadmin';
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) return NextResponse.json({ error: 'Event ID is required' }, { status: 400 });
 
-    const { error } = await supabase
-      .from('events')
-      .delete()
-      .eq('id', id)
-      .eq('manager_id', user.id); // Regular managers can only delete their own
+    const client = isSuperadmin ? supabaseAdmin! : supabase;
+    let query = client.from('events').delete().eq('id', id);
+
+    // Regular managers can only delete their own
+    if (!isSuperadmin) {
+      query = query.eq('manager_id', user.id);
+    }
+
+    const { error } = await query;
 
     if (error) throw error;
 

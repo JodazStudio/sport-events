@@ -38,15 +38,22 @@ We use an internal API layer to interface with the database, prioritizing Server
 - **Server Components**: Fetch data directly in server components to benefit from SSR and SEO.
 - **Streaming with Suspense**: Use `Suspense` boundaries for progressive loading of event data and results.
 - **Internal API**: Use `/api/events` and `/api/events?slug=[slug]` for data retrieval.
+- **eventService**: Use the centralized **`eventService`** from `@/features/events` for all event data fetching.
 - **Supabase Client**: Use `supabase` for client-side interactions (leaves) and `supabaseAdmin` for protected server-side operations.
 
-## 4. Language & Content
+## 4. Reusable Utilities
+
+Standardized utilities for common project tasks.
+
+- **Date Formatting**: Use **`formatDate(dateStr)`** from `@/lib` to format event dates for the UI (returns `{ day, month, year }` in Spanish).
+
+## 5. Language & Content
 
 **Preferred Language**: Spanish (ES).
 - **Content**: All user-facing content is generated and displayed in Spanish only. Multilingual support is NOT required.
 - **Codebase**: All code, comments, and internal logic must be written in English.
 
-## 5. SEO & OpenGraph
+## 6. SEO & OpenGraph
 
 Dynamic SEO is critical for event discovery.
 - **Meta Generation**: Always use **`generateMetadata`** in `src/app/[event]/page.tsx` to fetch event details and inject meta tags dynamically.
@@ -54,7 +61,7 @@ Dynamic SEO is critical for event discovery.
 
 ---
 
-## 6. Maintainability & Quality
+## 7. Maintainability & Quality
 
 ### Standardized Barrel Exports (Mandatory)
 - **Always** use `index.ts` files in every directory under `src/components/`, `src/features/`, `src/hooks/`, `src/lib/`, `src/store/`, and `src/types/`.
@@ -77,19 +84,24 @@ Dynamic SEO is critical for event discovery.
 
 ---
 
-## Example: Fetching Event with Validation
-
+## Example: Fetching Event with Service
 ```typescript
 // Inside src/app/[event]/page.tsx (Server Component)
-import { eventSchema } from '@/features/events/schemas';
+import { eventService } from '@/features/events';
 
-const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/events?slug=${params.event}`);
-const json = await response.json();
-const { data: eventData } = eventSchema.parse(json);
+const eventData = await eventService.getEventBySlug(params.event);
 
 if (!eventData) {
   return notFound();
 }
+```
+
+## Example: Displaying Formatted Date
+```typescript
+import { formatDate } from '@/lib';
+
+const { day, month, year } = formatDate(event.event_date);
+// Renders: 21 ABR 2026
 ```
 
 ## Example: Updating an Event (Server Action or API)
