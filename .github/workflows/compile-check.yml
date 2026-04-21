@@ -1,0 +1,30 @@
+name: Compile Check
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    # Only run if the PR is coming from the develop branch
+    if: github.head_ref == 'develop'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (Compiles project)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: zonacrono:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

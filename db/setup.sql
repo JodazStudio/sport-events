@@ -4,7 +4,7 @@
 
 -- 1. CREACIÓN DE TIPOS PERSONALIZADOS (ENUMS)
 CREATE TYPE public.registration_status AS ENUM ('PENDING', 'REPORTED', 'APPROVED', 'REJECTED', 'EXPIRED');
-CREATE TYPE public.gender_type AS ENUM ('MALE', 'FEMALE');
+CREATE TYPE public.gender_type AS ENUM ('MALE', 'FEMALE', 'MIXED');
 
 -- 2. TABLAS DEL SISTEMA
 
