@@ -385,7 +385,7 @@ export default function EventConfigPage() {
                               />
                             </FormControl>
                             <FormDescription className="italic text-[10px]">
-                              zonacrono.com/events/{field.value || '...'}
+                              zonacrono.com/{field.value || '...'}
                             </FormDescription>
                             <FormMessage />
                           </FormItem>

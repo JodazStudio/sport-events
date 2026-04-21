@@ -24,7 +24,6 @@ export async function GET(request: Request) {
       userId = user?.id || null;
 
       if (userId) {
-        // Check if user is superadmin
         const { data: profile } = await supabaseAdmin!
           .from('managers')
           .select('role')
@@ -34,10 +33,12 @@ export async function GET(request: Request) {
       }
     }
 
-    // Determine target manager ID
     const targetManagerId = (isSuperadmin && impersonateId) ? impersonateId : userId;
 
-    let query = supabase.from('events').select('*');
+    // Use Admin client for slug/id lookups to ensure public visibility bypassing RLS if needed
+    // or if the user is a superadmin.
+    const client = (slug || id || isSuperadmin) ? supabaseAdmin! : supabase;
+    let query = client.from('events').select('*, categories(*), registration_stages(*)');
 
     if (id) {
       query = query.eq('id', id);
@@ -47,7 +48,6 @@ export async function GET(request: Request) {
       query = query.eq('manager_id', targetManagerId);
     }
 
-    // If it's a specific request, we want a single object
     if (id || slug) {
       const { data, error } = await query.single();
       if (error) {
@@ -57,7 +57,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ status: 'success', data });
     }
 
-    // Otherwise return list
     const { data, error } = await query.order('created_at', { ascending: false });
     if (error) throw error;
 

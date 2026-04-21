@@ -1,4 +1,7 @@
-import { MapPin, Calendar, ArrowRight } from "lucide-react";
+'use client';
+
+import { useState, useEffect } from "react";
+import { MapPin, Calendar, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 interface Event {
@@ -25,24 +28,40 @@ function formatDate(dateStr: string) {
   }
 }
 
-const EventsSection = ({ events = [] }: EventsSectionProps) => {
-  // Fallback events if none provided
-  const displayEvents = events.length > 0 ? events : [
-    {
-      id: "santarosa10k",
-      date: "2026-08-30",
-      name: "Santa Rosa 10K",
-      location: "Carúpano, VE",
-      categories: "10K · 5K Caminata",
-    },
-    {
-      id: "bici-race",
-      date: "2026-10-18",
-      name: "Bici Race Carúpano",
-      location: "Carúpano, VE",
-      categories: "20KM Uphill · 20KM Downhill",
-    },
-  ];
+const EventsSection = ({ events: initialEvents = [] }: EventsSectionProps) => {
+  const [events, setEvents] = useState<Event[]>(initialEvents);
+  const [isLoading, setIsLoading] = useState(initialEvents.length === 0);
+
+  useEffect(() => {
+    // Only fetch if no initial events are provided
+    if (initialEvents.length > 0) return;
+
+    const fetchEvents = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('/api/events');
+        if (!response.ok) throw new Error('Failed to fetch events');
+        const result = await response.json();
+        
+        if (result.status === 'success' && Array.isArray(result.data)) {
+          const mappedEvents = result.data.map((event: any) => ({
+            id: event.slug || event.id,
+            date: event.event_date || event.created_at,
+            name: event.name,
+            location: "Venezuela", // Default for now
+            categories: event.categories?.map((c: any) => c.name).join(" · ") || "Inscripciones Abiertas",
+          }));
+          setEvents(mappedEvents);
+        }
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, [initialEvents]);
 
   return (
     <section id="eventos" className="py-24">
@@ -61,8 +80,18 @@ const EventsSection = ({ events = [] }: EventsSectionProps) => {
         </div>
 
         {/* Event cards */}
-        <div className="grid gap-4 md:grid-cols-2 max-w-4xl">
-          {displayEvents.map((event, index) => {
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20 border-2 border-dashed border-muted rounded-none max-w-4xl">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground animate-pulse">
+                Cargando calendario...
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 max-w-4xl">
+          {events.map((event, index) => {
             const { day, month, year } = formatDate(event.date);
             return (
               <div
@@ -107,6 +136,7 @@ const EventsSection = ({ events = [] }: EventsSectionProps) => {
             );
           })}
         </div>
+        )}
       </div>
     </section>
   );

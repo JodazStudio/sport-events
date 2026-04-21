@@ -413,7 +413,7 @@ export default function SuperadminEventsPage() {
                   <TableCell className="font-black italic text-lg py-5">{event.name}</TableCell>
                   <TableCell>
                     <Link 
-                      href={`/events/${event.slug}`} 
+                      href={`/${event.slug}`} 
                       target="_blank"
                       className="font-mono text-xs text-primary hover:underline flex items-center gap-1"
                     >
