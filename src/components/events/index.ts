@@ -1,6 +1,5 @@
 export * from './DistancesSection';
 export * from './EventDetailsSection';
-export * from './EventFooter';
 export * from './EventHero';
 export * from './EventHubTemplate';
 export * from './EventSponsors';

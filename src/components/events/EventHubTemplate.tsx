@@ -7,7 +7,7 @@ import { EventSponsors } from "./EventSponsors";
 import { GallerySection } from "./GallerySection";
 import { ResultsCenter } from "./ResultsCenter";
 import { StickyNav } from "./StickyNav";
-import { EventFooter } from "./EventFooter";
+import { Footer } from "@/components/ui/Footer";
 import type { EventData, Distance, Sponsor, GalleryImage, PricingStage, RuleSection } from "./types";
 
 interface EventHubTemplateProps {
@@ -100,13 +100,14 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
         <EventSponsors sponsors={sponsors} />
       </main>
 
-      <EventFooter 
+      <Footer 
+        isEvent
         contact={{ 
           whatsapp: tenant.contact?.whatsapp || "584120000000", 
           email: tenant.contact?.email || "info@zonacrono.com" 
         }} 
         saasName="ZonaCrono"
-        saasUrl="https://zonacrono.com"
+        saasUrl="/"
       />
     </div>
   );

@@ -1,3 +1,4 @@
+export * from './Footer';
 export * from './AnimatedContent';
 export * from './Animation';
 export * from './SplitText';

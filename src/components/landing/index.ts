@@ -4,7 +4,7 @@ export * from './CategoriesSection';
 export * from './ContactCTA';
 export * from './EventsSection';
 
-export * from './Footer';
+export { Footer } from '@/components/ui/Footer';
 export * from './Gallery';
 export * from './Hero';
 export * from './HeroSection';
