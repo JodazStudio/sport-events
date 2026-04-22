@@ -14,6 +14,8 @@ CREATE TABLE public.managers (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
+    role VARCHAR(20) DEFAULT 'admin',
+    is_active BOOLEAN DEFAULT TRUE,
     telegram_chat_id BIGINT UNIQUE,
     telegram_notifications_enabled BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL

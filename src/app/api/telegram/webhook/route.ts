@@ -52,7 +52,6 @@ function setupBot(): Telegraf | null {
         .from('telegram_verification_codes')
         .select('manager_id, expires_at')
         .eq('code', code)
-        .eq('used', false)
         .gt('expires_at', new Date().toISOString())
         .single();
 
