@@ -135,3 +135,31 @@ const { data, error } = await supabase
   .update({ name: 'Nuevo Nombre del Evento' })
   .eq('slug', 'bici-race');
 ```
+
+---
+
+## 8. Telegram Bot Integration
+
+Zonacrono uses a Telegram Bot for real-time manager alerts.
+
+### Core Principles
+- **Library**: Use **`telegraf`** for bot logic and webhook handling.
+- **Formatting**: Always use **`MarkdownV2`**. Use the centralized `escapeMarkdown` utility from `@/lib/telegram` to prevent API errors caused by unescaped special characters.
+- **Webhook**: Implement via Next.js API routes (e.g., `/api/telegram/webhook`). Use `bot.handleUpdate(body)` to process incoming messages.
+- **Deep Linking**: Use `t.me/bot?start=TOKEN` or verification codes to link Telegram Chat IDs to Zonacrono `manager_id`.
+
+### Sending Alerts
+Notifications should be triggered asynchronously in API routes or Server Actions after critical events (e.g., successful registration).
+
+```typescript
+// Example: Asynchronous notification trigger
+(async () => {
+  try {
+    const { sendTelegramNotification, formatRegistrationAlert } = await import('@/lib/telegram');
+    const message = formatRegistrationAlert({ ...data });
+    await sendTelegramNotification(chatId, message);
+  } catch (err) {
+    console.error('Telegram notification failed', err);
+  }
+})();
+```

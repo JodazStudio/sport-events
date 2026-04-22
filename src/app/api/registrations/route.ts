@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
 
         const manager = eventData?.managers as any;
 
-        if (manager?.telegram_chat_id && manager?.telegram_notifications_enabled) {
+        if (eventData && manager?.telegram_chat_id && manager?.telegram_notifications_enabled) {
           const { sendTelegramNotification, formatRegistrationAlert } = await import('@/lib/telegram');
           
           // Get category name for better alert
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
             .single();
 
           const message = formatRegistrationAlert({
-            eventName: eventData?.name || 'Evento',
+            eventName: eventData.name,
             athleteName: `${first_name} ${last_name}`,
             categoryName: catData?.name || 'N/A',
             amount: payment_data ? `${payment_data.amount_usd} USD` : 'Pendiente'
