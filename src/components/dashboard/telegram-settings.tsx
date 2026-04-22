@@ -15,7 +15,10 @@ export function TelegramSettings() {
   const [verificationCode, setVerificationCode] = useState<string | null>(null);
 
   const fetchProfile = async () => {
-    if (!session) return;
+    if (!session) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const response = await fetch('/api/auth/profile', {
