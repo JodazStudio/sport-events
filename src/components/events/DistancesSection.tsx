@@ -91,9 +91,10 @@ export const DistancesSection = ({ description, distances, routeMapUrl, stravaUr
               <AnimatedContent delay={0.4} distance={20}>
                 <div className="mt-6 text-center">
                   <Button
-                    variant="outline"
+                    variant="mechanical-outline"
                     asChild
-                    className="border-ember text-ember hover:bg-ember hover:text-ember-foreground font-satoshi rounded-none"
+                    className="border-ember text-ember hover:bg-ember hover:text-white transition-all bg-transparent"
+                    style={{ boxShadow: '4px 4px 0px 0px hsl(14 78% 57%)' }}
                   >
                     <a href={stravaUrl} target="_blank" rel="noopener noreferrer">
                       Ver en Strava
@@ -102,6 +103,7 @@ export const DistancesSection = ({ description, distances, routeMapUrl, stravaUr
                 </div>
               </AnimatedContent>
             )}
+
           </div>
         </div>
       </section>

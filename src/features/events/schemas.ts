@@ -6,10 +6,10 @@ import * as z from 'zod';
 export const registrationStageSchema = z.object({
   id: z.string(),
   name: z.string(),
-  price: z.number(),
-  start_date: z.string(),
-  end_date: z.string(),
-  capacity: z.number().nullable(),
+  price_usd: z.number(),
+  total_capacity: z.number().nullable().optional(),
+  used_capacity: z.number().nullable().optional(),
+  is_active: z.boolean().default(false),
 });
 
 /**
@@ -19,8 +19,7 @@ export const categorySchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional().nullable(),
-  distance: z.string().optional().nullable(),
-  gender: z.enum(['Masculino', 'Femenino', 'Mixto']),
+  gender: z.enum(['MALE', 'FEMALE', 'MIXED']),
   min_age: z.number().min(0, 'La edad mínima no puede ser negativa'),
   max_age: z.number().min(0, 'La edad máxima no puede ser negativa'),
 });

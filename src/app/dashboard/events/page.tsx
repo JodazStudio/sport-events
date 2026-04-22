@@ -21,18 +21,13 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from '@/components/ui';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui';
-import { Input } from '@/components/ui';
-import { Label } from '@/components/ui';
-import { Badge } from '@/components/ui';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Form, Input } from '@/components/ui';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store';
+import { FormInput, FormSelect } from '@/components/ui/forms';
 import { ConfigView } from '@/components/dashboard/config-view';
 import { 
   Plus, 
@@ -86,15 +81,39 @@ export default function EventsPage() {
   const [isProvisionModalOpen, setIsProvisionModalOpen] = useState(false);
   
   // Form State for Provisioning
-  const [formData, setFormData] = useState({
-    manager_id: '',
-    name: '',
-    slug: '',
-    event_date: '',
-    event_time: ''
+  const eventSchema = z.object({
+    manager_id: z.string().min(1, 'El organizador es requerido'),
+    name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
+    slug: z.string()
+      .min(3, 'El slug debe tener al menos 3 caracteres')
+      .regex(/^[a-z0-9-]+$/, 'El slug solo puede contener minúsculas, números y guiones'),
+    event_date: z.string().min(1, 'La fecha es requerida'),
+    event_time: z.string().min(1, 'La hora es requerida'),
   });
-  
-  const [deleteConfirmName, setDeleteConfirmName] = useState('');
+
+  type EventFormValues = z.infer<typeof eventSchema>;
+
+  const form = useForm<EventFormValues>({
+    resolver: zodResolver(eventSchema),
+    defaultValues: {
+      manager_id: '',
+      name: '',
+      slug: '',
+      event_date: '',
+      event_time: ''
+    }
+  });
+
+  const { watch, setValue } = form;
+
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === 'name') {
+        setValue('slug', handleSlugify(value.name || ''), { shouldValidate: true });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, setValue]);
 
   const fetchData = async () => {
     if (!session?.access_token) return;
@@ -131,20 +150,13 @@ export default function EventsPage() {
   const handleSlugify = (text: string) => {
     return text
       .toLowerCase()
-      .replace(/[^\w ]+/g, '')
-      .replace(/ +/g, '-');
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   };
 
-  const handleNameChange = (name: string) => {
-    setFormData(prev => ({
-      ...prev,
-      name,
-      slug: handleSlugify(name)
-    }));
-  };
-
-  const handleProvisionSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleProvisionSubmit = async (values: EventFormValues) => {
     if (!session?.access_token) return;
     
     setIsSubmitting(true);
@@ -155,14 +167,14 @@ export default function EventsPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(values)
       });
       
       if (!response.ok) throw new Error('Error al aprovisionar evento');
       
       toast.success('Evento creado correctamente');
       setIsProvisionModalOpen(false);
-      setFormData({ manager_id: '', name: '', slug: '', event_date: '', event_time: '' });
+      form.reset();
       fetchData();
     } catch (error) {
       toast.error('Error al crear el evento');
@@ -195,7 +207,7 @@ export default function EventsPage() {
             <Input 
               placeholder="Buscar evento..." 
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
               className="pl-9 h-11 rounded-none border-2 border-black focus-visible:ring-primary/20 bg-white"
             />
           </div>
@@ -207,85 +219,62 @@ export default function EventsPage() {
                 Provision New
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] rounded-none border-4 border-black">
-              <form onSubmit={handleProvisionSubmit}>
-                <DialogHeader>
-                  <DialogTitle className="font-satoshi text-2xl font-black italic uppercase text-foreground">Crear Evento</DialogTitle>
-                  <DialogDescription className="font-medium italic">
-                    Crea un nuevo evento y asígnalo a un organizador.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-6 py-6">
-                  <div className="grid gap-2">
-                    <Label className="font-mono text-[10px] uppercase tracking-widest text-foreground">Organizador Responsable</Label>
-                    <Select 
-                      onValueChange={(val) => setFormData(p => ({ ...p, manager_id: val }))}
-                      value={formData.manager_id}
-                    >
-                      <SelectTrigger className="rounded-none border-2 border-black">
-                        <SelectValue placeholder="Seleccionar organizador" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-none border-2 border-black">
-                        {managers.map((m) => (
-                          <SelectItem key={m.id} value={m.id} className="font-medium italic">
-                            {m.name} ({m.email})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+            <DialogContent className="sm:max-w-[500px] rounded-none border-4 border-black p-0 overflow-hidden">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleProvisionSubmit)}>
+                  <DialogHeader className="bg-black p-6 text-white">
+                    <DialogTitle className="font-satoshi text-2xl font-black italic uppercase">Crear Evento</DialogTitle>
+                    <DialogDescription className="font-medium italic text-gray-400">
+                      Crea un nuevo evento y asígnalo a un organizador.
+                    </DialogDescription>
+                  </DialogHeader>
                   
-                  <div className="grid gap-2">
-                    <Label className="font-mono text-[10px] uppercase tracking-widest text-foreground">Nombre del Evento</Label>
-                    <Input 
-                      placeholder="Ej. Maratón de la Ciudad" 
-                      value={formData.name}
-                      onChange={(e) => handleNameChange(e.target.value)}
-                      className="rounded-none border-2 border-black italic font-bold"
-                      required
+                  <div className="p-6 space-y-6">
+                    <FormSelect
+                      control={form.control}
+                      name="manager_id"
+                      label="Organizador Responsable"
+                      placeholder="Seleccionar organizador"
+                      options={managers.map(m => ({ value: m.id, label: m.name, email: m.email }))}
                     />
-                  </div>
-                  
-                  <div className="grid gap-2">
-                    <Label className="font-mono text-[10px] uppercase tracking-widest text-foreground">Slug URL</Label>
-                    <Input 
-                      placeholder="maraton-ciudad" 
-                      value={formData.slug}
-                      onChange={(e) => setFormData(p => ({ ...p, slug: e.target.value }))}
-                      className="rounded-none border-2 border-black font-mono text-sm"
-                      required
+                    
+                    <FormInput
+                      control={form.control}
+                      name="name"
+                      label="Nombre del Evento"
+                      placeholder="Ej. Maratón de la Ciudad"
                     />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label className="font-mono text-[10px] uppercase tracking-widest text-foreground">Fecha</Label>
-                      <Input 
-                        type="date" 
-                        value={formData.event_date}
-                        onChange={(e) => setFormData(p => ({ ...p, event_date: e.target.value }))}
-                        className="rounded-none border-2 border-black"
-                        required
+                    
+                    <FormInput
+                      control={form.control}
+                      name="slug"
+                      label="Slug URL"
+                      placeholder="maraton-ciudad"
+                    />
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormInput
+                        control={form.control}
+                        name="event_date"
+                        label="Fecha"
+                        type="date"
                       />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label className="font-mono text-[10px] uppercase tracking-widest text-foreground">Hora</Label>
-                      <Input 
-                        type="time" 
-                        value={formData.event_time}
-                        onChange={(e) => setFormData(p => ({ ...p, event_time: e.target.value }))}
-                        className="rounded-none border-2 border-black"
-                        required
+                      <FormInput
+                        control={form.control}
+                        name="event_time"
+                        label="Hora"
+                        type="time"
                       />
                     </div>
                   </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit" disabled={isSubmitting} className="w-full rounded-none border-2 border-black bg-black text-white font-black italic uppercase py-6">
-                    {isSubmitting ? <Loader2 className="animate-spin" /> : 'Confirmar Provisión'}
-                  </Button>
-                </DialogFooter>
-              </form>
+
+                  <DialogFooter className="p-6 bg-muted/30 border-t-2 border-black/5">
+                    <Button type="submit" disabled={isSubmitting} className="w-full rounded-none border-2 border-black bg-black text-white font-black italic uppercase py-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
+                      {isSubmitting ? <Loader2 className="animate-spin" /> : 'Confirmar Provisión'}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
             </DialogContent>
           </Dialog>
         </div>

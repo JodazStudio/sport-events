@@ -5,6 +5,7 @@ import { CalendarDays, MapPin, Clock, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds, isValid, isBefore } from "date-fns";
 import type { EventData } from "./types";
+import { formatDate } from "@/lib/utils";
 
 interface HeroSectionProps {
   event?: EventData;
@@ -90,7 +91,10 @@ export const EventHero = ({ event, countdownTarget }: HeroSectionProps) => {
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-white/70 font-satoshi text-base sm:text-lg mb-10">
             <span className="flex items-center gap-2">
               <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5 text-ember" />
-              {event?.date || "Fecha por confirmar"}
+              {event?.date ? (() => {
+                const { day, month, year } = formatDate(event.date);
+                return `${day} ${month} ${year}`;
+              })() : "Fecha por confirmar"}
             </span>
             <span className="flex items-center gap-2">
               <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-ember" />
@@ -135,16 +139,20 @@ export const EventHero = ({ event, countdownTarget }: HeroSectionProps) => {
           {event?.slug ? (
             <Link href={`/${event.slug}/inscripciones`}>
               <Button
+                variant="mechanical"
                 size="lg"
-                className="bg-ember text-ember-foreground hover:bg-ember/90 font-satoshi font-bold text-lg px-10 py-6 rounded-none transition-all transform hover:scale-105 active:scale-95"
+                className="bg-ember text-white border-0 hover:scale-105 active:scale-95 transition-transform"
+                style={{ boxShadow: '4px 4px 0px 0px rgba(0,0,0,0.5)' }}
               >
                 Inscríbete Ahora
               </Button>
             </Link>
           ) : (
             <Button
+              variant="mechanical"
               size="lg"
-              className="bg-ember text-ember-foreground hover:bg-ember/90 font-satoshi font-bold text-lg px-10 py-6 rounded-none"
+              className="bg-ember text-white border-0"
+              style={{ boxShadow: '4px 4px 0px 0px rgba(0,0,0,0.5)' }}
             >
               Inscríbete Ahora
             </Button>

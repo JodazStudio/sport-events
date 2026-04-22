@@ -98,7 +98,9 @@ export const StickyNav = ({ eventSlug, eventName }: StickyNavProps) => {
           <AnimatedContent distance={20} direction="horizontal" reverse delay={0.4}>
             <Link href={`/${eventSlug}/inscripciones`}>
               <Button
-                className="bg-ember text-ember-foreground hover:bg-ember/90 font-satoshi font-bold uppercase tracking-widest text-[10px] sm:text-xs rounded-none shadow-[2px_2px_0px_0px_rgba(255,255,255,0.3)] hover:shadow-none transition-all px-3 sm:px-4"
+                variant="mechanical"
+                className="bg-ember text-white hover:bg-ember/90 font-satoshi font-bold uppercase tracking-widest text-[10px] sm:text-xs rounded-none transition-all px-3 sm:px-4 border-0"
+                style={{ boxShadow: '2px 2px 0px 0px rgba(255,255,255,0.3)' }}
               >
                 Inscribirse
               </Button>

@@ -28,6 +28,7 @@ import { Calendar } from "@/components/ui";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui";
+import { akomoService } from "@/features/akomo";
 
 // --- Types ---
 interface EventData {
@@ -98,13 +99,9 @@ export default function InscripcionPage() {
           setActiveStage(data.activeStage);
         }
 
-        // 2. Fetch BCV Rate
-        const bcvRes = await fetch("https://api.akomo.xyz/api/exchange-rates");
-        const bcvData = await bcvRes.json();
-        const bcv = bcvData.rates.find((r: any) => r.label === "USD");
-        if (bcv) {
-          setBcvRate(parseFloat(bcv.value.replace(",", ".")));
-        }
+        // 2. Fetch BCV Rate via akomoService
+        const rate = await akomoService.getExchangeRate();
+        setBcvRate(rate);
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("Error al cargar los datos del evento.");
@@ -206,8 +203,10 @@ export default function InscripcionPage() {
         <AlertCircle className="h-12 w-12 text-destructive mb-4" />
         <h2 className="text-2xl font-black uppercase italic mb-2">Evento no disponible</h2>
         <p className="text-muted-foreground mb-6">No se encontraron etapas de inscripción activas para este evento.</p>
-        <Link href="/" className="btn-mechanical bg-primary text-primary-foreground px-6 py-2">
-          Volver al Inicio
+        <Link href="/">
+          <Button variant="mechanical" className="bg-primary text-white border-0 px-6 py-2">
+            Volver al Inicio
+          </Button>
         </Link>
       </div>
     );
@@ -419,7 +418,8 @@ export default function InscripcionPage() {
             <div className="flex justify-end">
               <Button 
                 onClick={handleNextStep}
-                className="btn-mechanical bg-primary text-primary-foreground text-sm uppercase font-black px-12 py-6 rounded-none"
+                variant="mechanical"
+                className="bg-primary text-white text-sm uppercase font-black px-12 py-6 border-0"
               >
                 Continuar al Pago
               </Button>
@@ -526,7 +526,8 @@ export default function InscripcionPage() {
                 <Button 
                   onClick={() => submitRegistration(true)}
                   disabled={submitting}
-                  className="btn-mechanical bg-primary text-primary-foreground font-black uppercase text-xs italic py-6 px-10 rounded-none h-auto"
+                  variant="mechanical"
+                  className="bg-primary text-white font-black uppercase text-xs italic py-6 px-10 border-0 h-auto"
                 >
                   {submitting ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
