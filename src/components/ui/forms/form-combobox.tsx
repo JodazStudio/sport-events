@@ -29,6 +29,7 @@ interface FormComboboxProps<TFieldValues extends FieldValues, TName extends Fiel
   options: { label: string; value: string }[];
   placeholder?: string;
   emptyText?: string;
+  onSelect?: (value: string) => void;
 }
 
 export function FormCombobox<TFieldValues extends FieldValues, TName extends FieldPath<TFieldValues>>({
@@ -40,6 +41,7 @@ export function FormCombobox<TFieldValues extends FieldValues, TName extends Fie
   options,
   placeholder = "Seleccionar...",
   emptyText = "No se encontraron resultados.",
+  onSelect,
 }: FormComboboxProps<TFieldValues, TName>) {
   return (
     <FormField
@@ -82,6 +84,7 @@ export function FormCombobox<TFieldValues extends FieldValues, TName extends Fie
                         key={opt.value}
                         onSelect={() => {
                           field.onChange(opt.value);
+                          onSelect?.(opt.value);
                         }}
                         className="font-medium italic"
                       >
