@@ -1,14 +1,17 @@
-import Navbar from "@/components/zonacrono/Navbar";
-import HeroSection from "@/components/zonacrono/HeroSection";
-import StatsBar from "@/components/zonacrono/StatsBar";
-import AboutSection from "@/components/zonacrono/AboutSection";
-import ServicesSection from "@/components/zonacrono/ServicesSection";
-import EventsSection from "@/components/zonacrono/EventsSection";
-import ContactCTA from "@/components/zonacrono/ContactCTA";
-import Footer from "@/components/zonacrono/Footer";
+import { Suspense } from "react";
+import { 
+  Navbar, 
+  HeroSection, 
+  StatsBar, 
+  AboutSection, 
+  ServicesSection, 
+  EventsSection, 
+  EventsSkeleton,
+  ContactCTA, 
+  Footer 
+} from "@/components/landing";
 import Link from "next/link";
 import { Metadata } from "next";
-import { supabase } from "@/lib/supabase";
 
 export const metadata: Metadata = {
   title: "Zonacrono | Software y Promoción para Eventos Deportivos",
@@ -30,27 +33,6 @@ export default async function LandingPage() {
     ]
   };
 
-  let eventsData = [];
-  
-  try {
-    const { data, error } = await supabase
-      .from('events')
-      .select('*, categories(*)')
-      .order('created_at', { ascending: false });
-    
-    if (!error && data) {
-      eventsData = data.map((event: any) => ({
-        id: event.slug,
-        date: event.event_date || event.created_at,
-        name: event.name,
-        location: "Venezuela",
-        categories: event.categories?.map((c: any) => c.name).join(" · ") || "Próximamente",
-      }));
-    }
-  } catch (err) {
-    console.error("Error fetching landing events:", err);
-  }
-
   return (
     <div className="min-h-screen bg-background font-sans selection:bg-primary selection:text-primary-foreground">
       <Navbar />
@@ -63,7 +45,11 @@ export default async function LandingPage() {
         <StatsBar />
         <AboutSection />
         <ServicesSection />
-        <EventsSection events={eventsData} />
+        
+        <Suspense fallback={<EventsSkeleton />}>
+          <EventsSection />
+        </Suspense>
+
         <ContactCTA />
         
         {/* Resultados Section */}

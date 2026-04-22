@@ -47,8 +47,10 @@ export const metadata: Metadata = {
   },
 };
 
-import { AuthInitializer } from "@/components/auth/auth-initializer";
-import { Toaster } from "@/components/ui/sonner";
+import { AuthInitializer } from "@/components/auth";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
+import QueryProvider from "@/components/providers/QueryProvider";
 
 export default function RootLayout({
   children,
@@ -56,14 +58,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthInitializer>
-          {children}
-          <Toaster position="top-right" richColors />
-        </AuthInitializer>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryProvider>
+            <AuthInitializer>
+              {children}
+              <SonnerToaster position="top-right" richColors />
+            </AuthInitializer>
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

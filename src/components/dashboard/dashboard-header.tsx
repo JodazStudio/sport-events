@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { 
   RefreshCw, 
   User, 
@@ -11,8 +11,7 @@ import {
   CreditCard, 
   Activity,
   Users,
-  Globe,
-  ShieldCheck
+  Globe
 } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -21,13 +20,15 @@ import {
   DropdownMenuLabel, 
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useAuthStore } from "@/store/useAuthStore";
+} from "../ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { useAuthStore } from "@/store";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { ThemeToggle } from "./theme-toggle";
+import { useExchangeRates } from "@/hooks/queries/useAkomo";
 
 interface ExchangeRate {
   id: string;
@@ -37,76 +38,57 @@ interface ExchangeRate {
 }
 
 export function DashboardHeader() {
-  const [bcvRate, setBcvRate] = useState<string>("36.54");
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState<string>("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  const { role, impersonatedAdminId, logout, stopImpersonation } = useAuthStore();
+  const { role, logout } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
 
-  const isImpersonating = !!impersonatedAdminId;
-  const showSuperadminUI = role === 'superadmin' && !isImpersonating;
+  // React Query for exchange rates
+  const { data: rateData, isFetching: isSyncing, refetch } = useExchangeRates();
+
+  // Calculate formatted rate
+  const bcvRate = React.useMemo(() => {
+    if (!rateData?.rates) return "36.54";
+    const bcv = rateData.rates.find((r: any) => r.label === "USD" || r.label === "Dólar BCV");
+    if (!bcv) return "36.54";
+    const formattedValue = bcv.value.replace(",", ".");
+    return parseFloat(formattedValue).toFixed(2);
+  }, [rateData]);
 
   const adminNavItems = [
     { title: "Resumen", url: "/dashboard/overview", icon: LayoutDashboard },
-    { title: "Configuración", url: "/dashboard/config", icon: Settings2 },
+    { title: "Eventos", url: "/dashboard/events", icon: Globe },
+    { title: "Gestores", url: "/dashboard/managers", icon: Users, superadminOnly: true },
     { title: "Aprobaciones", url: "/dashboard/payments", icon: CreditCard },
+    { title: "Configuración", url: "/dashboard/settings", icon: Settings2 },
   ];
 
-  const superadminNavItems = [
-    { title: "Gestores", url: "/dashboard/superadmin/managers", icon: Users },
-    { title: "Eventos", url: "/dashboard/superadmin/events", icon: Globe },
-  ];
+  const currentNavItems = adminNavItems.filter(item => 
+    !item.superadminOnly || role === 'superadmin'
+  );
 
-  const currentNavItems = showSuperadminUI ? superadminNavItems : adminNavItems;
-
-  const fetchRates = async () => {
-    setIsSyncing(true);
-    try {
-      const response = await fetch("https://api.akomo.xyz/api/exchange-rates");
-      const data = await response.json();
-      const bcv = data.rates.find((r: ExchangeRate) => r.label === "USD");
-      if (bcv) {
-        // Handle comma as decimal separator from API string
-        const formattedValue = bcv.value.replace(",", ".");
-        setBcvRate(parseFloat(formattedValue).toFixed(2));
-        setLastUpdate(new Date(data.lastUpdate).toLocaleTimeString());
-      }
-    } catch (error) {
-      console.error("Error fetching rates:", error);
-    } finally {
-      setIsSyncing(false);
-    }
+  const handleRefreshRates = () => {
+    refetch();
   };
-
-  useEffect(() => {
-    fetchRates();
-  }, []);
 
   // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
-  console.log(showSuperadminUI, role)
+
   return (
     <>
-      <header className="sticky top-0 z-50 flex h-16 w-full items-center border-b bg-white/95 backdrop-blur px-4 md:px-8">
+      <header className="sticky top-0 z-50 flex h-16 w-full items-center border-b bg-background/95 backdrop-blur px-4 md:px-8">
         {/* Logo Section */}
         <Link href="/dashboard" className="flex items-center gap-3 mr-8 shrink-0">
           <div className="h-9 w-9 bg-black flex items-center justify-center font-black text-white italic shadow-[3px_3px_0px_0px_hsl(var(--primary))]">
-            {showSuperadminUI || isImpersonating ? <ShieldCheck className="size-5 text-primary" /> : "ZC"}
+            ZC
           </div>
           <div className="flex flex-col">
             <span className="font-satoshi font-black uppercase tracking-tight text-xl italic leading-none">
               Zona<span className="text-primary">crono</span>
             </span>
-            {(showSuperadminUI || isImpersonating) && (
-              <span className="font-mono text-[7px] uppercase tracking-[0.2em] text-primary font-bold">
-                {isImpersonating ? "MODO DIOS" : "Superadmin"}
-              </span>
-            )}
           </div>
         </Link>
 
@@ -139,23 +121,11 @@ export function DashboardHeader() {
 
         {/* Right Section: Rates + Profile + Hamburger */}
         <div className="flex items-center gap-3 ml-auto">
-          {/* Stop Impersonation Button */}
-          {isImpersonating && (
-            <Button 
-              variant="destructive" 
-              size="sm" 
-              onClick={stopImpersonation}
-              className="h-9 rounded-none bg-red-600 hover:bg-red-700 font-black italic uppercase text-[10px] tracking-widest px-4 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all gap-2"
-            >
-              <RefreshCw className="h-3 w-3 animate-spin-slow" />
-              SALIR MODO DIOS
-            </Button>
-          )}
 
           <Badge 
             variant="outline" 
             className="hidden sm:flex bg-muted/30 border-dashed py-1.5 px-3 items-center gap-2 group cursor-pointer hover:bg-muted"
-            onClick={fetchRates}
+            onClick={handleRefreshRates}
           >
             <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">
               BCV:
@@ -168,9 +138,11 @@ export function DashboardHeader() {
             />
           </Badge>
 
+          <ThemeToggle />
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-none border-2 border-black p-0 bg-muted hover:bg-muted/80 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <Button variant="ghost" className="relative h-9 w-9 rounded-none border-2 border-black dark:border-white p-0 bg-muted hover:bg-muted/80 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]">
                 <Avatar className="h-8 w-8 rounded-none">
                   <AvatarFallback className="rounded-none bg-primary text-primary-foreground font-black text-[10px] italic">
                     {role === 'superadmin' ? 'SA' : 'AD'}
@@ -178,34 +150,17 @@ export function DashboardHeader() {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 rounded-none border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-0 overflow-hidden">
-              <DropdownMenuLabel className="font-satoshi uppercase italic font-black bg-black text-white p-3">Mi Cuenta</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-64 rounded-none border-2 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] p-0 overflow-hidden">
+              <DropdownMenuLabel className="font-satoshi uppercase italic font-black bg-black dark:bg-white text-white dark:text-black p-3">Mi Cuenta</DropdownMenuLabel>
               <div className="p-1">
-                <DropdownMenuItem className="cursor-pointer font-bold italic py-2">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Perfil Personal</span>
+                <DropdownMenuItem 
+                  className="cursor-pointer font-bold italic py-2"
+                  onClick={() => router.push("/dashboard/settings")}
+                >
+                  <Settings2 className="mr-2 h-4 w-4" />
+                  <span>Configuración</span>
                 </DropdownMenuItem>
                 
-                {role === 'superadmin' && (
-                  <>
-                    <DropdownMenuSeparator className="bg-black/10" />
-                    <DropdownMenuItem 
-                      className="cursor-pointer font-black italic py-2 text-primary"
-                      onClick={() => router.push("/dashboard/superadmin/managers")}
-                    >
-                      <Users className="mr-2 h-4 w-4" />
-                      <span>Cuentas de Managers</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className="cursor-pointer font-bold italic py-2"
-                      onClick={() => router.push("/dashboard/superadmin/events")}
-                    >
-                      <Globe className="mr-2 h-4 w-4" />
-                      <span>Control de Eventos</span>
-                    </DropdownMenuItem>
-                  </>
-                )}
-
                 <DropdownMenuSeparator className="bg-black/10" />
                 <DropdownMenuItem 
                   className="cursor-pointer text-destructive focus:text-destructive font-black italic py-2"
@@ -238,7 +193,7 @@ export function DashboardHeader() {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 top-16 z-40 lg:hidden animate-in slide-in-from-top duration-300">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
-          <nav className="relative bg-white border-b shadow-xl p-4 flex flex-col gap-2">
+          <nav className="relative bg-background border-b shadow-xl p-4 flex flex-col gap-2">
             {currentNavItems.map((item) => {
               const isActive = pathname === item.url;
               return (
@@ -269,8 +224,8 @@ export function DashboardHeader() {
             </div>
             
             <div className="p-4 border-t flex items-center gap-2 font-mono text-[9px] text-muted-foreground uppercase bg-muted/20">
-              <div className={`h-1.5 w-1.5 rounded-full ${isImpersonating ? 'bg-amber-500 animate-bounce' : 'bg-green-500 animate-pulse'}`} />
-              {isImpersonating ? 'Modo Dios Activo' : 'Sistema Operacional'}
+              <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+              Sistema Operacional
             </div>
           </nav>
         </div>

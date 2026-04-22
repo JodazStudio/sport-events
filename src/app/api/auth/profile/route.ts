@@ -1,9 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin, supabase } from '@/lib/supabase';
+import { supabaseAdmin, supabase } from '@/lib';
 
 /**
- * GET: Fetch the user's role and profile data from the managers table.
- * Authenticates the user via the Authorization header (Bearer token).
+ * @swagger
+ * /api/auth/profile:
+ *   get:
+ *     summary: Fetch the authenticated user's profile
+ *     description: Returns the user's role and profile data from the managers table.
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile data
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
  */
 export async function GET(request: NextRequest) {
   try {
@@ -30,7 +43,7 @@ export async function GET(request: NextRequest) {
     // 2. Fetch the profile from the managers table
     const { data: profile, error: dbError } = await supabaseAdmin
       .from('managers')
-      .select('id, name, email, role, created_at')
+      .select('id, name, email, role, is_active, telegram_chat_id, telegram_notifications_enabled, created_at')
       .eq('id', user.id)
       .single();
 
@@ -43,6 +56,10 @@ export async function GET(request: NextRequest) {
         role: (user.app_metadata?.role) || 'admin', // Fallback to auth metadata
         is_profile_missing: true
       });
+    }
+
+    if (profile.is_active === false) {
+      return NextResponse.json({ error: 'Account is blocked' }, { status: 403 });
     }
 
     return NextResponse.json(profile);

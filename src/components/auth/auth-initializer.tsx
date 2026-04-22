@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore } from "@/store";
 
 /**
  * Initializes the auth state and sets up listeners for session changes.

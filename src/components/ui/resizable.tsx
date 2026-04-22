@@ -1,7 +1,9 @@
+"use client";
+
 import { GripVertical } from "lucide-react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
 
 const ResizablePanelGroup = ({ className, ...props }: React.ComponentProps<typeof PanelGroup>) => (
   <PanelGroup

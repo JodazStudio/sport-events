@@ -1,28 +1,25 @@
-# Zonacrono - Events SaaS Platform
+# Zonacrono - High Performance Events SaaS
 
-A high-performance, multitenant SaaS platform built with **Next.js 16** and **Tailwind CSS 4**, designed for sports event organizers to quickly deploy branded landing pages and results dashboards.
+A high-performance SaaS platform built with **Next.js 16**, **Tailwind CSS 4**, and **Supabase**, designed for sports event organizers to manage registrations, results, and branding from a single dashboard.
 
 ## 🚀 Architecture Overview
 
-The platform uses a **Subpath-based Multitenancy** approach. Each event is served under its own URL slug, dynamically loading data from local configuration files.
+Zonacrono has evolved from a static-tenant model to a fully dynamic, database-driven platform.
 
-### 1. Multitenancy Strategy (Dynamic Routes)
-- **Root Domain:** Requests to the base URL serve the main Zonacrono landing page.
-- **Event Slugs:** Requests to `domain.com/[event-slug]` are handled by dynamic routes in `src/app/[event]/page.tsx`.
-- **Data Loading:** The application reads event configuration from `src/data/tenants/[event-slug].json` on the server.
+### 1. Dynamic Multitenancy
+- **Event Slugs:** Each event has a unique URL slug (`domain.com/[event-slug]`).
+- **Database Driven:** Event data, categories, stages, and registrations are stored in PostgreSQL (Supabase).
+- **Branding:** Visual identity (colors, logos, banners) is configured per-event via the admin dashboard.
 
-### 2. Data Strategy (No-DB Architecture)
-- **Event Data:** Stored in `src/data/tenants/[eventId].json`.
-- **Dynamic Branding:** Each JSON defines:
-  - Event metadata (title, year, description).
-  - Visual identity (primary/secondary colors, logo, hero images).
-  - Event details (route, categories, awards, kit information).
-  - External registration links.
+### 2. Tech Stack
+- **Frontend:** Next.js 16 (App Router), Tailwind CSS 4, React Query.
+- **Backend:** Next.js Route Handlers (Server-side validation with Zod).
+- **Auth & Database:** Supabase (Auth, PostgreSQL, Storage).
+- **Integrations:** Telegram Bot API for real-time registration alerts.
 
-### 3. Routing & Pages
-- `src/app/page.tsx`: Main marketing landing page.
-- `src/app/[event]/page.tsx`: Master template for event landing pages.
-- `src/app/dashboard/page.tsx`: Real-time results dashboard with live RFID telemetry simulation.
+### 3. Role-Based Access Control (RBAC)
+- **Superadmin:** Global system management, manager CRUD, and platform-wide metrics.
+- **Admin (Manager):** Event-specific management, registration tracking, and configuration.
 
 ## 📁 Project Structure
 
@@ -30,33 +27,46 @@ The platform uses a **Subpath-based Multitenancy** approach. Each event is serve
 zonacrono/
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx            # Main SaaS Landing Page
-│   │   ├── [event]/            # Dynamic Event Pages
-│   │   └── dashboard/          # Results Dashboard
+│   │   ├── [event]/            # Dynamic Public Event Landing Pages
+│   │   ├── api/                # Secure Route Handlers
+│   │   ├── dashboard/          # RBAC Admin Panels
+│   │   └── login/              # Authentication Flow
 │   ├── components/
-│   │   └── zonacrono/          # Shared components (Design System)
-│   ├── data/
-│   │   └── tenants/            # Event JSON configurations
-│   │       ├── santarosa10k.json
-│   │       └── bici-race.json
-│   └── lib/                    # Utilities and mock generators
-├── public/                     # Static assets per event
-└── next.config.ts              # Next.js configuration (Remote images authorized)
+│   │   ├── ui/                 # Neobrutalist Component Library
+│   │   └── dashboard/          # Admin-specific Views
+│   ├── hooks/                  # React Query Custom Hooks
+│   ├── lib/                    # Core Utilities & Shared Logic
+│   └── store/                  # Global State (Zustand)
+├── db/                         # SQL Migrations & Schema Docs
+└── public/                     # Static Assets
 ```
 
-## 🛠️ How to Add a New Event
+## 🛠️ Local Development
 
-1. Create a new JSON file in `src/data/tenants/[event-slug].json` following the `TenantData` type.
-2. Add any specific local assets to `public/tenants/[event-slug]/`.
-3. The event page is instantly accessible at `yourdomain.com/[event-slug]`.
-4. Update the `events` list in `src/components/zonacrono/EventsSection.tsx` to display it on the main landing page.
+### 1. Setup Environment
+Copy the example environment file and fill in your Supabase and Telegram credentials:
+```bash
+cp .env.example .env.local
+```
 
-## ✨ Current Features
+### 2. Install Dependencies
+Always use **pnpm** as the package manager:
+```bash
+pnpm install
+```
 
-- **Mechanical Aesthetic:** Industrial-inspired UI with high-contrast colors and grid patterns.
-- **Live Leaderboard:** Simulated real-time tracking of athletes.
-- **Responsive Design:** Optimized for mobile viewing during events.
-- **Remote Content:** Integrated with Unsplash for high-quality event placeholders.
+### 3. Run Development Server
+```bash
+pnpm dev
+```
+
+## ✨ Core Features
+
+- **Full CRUD for Events:** Manage categories, registration stages, and payment details.
+- **Athlete Registration:** Validated registration flow with automated category assignment.
+- **Real-time Notifications:** Instant Telegram alerts for new event registrations.
+- **Management Panel:** Complete suite for managers to track payments and participant stats.
+- **Neobrutalist UI:** Modern, high-contrast design system optimized for readability and performance.
 
 ---
 Built with ⚡ by Antigravity for Jesus Ordosgoitty.

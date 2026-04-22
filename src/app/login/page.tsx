@@ -1,20 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore } from "@/store";
 import { useRouter } from "next/navigation";
 import { Timer, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui";
+import { Input } from "@/components/ui";
+import { Label } from "@/components/ui";
 import { toast } from "sonner";
+import { translateAuthError } from "@/lib/utils";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const login = useAuthStore((state) => state.login);
+  const login = useAuthStore((state: any) => state.login);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -25,7 +26,7 @@ export default function LoginPage() {
 
     if (error) {
       toast.error("Error al iniciar sesión", {
-        description: error,
+        description: translateAuthError(error),
       });
       setLoading(false);
     } else {

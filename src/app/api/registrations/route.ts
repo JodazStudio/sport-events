@@ -1,16 +1,64 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib';
+import { registrationSchema } from '@/features/events/schemas';
 
+/**
+ * @swagger
+ * /api/registrations:
+ *   post:
+ *     summary: Register an athlete for an event
+ *     description: Creates a new registration and calculates the category based on birth date and gender.
+ *     tags: [Registrations]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [event_id, stage_id, first_name, last_name, dni, email, birth_date, gender]
+ *             properties:
+ *               event_id: { type: string }
+ *               stage_id: { type: string }
+ *               first_name: { type: string }
+ *               last_name: { type: string }
+ *               dni: { type: string }
+ *               email: { type: string, format: email }
+ *               birth_date: { type: string, format: date }
+ *               gender: { type: string, enum: [MALE, FEMALE, MIXED] }
+ *               shirt_size: { type: string }
+ *               payment_data:
+ *                 type: object
+ *                 properties:
+ *                   reference_number: { type: string }
+ *                   amount_usd: { type: number }
+ *                   amount_ves: { type: number }
+ *                   exchange_rate_bcv: { type: number }
+ *                   receipt_url: { type: string }
+ *     responses:
+ *       201:
+ *         description: Registration successful
+ *       400:
+ *         description: Validation failed or no suitable category found
+ *       500:
+ *         description: Server error
+ */
 export async function POST(request: NextRequest) {
   try {
     if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: 'Supabase Admin client not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Supabase Admin client not configured' }, { status: 500 });
     }
 
     const body = await request.json();
+    
+    // 1. Validate with Zod
+    const result = registrationSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json({ 
+        error: 'Validation failed', 
+        details: result.error.issues 
+      }, { status: 400 });
+    }
+
     const {
       event_id,
       stage_id,
@@ -22,20 +70,10 @@ export async function POST(request: NextRequest) {
       gender,
       shirt_size,
       payment_data
-    } = body;
+    } = result.data;
 
-    // 1. Basic Validation
-    if (!event_id || !stage_id || !first_name || !last_name || !dni || !email || !birth_date || !gender) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    // 2. Map gender from frontend (M/F) to DB ENUM (MALE/FEMALE)
-    const dbGender = gender === 'M' ? 'MALE' : 'FEMALE';
-
-    // 3. Calculate Category automatically
+    // 2. Calculate Category automatically
+    // Using Age at End of Year (Standard for most races)
     const birthDate = new Date(birth_date);
     const today = new Date();
     const age = today.getFullYear() - birthDate.getFullYear();
@@ -44,86 +82,89 @@ export async function POST(request: NextRequest) {
       .from('categories')
       .select('id')
       .eq('event_id', event_id)
-      .eq('gender', dbGender)
+      .eq('gender', gender)
       .lte('min_age', age)
       .gte('max_age', age)
       .single();
 
     if (categoryError || !category) {
-      console.error('Error finding category:', categoryError);
-      return NextResponse.json(
-        { error: 'No suitable category found for your age and gender.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ 
+        error: 'No suitable category found for your age and gender.' 
+      }, { status: 400 });
     }
 
-    // 4. Set Expiration: Today at 23:59:59 (11:59:59 PM)
+    // 3. Set Expiration: Today at 23:59:59
     const expiresAt = new Date();
     expiresAt.setHours(23, 59, 59, 999);
 
-    // 5. Insert Registration
-    const { data: registration, error: regError } = await supabaseAdmin
-      .from('registrations')
-      .insert([
-        {
-          event_id,
-          stage_id,
-          category_id: category.id,
-          first_name,
-          last_name,
-          dni,
-          email,
-          birth_date,
-          gender: dbGender,
-          shirt_size,
-          status: payment_data ? 'REPORTED' : 'PENDING',
-          expires_at: expiresAt.toISOString()
+    // 4. Call Atomic Postgres Function (RPC)
+    const { data: registrationId, error: rpcError } = await supabaseAdmin
+      .rpc('register_athlete', {
+        p_event_id: event_id,
+        p_stage_id: stage_id,
+        p_category_id: category.id,
+        p_first_name: first_name,
+        p_last_name: last_name,
+        p_dni: dni,
+        p_email: email,
+        p_birth_date: birth_date,
+        p_gender: gender,
+        p_shirt_size: shirt_size,
+        p_status: payment_data ? 'REPORTED' : 'PENDING',
+        p_expires_at: expiresAt.toISOString(),
+        p_payment_data: payment_data || null
+      });
+
+    if (rpcError) {
+      console.error('Error in register_athlete RPC:', rpcError);
+      return NextResponse.json({ 
+        error: rpcError.message || 'Failed to process registration' 
+      }, { status: 400 });
+    }
+
+    // --- TELEGRAM NOTIFICATION ---
+    // We do this asynchronously to avoid blocking the response
+    (async () => {
+      try {
+        // 1. Get event and manager info
+        const { data: eventData } = await supabaseAdmin
+          .from('events')
+          .select('name, manager_id, managers(telegram_chat_id, telegram_notifications_enabled)')
+          .eq('id', event_id)
+          .single();
+
+        const manager = eventData?.managers as any;
+
+        if (eventData && manager?.telegram_chat_id && manager?.telegram_notifications_enabled) {
+          const { sendTelegramNotification, formatRegistrationAlert } = await import('@/lib/telegram');
+          
+          // Get category name for better alert
+          const { data: catData } = await supabaseAdmin
+            .from('categories')
+            .select('name')
+            .eq('id', category.id)
+            .single();
+
+          const message = formatRegistrationAlert({
+            eventName: eventData.name,
+            athleteName: `${first_name} ${last_name}`,
+            categoryName: catData?.name || 'N/A',
+            amount: payment_data ? `${payment_data.amount_usd} USD` : 'Pendiente'
+          });
+
+          await sendTelegramNotification(manager.telegram_chat_id, message);
         }
-      ])
-      .select('id')
-      .single();
-
-    if (regError || !registration) {
-      console.error('Error creating registration:', regError);
-      return NextResponse.json(
-        { error: 'Failed to process registration' },
-        { status: 400 }
-      );
-    }
-
-    // 6. Process Payment if provided
-    if (payment_data) {
-      const { receipt_url, reference_number, amount_ves, exchange_rate_bcv, amount_usd } = payment_data;
-      
-      const { error: paymentError } = await supabaseAdmin
-        .from('payments')
-        .insert([
-          {
-            registration_id: registration.id,
-            amount_usd: amount_usd,
-            exchange_rate_bcv: exchange_rate_bcv,
-            amount_ves: amount_ves,
-            reference_number: reference_number,
-            receipt_url: receipt_url
-          }
-        ]);
-
-      if (paymentError) {
-        console.error('Error inserting payment:', paymentError);
-        // We don't fail the whole request here, but we should log it
-        // The registration is already created.
+      } catch (tgError) {
+        console.error('Failed to send Telegram notification:', tgError);
       }
-    }
+    })();
 
     return NextResponse.json({
-      registration_id: registration.id
+      registration_id: registrationId
     }, { status: 201 });
 
   } catch (err) {
     console.error('Unexpected error in POST /api/registrations:', err);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -1,18 +1,42 @@
 import { NextResponse } from 'next/server';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * GET: Fetch events for the logged-in manager or a specific event by slug/id.
- * Supports impersonation for superadmins.
+ * @swagger
+ * /api/events:
+ *   get:
+ *     summary: Fetch events list or a single event
+ *     description: |
+ *       - Anonymous: Returns all events (public list).
+ *       - Authenticated Manager: Returns events they manage.
+ *       - Superadmin: Returns all events.
+ *     tags: [Events]
+ *     parameters:
+ *       - in: query
+ *         name: slug
+ *         schema:
+ *           type: string
+ *         description: Filter by event slug
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         description: Filter by event id
+ *     responses:
+ *       200:
+ *         description: A list of events or a single event object
+ *       404:
+ *         description: Event not found
+ *       500:
+ *         description: Server error
  */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get('slug');
     const id = searchParams.get('id');
-    const impersonateId = request.headers.get('x-impersonate-id');
 
     const authHeader = request.headers.get('Authorization');
     let userId: string | null = null;
@@ -33,27 +57,35 @@ export async function GET(request: Request) {
       }
     }
 
-    const targetManagerId = (isSuperadmin && impersonateId) ? impersonateId : userId;
-
-    // Use Admin client for slug/id lookups to ensure public visibility bypassing RLS if needed
-    // or if the user is a superadmin.
-    const client = (slug || id || isSuperadmin) ? supabaseAdmin! : supabase;
+    // Use Admin client for:
+    // 1. Slug/ID lookups (publicly visible details)
+    // 2. Superadmin access (view all)
+    // 3. Anonymous list requests (for the landing page)
+    const client = (slug || id || isSuperadmin || !userId) ? supabaseAdmin! : supabase;
     let query = client.from('events').select('*, categories(*), registration_stages(*)');
 
     if (id) {
       query = query.eq('id', id);
     } else if (slug) {
       query = query.eq('slug', slug);
-    } else if (targetManagerId) {
-      query = query.eq('manager_id', targetManagerId);
+    } else if (userId) {
+      // Regular admins see only their own events.
+      if (!isSuperadmin) {
+        query = query.eq('manager_id', userId);
+      }
     }
 
     if (id || slug) {
-      const { data, error } = await query.single();
-      if (error) {
-        if (error.code === 'PGRST116') return NextResponse.json({ error: 'Event not found' }, { status: 404 });
-        throw error;
+      const { data, error } = await query.maybeSingle();
+      if (error) throw error;
+      
+      if (!data) {
+        return NextResponse.json({ 
+          status: 'error', 
+          message: 'Event not found' 
+        }, { status: 404 });
       }
+      
       return NextResponse.json({ status: 'success', data });
     }
 
@@ -61,6 +93,7 @@ export async function GET(request: Request) {
     if (error) throw error;
 
     return NextResponse.json({ status: 'success', data });
+
 
   } catch (err) {
     console.error('Error fetching events:', err);
@@ -72,6 +105,42 @@ export async function GET(request: Request) {
   }
 }
 
+/**
+ * @swagger
+ * /api/events:
+ *   post:
+ *     summary: Create a new event
+ *     description: Restricted to authenticated managers.
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, slug, event_date, event_time]
+ *             properties:
+ *               name: { type: string }
+ *               slug: { type: string }
+ *               description: { type: string }
+ *               event_date: { type: string, format: date }
+ *               event_time: { type: string }
+ *               rules_text: { type: string }
+ *               has_inventory: { type: boolean }
+ *               banner_url: { type: string }
+ *               route_image_url: { type: string }
+ *               strava_url: { type: string }
+ *               social_media: { type: object }
+ *     responses:
+ *       201:
+ *         description: Event created successfully
+ *       400:
+ *         description: Missing required fields or slug in use
+ *       401:
+ *         description: Unauthorized
+ */
 export async function POST(request: Request) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -97,7 +166,8 @@ export async function POST(request: Request) {
       has_inventory, 
       banner_url, 
       route_image_url, 
-      strava_url 
+      strava_url,
+      social_media
     } = body;
 
     if (!name || !slug || !event_date || !event_time) {
@@ -118,6 +188,7 @@ export async function POST(request: Request) {
           banner_url,
           route_image_url,
           strava_url,
+          social_media: social_media || {},
           manager_id: user.id
         }
       ])
@@ -137,10 +208,46 @@ export async function POST(request: Request) {
   }
 }
 
+/**
+ * @swagger
+ * /api/events:
+ *   put:
+ *     summary: Update an existing event
+ *     description: Managers can only update their own events. Superadmins can update any event.
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [id]
+ *             properties:
+ *               id: { type: string }
+ *               name: { type: string }
+ *               slug: { type: string }
+ *               description: { type: string }
+ *               event_date: { type: string, format: date }
+ *               event_time: { type: string }
+ *               rules_text: { type: string }
+ *               has_inventory: { type: boolean }
+ *               banner_url: { type: string }
+ *               route_image_url: { type: string }
+ *               strava_url: { type: string }
+ *               social_media: { type: object }
+ *     responses:
+ *       200:
+ *         description: Event updated successfully
+ *       400:
+ *         description: Event ID required or slug in use
+ *       401:
+ *         description: Unauthorized
+ */
 export async function PUT(request: Request) {
   try {
     const authHeader = request.headers.get('Authorization');
-    const impersonateId = request.headers.get('x-impersonate-id');
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Missing or invalid authorization header' }, { status: 401 });
@@ -153,7 +260,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if user is superadmin for impersonation
+    // Check if user is superadmin
     let isSuperadmin = false;
     const { data: profile } = await supabaseAdmin!
       .from('managers')
@@ -173,9 +280,6 @@ export async function PUT(request: Request) {
     // If not superadmin, ensure they own the event
     if (!isSuperadmin) {
       query = query.eq('manager_id', user.id);
-    } else if (impersonateId) {
-      // If superadmin is impersonating, we can still use Admin client without manager_id check
-      // but it's safer to check if the event belongs to the impersonated user if we want strictness.
     }
 
     const { data, error } = await query.select().single();
@@ -193,6 +297,30 @@ export async function PUT(request: Request) {
   }
 }
 
+/**
+ * @swagger
+ * /api/events:
+ *   delete:
+ *     summary: Remove an event
+ *     description: Managers can only delete their own events. Superadmins can delete any event.
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event ID to delete
+ *     responses:
+ *       200:
+ *         description: Event deleted successfully
+ *       400:
+ *         description: Event ID required
+ *       401:
+ *         description: Unauthorized
+ */
 export async function DELETE(request: Request) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -207,16 +335,29 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Check if user is superadmin
+    let isSuperadmin = false;
+    const { data: profile } = await supabaseAdmin!
+      .from('managers')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    isSuperadmin = profile?.role === 'superadmin';
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) return NextResponse.json({ error: 'Event ID is required' }, { status: 400 });
 
-    const { error } = await supabase
-      .from('events')
-      .delete()
-      .eq('id', id)
-      .eq('manager_id', user.id); // Regular managers can only delete their own
+    const client = isSuperadmin ? supabaseAdmin! : supabase;
+    let query = client.from('events').delete().eq('id', id);
+
+    // Regular managers can only delete their own
+    if (!isSuperadmin) {
+      query = query.eq('manager_id', user.id);
+    }
+
+    const { error } = await query;
 
     if (error) throw error;
 

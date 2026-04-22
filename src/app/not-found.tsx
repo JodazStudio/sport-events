@@ -1,7 +1,6 @@
 "use client"
 import Link from "next/link";
-import Navbar from "@/components/zonacrono/Navbar";
-import Footer from "@/components/zonacrono/Footer";
+import { Navbar, Footer } from "@/components/landing";
 import { Home, AlertTriangle } from "lucide-react";
 
 export default function NotFound() {

@@ -52,7 +52,9 @@ Does it need...?
 |--------|---------|
 | Database | Server Component fetch |
 | API | fetch with caching |
+| **Feature Service** | Centralized `featureService` (e.g., `eventService`) |
 | User input | Client state + server action |
+| **Admin UI** | React Query Hooks (fetching + mutations) |
 
 ---
 
@@ -95,6 +97,7 @@ Does it need...?
 - Return proper status codes
 - Handle errors gracefully
 - Use Edge runtime when possible
+- **Bulk Operations**: Implement batch endpoints for high-frequency dashboard actions to minimize latency.
 
 ---
 
