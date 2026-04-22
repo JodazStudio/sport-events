@@ -153,6 +153,8 @@ export async function POST(request: NextRequest) {
  *               manager_id: { type: string }
  *               name: { type: string }
  *               slug: { type: string }
+ *               description: { type: string }
+ *               social_media: { type: object }
  *     responses:
  *       200:
  *         description: Event updated

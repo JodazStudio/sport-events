@@ -18,7 +18,8 @@ import {
   ImageIcon,
   Activity,
   CreditCard,
-  User
+  User,
+  AlertTriangle
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { 
@@ -45,11 +46,11 @@ import { FormInput, FormTextarea, FormSelect, FormSwitch } from "@/components/ui
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store";
+import { cn } from "@/lib";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CategoryManagement } from "./category-management";
 import { StageManagement } from "./stage-management";
 import { RegistrationManagement } from "./registration-management";
-import { PaymentsView } from "./payments-view";
 import { useAdminEvents, useUpdateEvent } from "@/hooks/queries/useEvents";
 
 // --- ZOD SCHEMA ---
@@ -261,9 +262,23 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
             <User className="mr-2 size-4 hidden sm:inline" />
             Inscritos
           </TabsTrigger>
+          <TabsTrigger value="sponsors" disabled className="rounded-none opacity-60 cursor-not-allowed font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm flex flex-col items-center justify-center gap-0">
+            <div className="flex items-center">
+              <AlertTriangle className="mr-2 size-3 text-amber-500" />
+              Sponsors
+            </div>
+            <span className="text-[7px] font-mono tracking-widest text-amber-500/80">PRÓXIMAMENTE</span>
+          </TabsTrigger>
+          <TabsTrigger value="gallery" disabled className="rounded-none opacity-60 cursor-not-allowed font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm flex flex-col items-center justify-center gap-0">
+            <div className="flex items-center">
+              <AlertTriangle className="mr-2 size-3 text-amber-500" />
+              Galería
+            </div>
+            <span className="text-[7px] font-mono tracking-widest text-amber-500/80">PRÓXIMAMENTE</span>
+          </TabsTrigger>
           <TabsTrigger value="payments" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
             <CreditCard className="mr-2 size-4 hidden sm:inline" />
-            Pagos
+            Datos Bancarios
           </TabsTrigger>
         </TabsList>
 
@@ -320,44 +335,6 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
                     name="description"
                     label="Descripción"
                   />
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-black dark:border-white rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] bg-card">
-                <CardHeader className="bg-muted/30 border-b-2 border-black dark:border-white">
-                  <CardTitle className="font-satoshi font-black italic uppercase text-xl">Datos Bancarios</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6 pt-6">
-                  <p className="text-[10px] font-mono text-muted-foreground uppercase mb-2">
-                    Estos datos se mostrarán a los atletas durante el proceso de pago.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormInput
-                      control={form.control}
-                      name="payment_info.bank_name"
-                      label="Nombre del Banco"
-                      placeholder="Ej: Bancamiga"
-                    />
-                    <FormInput
-                      control={form.control}
-                      name="payment_info.phone_number"
-                      label="Número de Teléfono (Pago Móvil)"
-                      placeholder="Ej: 0424-0000000"
-                    />
-                    <FormInput
-                      control={form.control}
-                      name="payment_info.id_number"
-                      label="Cédula / RIF"
-                      placeholder="Ej: V-12345678"
-                    />
-                    <FormInput
-                      control={form.control}
-                      name="payment_info.account_number"
-                      label="Número de Cuenta (Opcional)"
-                      placeholder="0123..."
-                    />
-                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -445,18 +422,63 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
               </Card>
             </TabsContent>
 
+            <TabsContent value="payments" className="space-y-8">
+              <Card className="border-2 border-black dark:border-white rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] bg-card">
+                <CardHeader className="bg-muted/30 border-b-2 border-black dark:border-white">
+                  <CardTitle className="font-satoshi font-black italic uppercase text-xl">Datos Bancarios</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6 pt-6">
+                  <p className="text-[10px] font-mono text-muted-foreground uppercase mb-2">
+                    Estos datos se mostrarán a los atletas durante el proceso de pago.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormInput
+                      control={form.control}
+                      name="payment_info.bank_name"
+                      label="Nombre del Banco"
+                      placeholder="Ej: Bancamiga"
+                    />
+                    <FormInput
+                      control={form.control}
+                      name="payment_info.phone_number"
+                      label="Número de Teléfono (Pago Móvil)"
+                      placeholder="Ej: 0424-0000000"
+                    />
+                    <FormInput
+                      control={form.control}
+                      name="payment_info.id_number"
+                      label="Cédula / RIF"
+                      placeholder="Ej: V-12345678"
+                    />
+                    <FormInput
+                      control={form.control}
+                      name="payment_info.account_number"
+                      label="Número de Cuenta (Opcional)"
+                      placeholder="0123..."
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
             {/* Sticky/Fixed Actions Bar for General/Media/Payments tabs */}
-            {(activeTab === 'general' || activeTab === 'media') && (
-              <div className="flex items-center justify-between gap-4 pt-4">
-                <Button 
-                  type="button" 
-                  variant="destructive" 
-                  onClick={onDelete}
-                  className="rounded-none border-2 border-black dark:border-white font-black uppercase italic tracking-widest py-6 px-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
-                >
-                  <Trash2 className="w-5 h-5 mr-2" />
-                  Eliminar Evento
-                </Button>
+            {(activeTab === 'general' || activeTab === 'media' || activeTab === 'payments') && (
+              <div className={cn(
+                "flex items-center gap-4 pt-4",
+                activeTab === 'payments' ? "justify-end" : "justify-between"
+              )}>
+                {activeTab !== 'payments' && (
+                  <Button 
+                    type="button" 
+                    variant="destructive" 
+                    onClick={onDelete}
+                    className="rounded-none border-2 border-black dark:border-white font-black uppercase italic tracking-widest py-6 px-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+                  >
+                    <Trash2 className="w-5 h-5 mr-2" />
+                    Eliminar Evento
+                  </Button>
+                )}
 
                 <Button 
                   type="submit" 
@@ -470,10 +492,6 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
             )}
           </form>
         </Form>
-
-        <TabsContent value="payments" className="space-y-8">
-          <PaymentsView eventId={form.getValues('id') || eventId} />
-        </TabsContent>
 
         <TabsContent value="categories" className="space-y-6">
           <CategoryManagement eventId={form.getValues('id') || eventId} />

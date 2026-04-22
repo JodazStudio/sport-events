@@ -3,6 +3,19 @@ import { supabaseAdmin, checkAdmin } from '@/lib';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * @swagger
+ * /api/admin/dashboard/stats:
+ *   get:
+ *     summary: Fetch dashboard statistics (Admin/Superadmin only)
+ *     description: Returns different stats based on user role (manager vs superadmin).
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 export async function GET(request: NextRequest) {
   try {
     const auth = await checkAdmin(request);

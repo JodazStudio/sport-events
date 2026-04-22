@@ -9,6 +9,7 @@ import { Button } from "@/components/ui";
 import { Input } from "@/components/ui";
 import { Label } from "@/components/ui";
 import { toast } from "sonner";
+import { translateAuthError } from "@/lib/utils";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -25,7 +26,7 @@ export default function LoginPage() {
 
     if (error) {
       toast.error("Error al iniciar sesión", {
-        description: error,
+        description: translateAuthError(error),
       });
       setLoading(false);
     } else {

@@ -1,6 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib';
 
+/**
+ * @swagger
+ * /api/upload:
+ *   post:
+ *     summary: Upload a file (Receipts)
+ *     tags: [Utility]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: File uploaded
+ *       400:
+ *         description: Invalid file
+ */
 export async function POST(request: NextRequest) {
   try {
     if (!supabaseAdmin) {

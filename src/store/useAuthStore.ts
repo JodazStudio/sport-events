@@ -69,6 +69,14 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     
     if (session) {
       const profile = await get().fetchUserProfile(session);
+      
+      if (!profile || profile.error) {
+        // If profile fetch fails (e.g. blocked), log out
+        await get().logout();
+        set({ isLoading: false });
+        return;
+      }
+
       const role = profile?.role as Role || (session.user.app_metadata?.role as Role) || 'admin';
       
       set({ 
@@ -85,6 +93,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
       if (session) {
         const profile = await get().fetchUserProfile(session);
+        
+        if (!profile || profile.error) {
+          await get().logout();
+          return;
+        }
+
         const role = profile?.role as Role || (session.user.app_metadata?.role as Role) || 'admin';
         set({ session, user: session.user, role, isLoading: false });
       } else {
@@ -108,6 +122,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
     if (data.session) {
       const profile = await get().fetchUserProfile(data.session);
+      
+      if (!profile || profile.error) {
+        await get().logout();
+        return { error: profile?.error || 'Account is inactive' };
+      }
+
       const role = profile?.role as Role || (data.user.app_metadata?.role as Role) || 'admin';
       
       set({ 

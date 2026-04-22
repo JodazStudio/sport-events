@@ -1,6 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin, checkAdmin } from '@/lib';
 
+/**
+ * @swagger
+ * /api/admin/registrations/status:
+ *   patch:
+ *     summary: Update registration status (Admin only)
+ *     tags: [Admin Registrations]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [registrationId, status]
+ *             properties:
+ *               registrationId: { type: string }
+ *               status: { type: string, enum: [PENDING, REPORTED, APPROVED, REJECTED, EXPIRED] }
+ *     responses:
+ *       200:
+ *         description: Status updated
+ */
 export async function PATCH(request: NextRequest) {
   try {
     const auth = await checkAdmin(request);

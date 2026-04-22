@@ -51,4 +51,32 @@ export function formatDate(dateStr: string) {
     return { day: "??", month: "???", year: "????" };
   }
 }
+/**
+ * Translates Supabase and internal auth errors to Spanish.
+ */
+export function translateAuthError(error: string): string {
+  if (!error) return "";
+  
+  const translations: Record<string, string> = {
+    "Invalid login credentials": "Correo electrónico o contraseña incorrectos.",
+    "Email not confirmed": "Tu correo electrónico no ha sido confirmado.",
+    "User not found": "No se encontró ningún usuario con ese correo.",
+    "Account is blocked": "Tu cuenta ha sido bloqueada. Contacta al soporte.",
+    "Account is inactive": "Tu cuenta está inactiva.",
+    "Invalid token": "Token inválido o expirado.",
+    "Password is too short": "La contraseña es demasiado corta.",
+    "User already registered": "Este correo ya está registrado.",
+    "Network request failed": "Error de conexión. Inténtalo de nuevo.",
+    "New password should be different from the old password": "La nueva contraseña debe ser diferente a la anterior.",
+  };
 
+  // Check for exact match or partial match
+  for (const [key, value] of Object.entries(translations)) {
+    if (error.toLowerCase().includes(key.toLowerCase())) {
+      return value;
+    }
+  }
+
+  // Fallback for unknown errors
+  return "Ocurrió un error inesperado al intentar acceder.";
+}

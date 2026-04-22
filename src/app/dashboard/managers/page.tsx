@@ -1,20 +1,24 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { 
   Plus, 
   MoreHorizontal, 
-  UserCheck, 
-  UserX, 
-  ExternalLink, 
   Mail, 
   ShieldAlert, 
   Loader2, 
   Eye, 
   EyeOff,
   KeyRound,
-  Trash2
+  Trash2,
+  Edit2,
+  Ban,
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
 import { useAuthStore } from "@/store";
 import { 
@@ -24,7 +28,7 @@ import {
   TableHead, 
   TableHeader, 
   TableRow 
-} from "@/components/ui";
+} from "@/components/ui/table";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -32,9 +36,9 @@ import {
   DropdownMenuLabel, 
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
-} from "@/components/ui";
-import { Button } from "@/components/ui";
-import { Badge } from "@/components/ui";
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -42,23 +46,63 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from "@/components/ui";
-import { Input } from "@/components/ui";
-import { Label } from "@/components/ui";
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { 
+  Form,
+} from "@/components/ui/form";
+import { FormInput, FormSelect, FormSwitch } from "@/components/ui/forms";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { translateAuthError } from "@/lib/utils";
 import type { Manager } from "@/app/api/managers/route";
-import { useManagers, useCreateManager } from "@/hooks/queries/useManagers";
+import { 
+  useManagers, 
+  useCreateManager, 
+  useUpdateManager, 
+  useDeleteManager 
+} from "@/hooks/queries/useManagers";
+
+// --- ZOD SCHEMAS ---
+
+const createManagerSchema = z.object({
+  name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
+  email: z.string().email("Correo electrónico inválido"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+  role: z.enum(["admin", "superadmin"]),
+});
+
+const updateManagerSchema = z.object({
+  id: z.string(),
+  name: z.string().min(3, "El nombre debe tener al menos 3 caracteres").optional(),
+  email: z.string().email("Correo electrónico inválido").optional(),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres").or(z.literal("")).optional(),
+  role: z.enum(["admin", "superadmin"]).optional(),
+  is_active: z.boolean().optional(),
+});
+
+type CreateFormValues = z.infer<typeof createManagerSchema>;
+type UpdateFormValues = z.infer<typeof updateManagerSchema>;
 
 export default function ManagersPage() {
   const router = useRouter();
-  const { role, isLoading: authLoading } = useAuthStore();
+  const { role, user, isLoading: authLoading } = useAuthStore();
   
   // React Query Hooks
   const { data: managers = [], isLoading } = useManagers();
   const createMutation = useCreateManager();
+  const updateMutation = useUpdateManager();
+  const deleteMutation = useDeleteManager();
 
   useEffect(() => {
     if (!authLoading && role !== 'superadmin') {
@@ -66,13 +110,113 @@ export default function ManagersPage() {
     }
   }, [authLoading, role, router]);
 
+  // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedManager, setSelectedManager] = useState<Manager | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  
-  // Form state
-  const [newName, setNewName] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+
+  // Forms
+  const createForm = useForm<CreateFormValues>({
+    resolver: zodResolver(createManagerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      role: "admin",
+    },
+  });
+
+  const editForm = useForm<UpdateFormValues>({
+    resolver: zodResolver(updateManagerSchema),
+    defaultValues: {
+      id: "",
+      name: "",
+      email: "",
+      password: "",
+      role: "admin",
+      is_active: true,
+    },
+  });
+
+  // Handle Create
+  const handleCreateManager = (values: CreateFormValues) => {
+    createMutation.mutate(values, {
+      onSuccess: () => {
+        toast.success("Manager creado", {
+          description: `Se ha creado la cuenta para ${values.name} correctamente.`
+        });
+        createForm.reset();
+        setIsCreateModalOpen(false);
+      },
+      onError: (error: any) => {
+        toast.error("Error", {
+          description: translateAuthError(error.message || "No se pudo crear la cuenta.")
+        });
+      }
+    });
+  };
+
+  // Handle Update
+  const handleUpdateManager = (values: UpdateFormValues) => {
+    // If password is empty, don't send it
+    const data = { ...values };
+    if (!data.password) delete data.password;
+
+    updateMutation.mutate(data, {
+      onSuccess: () => {
+        toast.success("Manager actualizado", {
+          description: `Se han guardado los cambios para ${values.name}.`
+        });
+        setIsEditModalOpen(false);
+        setSelectedManager(null);
+      },
+      onError: (error: any) => {
+        toast.error("Error", {
+          description: translateAuthError(error.message || "No se pudo actualizar la cuenta.")
+        });
+      }
+    });
+  };
+
+  // Handle Delete
+  const handleDeleteManager = () => {
+    if (!selectedManager) return;
+
+    deleteMutation.mutate(selectedManager.id, {
+      onSuccess: () => {
+        toast.success("Manager eliminado", {
+          description: "La cuenta ha sido eliminada permanentemente del sistema."
+        });
+        setIsDeleteModalOpen(false);
+        setSelectedManager(null);
+      },
+      onError: (error: any) => {
+        toast.error("Error", {
+          description: translateAuthError(error.message || "No se pudo eliminar la cuenta.")
+        });
+      }
+    });
+  };
+
+  const openEditModal = (manager: Manager) => {
+    setSelectedManager(manager);
+    editForm.reset({
+      id: manager.id,
+      name: manager.name,
+      email: manager.email,
+      role: manager.role,
+      is_active: manager.is_active,
+      password: "",
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const openDeleteModal = (manager: Manager) => {
+    setSelectedManager(manager);
+    setIsDeleteModalOpen(true);
+  };
 
   if (authLoading || role !== 'superadmin') {
     return (
@@ -81,31 +225,6 @@ export default function ManagersPage() {
       </div>
     );
   }
-
-  const handleCreateManager = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    createMutation.mutate({
-      name: newName,
-      email: newEmail,
-      password: newPassword,
-    }, {
-      onSuccess: () => {
-        toast.success("Manager creado", {
-          description: `Se ha creado la cuenta para ${newName} correctamente.`
-        });
-        setNewName("");
-        setNewEmail("");
-        setNewPassword("");
-        setIsCreateModalOpen(false);
-      },
-      onError: (error: any) => {
-        toast.error("Error", {
-          description: error.message || "No se pudo crear la cuenta."
-        });
-      }
-    });
-  };
 
   return (
     <div className="space-y-6">
@@ -119,86 +238,13 @@ export default function ManagersPage() {
           </p>
         </div>
 
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-black italic uppercase tracking-widest rounded-none gap-2 h-12 px-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
-              <Plus className="h-5 w-5" strokeWidth={3} />
-              Añadir Nuevo Manager
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] rounded-none border-2 border-black dark:border-white p-0 overflow-hidden bg-card">
-            <div className="bg-primary p-4 border-b-2 border-black dark:border-white">
-              <DialogTitle className="font-satoshi font-black uppercase tracking-tight italic text-2xl text-primary-foreground">
-                NUEVA <span className="text-black">CUENTA</span>
-              </DialogTitle>
-            </div>
-            <div className="p-6 pt-4">
-              <DialogDescription className="font-medium text-foreground mb-4">
-                Crea una cuenta para un organizador. Se le asignará el rol de administrador automáticamente.
-              </DialogDescription>
-              <form onSubmit={handleCreateManager} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Nombre Completo</Label>
-                  <Input 
-                    id="name" 
-                    value={newName} 
-                    onChange={(e) => setNewName(e.target.value)} 
-                    placeholder="Ej. Juan Pérez" 
-                    className="rounded-none border-2 border-black font-medium h-11 focus-visible:ring-0 focus-visible:border-primary" 
-                    required 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Correo Electrónico</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    value={newEmail} 
-                    onChange={(e) => setNewEmail(e.target.value)} 
-                    placeholder="juan@ejemplo.com" 
-                    className="rounded-none border-2 border-black font-medium h-11 focus-visible:ring-0 focus-visible:border-primary" 
-                    required 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Contraseña Inicial</Label>
-                  <div className="relative">
-                    <Input 
-                      id="password" 
-                      type={showPassword ? "text" : "password"} 
-                      value={newPassword} 
-                      onChange={(e) => setNewPassword(e.target.value)} 
-                      placeholder="••••••••" 
-                      className="rounded-none border-2 border-black font-medium h-11 pr-10 focus-visible:ring-0 focus-visible:border-primary" 
-                      required 
-                    />
-                    <button 
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-                <DialogFooter className="pt-4">
-                  <Button 
-                    type="submit" 
-                    disabled={createMutation.isPending}
-                    className="w-full bg-primary hover:bg-primary/90 font-black uppercase italic tracking-widest rounded-none h-12 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {createMutation.isPending ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        CREANDO...
-                      </div>
-                    ) : "CREAR CUENTA DE MANAGER"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button 
+          onClick={() => setIsCreateModalOpen(true)}
+          className="bg-primary hover:bg-primary/90 text-primary-foreground font-black italic uppercase tracking-widest rounded-none gap-2 h-12 px-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+        >
+          <Plus className="h-5 w-5" strokeWidth={3} />
+          Añadir Nuevo Manager
+        </Button>
       </div>
 
       <div className="bg-card border-2 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] rounded-none overflow-hidden">
@@ -223,6 +269,7 @@ export default function ManagersPage() {
                   <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-foreground border-r-2 border-black/10 dark:border-white/10">Nombre del Manager</TableHead>
                   <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-foreground border-r-2 border-black/10 dark:border-white/10">Identidad Digital (Email)</TableHead>
                   <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-foreground text-center border-r-2 border-black/10 dark:border-white/10">Rol</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-foreground text-center border-r-2 border-black/10 dark:border-white/10">Estado</TableHead>
                   <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-foreground border-r-2 border-black/10 dark:border-white/10">Fecha Registro</TableHead>
                   <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-foreground text-right">Sistema</TableHead>
                 </TableRow>
@@ -244,6 +291,19 @@ export default function ManagersPage() {
                         {manager.role === 'superadmin' ? 'SUPER' : 'ADMIN'}
                       </Badge>
                     </TableCell>
+                    <TableCell className="text-center py-5 px-6">
+                      {manager.is_active ? (
+                        <div className="flex items-center justify-center gap-1 text-green-600 font-black italic uppercase text-[10px] tracking-widest">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Activo
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-1 text-destructive font-black italic uppercase text-[10px] tracking-widest">
+                          <Ban className="h-3 w-3" />
+                          Bloqueado
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="py-5 px-6 font-mono text-xs font-bold whitespace-nowrap">
                       {manager.created_at ? format(new Date(manager.created_at), "dd/MM/yyyy · HH:mm", { locale: es }) : 'N/A'}
                     </TableCell>
@@ -259,16 +319,19 @@ export default function ManagersPage() {
                             Control de Sistema
                           </DropdownMenuLabel>
                           <div className="p-1">
-                            <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 cursor-pointer font-bold italic uppercase text-xs tracking-wider hover:bg-primary/5">
-                              <KeyRound className="h-4 w-4 text-primary" />
-                              Cambiar Contraseña
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 cursor-pointer font-bold italic uppercase text-xs tracking-wider hover:bg-primary/5">
-                              <ExternalLink className="h-4 w-4 text-primary" />
-                              Perfil Detallado
+                            <DropdownMenuItem 
+                              onClick={() => openEditModal(manager)}
+                              className="flex items-center gap-3 px-3 py-3 cursor-pointer font-bold italic uppercase text-xs tracking-wider hover:bg-primary/5"
+                            >
+                              <Edit2 className="h-4 w-4 text-primary" />
+                              Editar / Cambiar Contraseña
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-black/10 h-[2px]" />
-                            <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 cursor-pointer font-black italic uppercase text-xs tracking-wider text-destructive focus:text-destructive focus:bg-destructive/10">
+                            <DropdownMenuItem 
+                              disabled={manager.id === user?.id}
+                              onClick={() => openDeleteModal(manager)}
+                              className="flex items-center gap-3 px-3 py-3 cursor-pointer font-black italic uppercase text-xs tracking-wider text-destructive focus:text-destructive focus:bg-destructive/10"
+                            >
                               <Trash2 className="h-4 w-4" strokeWidth={3} />
                               Eliminar Cuenta
                             </DropdownMenuItem>
@@ -283,6 +346,168 @@ export default function ManagersPage() {
           </div>
         )}
       </div>
+
+      {/* CREATE MODAL */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="sm:max-w-[425px] rounded-none border-2 border-black dark:border-white p-0 overflow-hidden bg-card">
+          <div className="bg-primary p-4 border-b-2 border-black dark:border-white">
+            <DialogTitle className="font-satoshi font-black uppercase tracking-tight italic text-2xl text-primary-foreground">
+              NUEVA <span className="text-black">CUENTA</span>
+            </DialogTitle>
+          </div>
+          <div className="p-6 pt-4">
+            <Form {...createForm}>
+              <form onSubmit={createForm.handleSubmit(handleCreateManager)} className="space-y-4">
+                <FormInput 
+                  control={createForm.control}
+                  name="name"
+                  label="Nombre Completo"
+                  placeholder="Ej. Juan Pérez"
+                />
+                <FormInput 
+                  control={createForm.control}
+                  name="email"
+                  label="Correo Electrónico"
+                  type="email"
+                  placeholder="juan@ejemplo.com"
+                />
+                <div className="relative">
+                  <FormInput 
+                    control={createForm.control}
+                    name="password"
+                    label="Contraseña Inicial"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-[38px] text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <FormSelect 
+                  control={createForm.control}
+                  name="role"
+                  label="Rol de Usuario"
+                  options={[
+                    { value: "admin", label: "Administrador (Eventos)" },
+                    { value: "superadmin", label: "Superadmin (Sistema)" },
+                  ]}
+                />
+                <DialogFooter className="pt-4">
+                  <Button 
+                    type="submit" 
+                    disabled={createMutation.isPending}
+                    className="w-full bg-primary hover:bg-primary/90 font-black uppercase italic tracking-widest rounded-none h-12 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+                  >
+                    {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "CREAR CUENTA"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* EDIT MODAL */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px] rounded-none border-2 border-black dark:border-white p-0 overflow-hidden bg-card">
+          <div className="bg-black dark:bg-white p-4 border-b-2 border-black dark:border-white">
+            <DialogTitle className="font-satoshi font-black uppercase tracking-tight italic text-2xl text-white dark:text-black">
+              EDITAR <span className="text-primary">PERFIL</span>
+            </DialogTitle>
+          </div>
+          <div className="p-6 pt-4">
+            <Form {...editForm}>
+              <form onSubmit={editForm.handleSubmit(handleUpdateManager)} className="space-y-4">
+                <FormInput 
+                  control={editForm.control}
+                  name="name"
+                  label="Nombre Completo"
+                />
+                <FormInput 
+                  control={editForm.control}
+                  name="email"
+                  label="Correo Electrónico"
+                  type="email"
+                />
+                <div className="relative">
+                  <FormInput 
+                    control={editForm.control}
+                    name="password"
+                    label="Nueva Contraseña (Opcional)"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Dejar en blanco para mantener actual"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-[38px] text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <FormSelect 
+                  control={editForm.control}
+                  name="role"
+                  label="Rol de Usuario"
+                  disabled={selectedManager?.id === user?.id}
+                  options={[
+                    { value: "admin", label: "Administrador (Eventos)" },
+                    { value: "superadmin", label: "Superadmin (Sistema)" },
+                  ]}
+                />
+                <FormSwitch 
+                  control={editForm.control}
+                  name="is_active"
+                  label="Cuenta Activa"
+                  description="Permitir acceso al sistema"
+                  disabled={selectedManager?.id === user?.id}
+                />
+                <DialogFooter className="pt-4">
+                  <Button 
+                    type="submit" 
+                    disabled={updateMutation.isPending}
+                    className="w-full bg-primary hover:bg-primary/90 font-black uppercase italic tracking-widest rounded-none h-12 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+                  >
+                    {updateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "GUARDAR CAMBIOS"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* DELETE DIALOG */}
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <AlertDialogContent className="rounded-none border-2 border-black dark:border-white bg-card">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 text-destructive mb-2">
+              <AlertCircle className="h-8 w-8" strokeWidth={3} />
+              <AlertDialogTitle className="font-satoshi font-black uppercase italic text-2xl tracking-tight">
+                ¿ELIMINAR CUENTA?
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="font-bold text-foreground/80">
+              Esta acción es permanente. Se eliminará el acceso de <span className="text-primary font-black uppercase">{selectedManager?.name}</span> y todos sus registros asociados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6 gap-3">
+            <AlertDialogCancel className="rounded-none border-2 border-black font-black uppercase italic tracking-widest h-12">
+              CANCELAR
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteManager}
+              className="rounded-none border-2 border-black bg-destructive hover:bg-destructive/90 text-destructive-foreground font-black uppercase italic tracking-widest h-12 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+            >
+              ELIMINAR PERMANENTEMENTE
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       <div className="flex items-center justify-between border-2 border-black dark:border-white bg-muted p-4 font-mono text-[10px] uppercase tracking-[0.3em] font-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]">
         <div className="flex items-center gap-4">
@@ -290,7 +515,7 @@ export default function ManagersPage() {
           <span className="text-primary">ESTADO: OPERACIONAL</span>
         </div>
         <div>
-          CUENTAS ACTIVAS: {managers.length}
+          CUENTAS ACTIVAS: {managers.filter((m: Manager) => m.is_active).length} / {managers.length}
         </div>
       </div>
     </div>

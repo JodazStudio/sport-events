@@ -19,6 +19,7 @@ export function FormSwitch<TFieldValues extends FieldValues, TName extends Field
   label,
   description,
   containerClassName,
+  disabled,
 }: BaseFieldProps<TFieldValues, TName>) {
   return (
     <FormField
@@ -34,6 +35,7 @@ export function FormSwitch<TFieldValues extends FieldValues, TName extends Field
             <Switch 
               checked={field.value} 
               onCheckedChange={field.onChange} 
+              disabled={disabled}
               className="data-[state=checked]:bg-primary" 
             />
           </FormControl>

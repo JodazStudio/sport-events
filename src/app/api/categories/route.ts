@@ -38,6 +38,97 @@ async function validateOwnership(request: Request, eventId: string) {
   return { user, isSuperadmin: false };
 }
 
+/**
+ * @swagger
+ * /api/categories:
+ *   get:
+ *     summary: Fetch categories for an event
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: event_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of categories
+ *   post:
+ *     summary: Create new categories (Single or Bulk)
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             oneOf:
+ *               - type: object
+ *                 required: [event_id, name, gender, min_age, max_age]
+ *                 properties:
+ *                   event_id: { type: string }
+ *                   name: { type: string }
+ *                   gender: { type: string, enum: [MALE, FEMALE, MIXED] }
+ *                   min_age: { type: number }
+ *                   max_age: { type: number }
+ *               - type: array
+ *                 items:
+ *                   type: object
+ *                   required: [event_id, name, gender, min_age, max_age]
+ *                   properties:
+ *                     event_id: { type: string }
+ *                     name: { type: string }
+ *                     gender: { type: string, enum: [MALE, FEMALE, MIXED] }
+ *                     min_age: { type: number }
+ *                     max_age: { type: number }
+ *     responses:
+ *       201:
+ *         description: Categories created
+ *   put:
+ *     summary: Update a category
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [id, event_id]
+ *             properties:
+ *               id: { type: string }
+ *               event_id: { type: string }
+ *               name: { type: string }
+ *               gender: { type: string, enum: [MALE, FEMALE, MIXED] }
+ *               min_age: { type: number }
+ *               max_age: { type: number }
+ *     responses:
+ *       200:
+ *         description: Category updated
+ *   delete:
+ *     summary: Delete a category
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: event_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Category deleted
+ */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);

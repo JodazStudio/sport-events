@@ -3,6 +3,26 @@ import { supabaseAdmin, checkAdmin } from '@/lib';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * @swagger
+ * /api/admin/registrations:
+ *   get:
+ *     summary: Fetch registrations for an event (Admin only)
+ *     tags: [Admin Registrations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of registrations
+ *       401:
+ *         description: Unauthorized
+ */
 export async function GET(request: NextRequest) {
   try {
     const auth = await checkAdmin(request);

@@ -8,4 +8,5 @@ export interface BaseFieldProps<TFieldValues extends FieldValues, TName extends 
   containerClassName?: string;
   labelClassName?: string;
   inputClassName?: string;
+  disabled?: boolean;
 }

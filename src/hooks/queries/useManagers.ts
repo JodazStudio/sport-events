@@ -49,3 +49,53 @@ export function useCreateManager() {
     },
   });
 }
+
+export function useUpdateManager() {
+  const queryClient = useQueryClient();
+  const { session } = useAuthStore();
+
+  return useMutation({
+    mutationFn: async (updatedManager: any) => {
+      const response = await fetch("/api/managers", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify(updatedManager),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update manager");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: managerKeys.all });
+    },
+  });
+}
+
+export function useDeleteManager() {
+  const queryClient = useQueryClient();
+  const { session } = useAuthStore();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/managers?id=${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete manager");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: managerKeys.all });
+    },
+  });
+}

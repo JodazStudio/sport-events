@@ -25,6 +25,7 @@ export function FormSelect<TFieldValues extends FieldValues, TName extends Field
   containerClassName,
   placeholder,
   options,
+  disabled,
   ...props
 }: BaseFieldProps<TFieldValues, TName> & {
   options: { value: string; label: string; email?: string }[];
@@ -37,7 +38,7 @@ export function FormSelect<TFieldValues extends FieldValues, TName extends Field
       render={({ field }) => (
         <FormItem className={containerClassName}>
           {label && <FormLabel className="font-mono text-[10px] uppercase tracking-widest">{label}</FormLabel>}
-          <Select onValueChange={field.onChange} value={field.value}>
+          <Select onValueChange={field.onChange} value={field.value} disabled={disabled}>
             <FormControl>
               <SelectTrigger className="rounded-none border-2 border-black h-11 font-bold italic">
                 <SelectValue placeholder={placeholder} />

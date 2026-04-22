@@ -4,6 +4,16 @@ import { supabase } from '@/lib';
 // Ensure the route is always treated as dynamic and not pre-rendered
 export const dynamic = 'force-dynamic';
 
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     summary: System health check
+ *     tags: [Utility]
+ *     responses:
+ *       200:
+ *         description: System is operational
+ */
 export async function GET() {
   try {
     // Check if client is initialized
