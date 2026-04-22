@@ -50,6 +50,7 @@ export const metadata: Metadata = {
 import { AuthInitializer } from "@/components/auth";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import QueryProvider from "@/components/providers/QueryProvider";
 
 export default function RootLayout({
   children,
@@ -67,10 +68,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthInitializer>
-            {children}
-            <SonnerToaster position="top-right" richColors />
-          </AuthInitializer>
+          <QueryProvider>
+            <AuthInitializer>
+              {children}
+              <SonnerToaster position="top-right" richColors />
+            </AuthInitializer>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

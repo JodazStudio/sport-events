@@ -15,7 +15,10 @@ import {
   XCircle,
   User,
   Activity,
-  Users
+  Users,
+  Copy,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -35,10 +38,12 @@ import {
   DialogTitle,
   Form,
   Badge,
+  Checkbox,
 } from '@/components/ui';
 import { FormInput, FormSelect } from '@/components/ui/forms';
 import { useAuthStore } from '@/store';
 import { checkAgeOverlap } from '@/features/events/utils';
+import { useCategories, useMutationCategory } from '@/hooks/queries/useCategories';
 
 // --- SCHEMAS ---
 
@@ -67,15 +72,17 @@ interface CategoryManagementProps {
 }
 
 export function CategoryManagement({ eventId }: CategoryManagementProps) {
-  const { session } = useAuthStore();
+  // React Query Hooks
+  const { data: categories = [], isLoading } = useCategories(eventId);
+  const categoryMutation = useMutationCategory();
   
   // State
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
+  const [duplicateTargetGender, setDuplicateTargetGender] = useState<'MALE' | 'FEMALE' | 'MIXED'>('FEMALE');
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema) as any,
@@ -86,30 +93,6 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
       max_age: 99,
     },
   });
-
-  // Load categories
-  const fetchCategories = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/categories?event_id=${eventId}`, {
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`
-        }
-      });
-      if (!response.ok) throw new Error('Failed to fetch categories');
-      const result = await response.json();
-      setCategories(result.data || []);
-    } catch (error) {
-      console.error(error);
-      toast.error('Error al cargar categorías');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (eventId) fetchCategories();
-  }, [eventId]);
 
   // Handlers
   const handleOpenAdd = () => {
@@ -140,8 +123,6 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
   };
 
   const onSubmit = async (values: CategoryFormValues) => {
-    if (!session?.access_token) return;
-
     // Client-side overlap validation
     const hasOverlap = checkAgeOverlap(
       { 
@@ -160,61 +141,88 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const method = selectedCategory ? 'PUT' : 'POST';
-      const body = {
+    const method = selectedCategory ? 'PUT' : 'POST';
+    categoryMutation.mutate({
+      method,
+      body: {
         ...values,
         id: selectedCategory?.id,
         event_id: eventId,
-      };
-
-      const response = await fetch('/api/categories', {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al procesar categoría');
       }
-
-      toast.success(selectedCategory ? 'Categoría actualizada' : 'Categoría creada');
-      setIsDialogOpen(false);
-      fetchCategories();
-    } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, {
+      onSuccess: () => {
+        toast.success(selectedCategory ? 'Categoría actualizada' : 'Categoría creada');
+        setIsDialogOpen(false);
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Error al procesar categoría');
+      }
+    });
   };
 
   const onDelete = async () => {
-    if (!session?.access_token || !selectedCategory) return;
+    if (!selectedCategory) return;
 
-    setIsSubmitting(true);
-    try {
-      const response = await fetch(`/api/categories?id=${selectedCategory.id}&event_id=${eventId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      });
+    categoryMutation.mutate({
+      method: 'DELETE',
+      body: {
+        id: selectedCategory.id,
+        event_id: eventId,
+      }
+    }, {
+      onSuccess: () => {
+        toast.success('Categoría eliminada');
+        setIsDeleteModalOpen(false);
+      },
+      onError: () => {
+        toast.error('Error al eliminar categoría');
+      }
+    });
+  };
 
-      if (!response.ok) throw new Error('Error al eliminar');
-
-      toast.success('Categoría eliminada');
-      setIsDeleteModalOpen(false);
-      fetchCategories();
-    } catch (error) {
-      toast.error('Error al eliminar categoría');
-    } finally {
-      setIsSubmitting(false);
+  const handleToggleSelect = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
     }
+    setSelectedIds(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.size === categories.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(categories.map((c: Category) => c.id)));
+    }
+  };
+
+  const onDuplicate = async () => {
+    if (selectedIds.size === 0) return;
+
+    const categoriesToDuplicate = categories.filter((c: Category) => selectedIds.has(c.id));
+    const newCategories = categoriesToDuplicate.map((c: Category) => ({
+      event_id: eventId,
+      name: c.name,
+      gender: duplicateTargetGender,
+      min_age: c.min_age,
+      max_age: c.max_age
+    }));
+
+    categoryMutation.mutate({
+      method: 'POST',
+      body: newCategories
+    }, {
+      onSuccess: () => {
+        toast.success(`${selectedIds.size} categorías duplicadas a ${duplicateTargetGender === 'MALE' ? 'Masculino' : duplicateTargetGender === 'FEMALE' ? 'Femenino' : 'Mixto'}`);
+        setIsDuplicateDialogOpen(false);
+        setSelectedIds(new Set());
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Error al duplicar categorías');
+      }
+    });
   };
 
   // Render Helpers
@@ -239,13 +247,25 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
           </h2>
           <p className="text-sm text-muted-foreground font-mono">Define los rangos de edad y géneros para la competencia.</p>
         </div>
-        <Button 
-          onClick={handleOpenAdd}
-          className="rounded-none border-2 border-black dark:border-white bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all h-12"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Nueva Categoría
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          {selectedIds.size > 0 && (
+            <Button 
+              onClick={() => setIsDuplicateDialogOpen(true)}
+              variant="outline"
+              className="rounded-none border-2 border-black dark:border-white bg-white dark:bg-card hover:bg-muted font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all h-12 px-6"
+            >
+              <Copy className="w-5 h-5 mr-2" />
+              Duplicar ({selectedIds.size})
+            </Button>
+          )}
+          <Button 
+            onClick={handleOpenAdd}
+            className="rounded-none border-2 border-black dark:border-white bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all h-12"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Nueva Categoría
+          </Button>
+        </div>
       </div>
 
       <div className="border-2 border-black dark:border-white bg-white dark:bg-card overflow-hidden shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)]">
@@ -269,6 +289,13 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
             <Table>
               <TableHeader className="bg-black dark:bg-white">
                 <TableRow className="hover:bg-transparent border-none">
+                  <TableHead className="w-12 text-white dark:text-black">
+                    <Checkbox 
+                      checked={categories.length > 0 && selectedIds.size === categories.length}
+                      onCheckedChange={handleSelectAll}
+                      className="border-white dark:border-black data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                    />
+                  </TableHead>
                   <TableHead className="text-white dark:text-black font-mono uppercase font-black text-[10px] tracking-widest h-12">Categoría</TableHead>
                   <TableHead className="text-white dark:text-black font-mono uppercase font-black text-[10px] tracking-widest h-12">Género</TableHead>
                   <TableHead className="text-white dark:text-black font-mono uppercase font-black text-[10px] tracking-widest h-12 text-center">Edad</TableHead>
@@ -276,8 +303,15 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {categories.map((category) => (
+                {categories.map((category: Category) => (
                   <TableRow key={category.id} className="hover:bg-muted/50 border-b-2 border-black/10 dark:border-white/10">
+                    <TableCell className="w-12">
+                      <Checkbox 
+                        checked={selectedIds.has(category.id)}
+                        onCheckedChange={() => handleToggleSelect(category.id)}
+                        className="border-black dark:border-white"
+                      />
+                    </TableCell>
                     <TableCell className="font-bold py-4">
                       <div className="flex flex-col">
                         <span className="uppercase tracking-tight text-foreground">{category.name}</span>
@@ -389,10 +423,10 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={isSubmitting}
-                  className="rounded-none border-2 border-black bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all px-8"
+                  disabled={categoryMutation.isPending}
+                  className="rounded-none border-2 border-black dark:border-white bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all px-8"
                 >
-                  {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  {categoryMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   {selectedCategory ? 'Actualizar' : 'Guardar'}
                 </Button>
               </DialogFooter>
@@ -426,12 +460,73 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
               <Button 
                 variant="destructive"
                 onClick={onDelete}
-                disabled={isSubmitting}
+                disabled={categoryMutation.isPending}
                 className="rounded-none border-2 border-black dark:border-white bg-destructive text-destructive-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               >
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sí, eliminar'}
+                {categoryMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sí, eliminar'}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* DUPLICATE DIALOG */}
+      <Dialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
+        <DialogContent className="rounded-none border-4 border-black dark:border-white p-0 overflow-hidden max-w-md shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] dark:shadow-[10px_10px_0px_0px_rgba(255,255,255,1)] bg-card">
+          <DialogHeader className="bg-black dark:bg-white p-6">
+            <DialogTitle className="text-white dark:text-black font-black uppercase tracking-widest flex items-center gap-2">
+              <Copy className="w-5 h-5" />
+              Duplicar Categorías
+            </DialogTitle>
+            <DialogDescription className="text-gray-400 dark:text-gray-500 font-mono text-xs">
+              Se duplicarán {selectedIds.size} categorías al género seleccionado.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="p-6 space-y-6">
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest font-mono">Género de Destino</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['MALE', 'FEMALE', 'MIXED'] as const).map((g) => (
+                  <Button
+                    key={g}
+                    type="button"
+                    variant={duplicateTargetGender === g ? 'default' : 'outline'}
+                    onClick={() => setDuplicateTargetGender(g)}
+                    className={`rounded-none border-2 border-black dark:border-white font-bold uppercase text-[10px] h-10 ${
+                      duplicateTargetGender === g ? 'bg-primary text-primary-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : ''
+                    }`}
+                  >
+                    {g === 'MALE' ? 'Masc' : g === 'FEMALE' ? 'Fem' : 'Mixto'}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-muted/30 p-4 border-2 border-dashed border-black">
+              <p className="text-[10px] font-mono leading-relaxed">
+                <span className="font-black text-primary uppercase">Nota:</span> Se mantendrán los mismos rangos de edad y nombres. Si alguna categoría ya existe en el género de destino, la operación fallará para evitar duplicados exactos.
+              </p>
+            </div>
+
+            <DialogFooter className="pt-4">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={() => setIsDuplicateDialogOpen(false)}
+                className="rounded-none border-2 border-transparent hover:border-black font-bold uppercase text-xs"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={onDuplicate}
+                disabled={categoryMutation.isPending}
+                className="rounded-none border-2 border-black bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all px-8"
+              >
+                {categoryMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Confirmar
+              </Button>
+            </DialogFooter>
           </div>
         </DialogContent>
       </Dialog>

@@ -49,6 +49,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CategoryManagement } from "./category-management";
 import { StageManagement } from "./stage-management";
 import { RegistrationManagement } from "./registration-management";
+import { PaymentsView } from "./payments-view";
+import { useAdminEvents, useUpdateEvent } from "@/hooks/queries/useEvents";
 
 // --- ZOD SCHEMA ---
 const configSchema = z.object({
@@ -100,13 +102,14 @@ interface Manager {
 }
 
 export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = false }: ConfigViewProps) {
-  const { session } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [managers, setManagers] = useState<Manager[]>([]);
+  // React Query Hooks
+  const { data: adminData, isLoading } = useAdminEvents();
+  const updateMutation = useUpdateEvent();
+
+  const managers = adminData?.managers || [];
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "general");
 
   const form = useForm<ConfigFormValues>({
@@ -139,17 +142,10 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
     },
   });
 
-  const fetchData = async () => {
-    if (!session?.access_token) return;
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/admin/events', {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      });
-      const data = await response.json();
-      setManagers(data.managers || []);
-      
-      const event = data.events?.find((e: any) => e.id === eventId || e.slug === eventId);
+  // Sync form with loaded data
+  useEffect(() => {
+    if (adminData?.events) {
+      const event = adminData.events.find((e: any) => e.id === eventId || e.slug === eventId);
       if (event) {
         if (onLoaded) onLoaded(event);
         form.reset({
@@ -180,16 +176,8 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
           }
         });
       }
-    } catch (error) {
-      toast.error("Error al cargar configuración");
-    } finally {
-      setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [eventId, session]);
+  }, [adminData, eventId, onLoaded, form]);
 
   // Sync tab with URL if isPage
   useEffect(() => {
@@ -218,28 +206,15 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
   };
 
   const onSubmit = async (values: ConfigFormValues) => {
-    if (!session?.access_token) return;
-    
-    setIsSubmitting(true);
-    try {
-      const response = await fetch('/api/admin/events', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify(values)
-      });
-      
-      if (!response.ok) throw new Error('Error al actualizar');
-      
-      toast.success('Configuración actualizada');
-      if (onUpdate) onUpdate();
-    } catch (error) {
-      toast.error('Error al actualizar');
-    } finally {
-      setIsSubmitting(false);
-    }
+    updateMutation.mutate(values, {
+      onSuccess: () => {
+        toast.success('Configuración actualizada');
+        if (onUpdate) onUpdate();
+      },
+      onError: () => {
+        toast.error('Error al actualizar');
+      }
+    });
   };
 
   if (isLoading) {
@@ -305,7 +280,7 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
                     name="manager_id"
                     label="Organizador / Dueño"
                     placeholder="Seleccionar organizador"
-                    options={managers.map(m => ({ value: m.id, label: m.name, email: m.email }))}
+                    options={managers.map((m: Manager) => ({ value: m.id, label: m.name, email: m.email }))}
                   />
 
                   <FormInput
@@ -345,6 +320,44 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
                     name="description"
                     label="Descripción"
                   />
+                </CardContent>
+              </Card>
+
+              <Card className="border-2 border-black dark:border-white rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] bg-card">
+                <CardHeader className="bg-muted/30 border-b-2 border-black dark:border-white">
+                  <CardTitle className="font-satoshi font-black italic uppercase text-xl">Datos Bancarios</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6 pt-6">
+                  <p className="text-[10px] font-mono text-muted-foreground uppercase mb-2">
+                    Estos datos se mostrarán a los atletas durante el proceso de pago.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormInput
+                      control={form.control}
+                      name="payment_info.bank_name"
+                      label="Nombre del Banco"
+                      placeholder="Ej: Bancamiga"
+                    />
+                    <FormInput
+                      control={form.control}
+                      name="payment_info.phone_number"
+                      label="Número de Teléfono (Pago Móvil)"
+                      placeholder="Ej: 0424-0000000"
+                    />
+                    <FormInput
+                      control={form.control}
+                      name="payment_info.id_number"
+                      label="Cédula / RIF"
+                      placeholder="Ej: V-12345678"
+                    />
+                    <FormInput
+                      control={form.control}
+                      name="payment_info.account_number"
+                      label="Número de Cuenta (Opcional)"
+                      placeholder="0123..."
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -433,7 +446,7 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
             </TabsContent>
 
             {/* Sticky/Fixed Actions Bar for General/Media/Payments tabs */}
-            {(activeTab === 'general' || activeTab === 'media' || activeTab === 'payments') && (
+            {(activeTab === 'general' || activeTab === 'media') && (
               <div className="flex items-center justify-between gap-4 pt-4">
                 <Button 
                   type="button" 
@@ -447,55 +460,20 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
 
                 <Button 
                   type="submit" 
-                  disabled={isSubmitting}
+                  disabled={updateMutation.isPending}
                   className="rounded-none border-2 border-black dark:border-white bg-black dark:bg-white text-white dark:text-black font-black uppercase italic tracking-widest py-6 px-12 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
                 >
-                  {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : <Save className="w-5 h-5 mr-2" />}
+                  {updateMutation.isPending ? <Loader2 className="animate-spin mr-2" /> : <Save className="w-5 h-5 mr-2" />}
                   Guardar Cambios
                 </Button>
               </div>
             )}
-            <TabsContent value="payments" className="space-y-8">
-              <Card className="border-2 border-black dark:border-white rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] bg-card">
-                <CardHeader className="bg-muted/30 border-b-2 border-black dark:border-white">
-                  <CardTitle className="font-satoshi font-black italic uppercase text-xl">Datos Bancarios para Inscripciones</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6 pt-6">
-                  <p className="text-xs font-mono text-muted-foreground uppercase mb-4">
-                    Estos datos se mostrarán a los atletas durante el proceso de pago.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormInput
-                      control={form.control}
-                      name="payment_info.bank_name"
-                      label="Nombre del Banco"
-                      placeholder="Ej: Bancamiga"
-                    />
-                    <FormInput
-                      control={form.control}
-                      name="payment_info.phone_number"
-                      label="Número de Teléfono (Pago Móvil)"
-                      placeholder="Ej: 0424-0000000"
-                    />
-                    <FormInput
-                      control={form.control}
-                      name="payment_info.id_number"
-                      label="Cédula / RIF"
-                      placeholder="Ej: V-12345678"
-                    />
-                    <FormInput
-                      control={form.control}
-                      name="payment_info.account_number"
-                      label="Número de Cuenta (Opcional)"
-                      placeholder="0123..."
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
           </form>
         </Form>
+
+        <TabsContent value="payments" className="space-y-8">
+          <PaymentsView eventId={form.getValues('id') || eventId} />
+        </TabsContent>
 
         <TabsContent value="categories" className="space-y-6">
           <CategoryManagement eventId={form.getValues('id') || eventId} />

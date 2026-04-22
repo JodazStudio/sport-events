@@ -50,19 +50,22 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Manager } from "@/app/api/managers/route";
+import { useManagers, useCreateManager } from "@/hooks/queries/useManagers";
 
 export default function ManagersPage() {
   const router = useRouter();
-  const { session, role, isLoading: authLoading } = useAuthStore();
-  const [managers, setManagers] = useState<Manager[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { role, isLoading: authLoading } = useAuthStore();
+  
+  // React Query Hooks
+  const { data: managers = [], isLoading } = useManagers();
+  const createMutation = useCreateManager();
 
   useEffect(() => {
     if (!authLoading && role !== 'superadmin') {
       router.replace('/dashboard/overview');
     }
   }, [authLoading, role, router]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
@@ -70,33 +73,6 @@ export default function ManagersPage() {
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
-
-  const fetchManagers = useCallback(async () => {
-    if (!session?.access_token) return;
-    
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/managers', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
-      if (!response.ok) throw new Error('Error al cargar managers');
-      const data = await response.json();
-      setManagers(data);
-    } catch (error) {
-      console.error(error);
-      toast.error("Error", {
-        description: "No se pudieron cargar los managers."
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchManagers();
-  }, [fetchManagers]);
 
   if (authLoading || role !== 'superadmin') {
     return (
@@ -108,47 +84,27 @@ export default function ManagersPage() {
 
   const handleCreateManager = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     
-    try {
-      const response = await fetch('/api/managers', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`
-        },
-        body: JSON.stringify({
-          name: newName,
-          email: newEmail,
-          password: newPassword,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al crear manager');
+    createMutation.mutate({
+      name: newName,
+      email: newEmail,
+      password: newPassword,
+    }, {
+      onSuccess: () => {
+        toast.success("Manager creado", {
+          description: `Se ha creado la cuenta para ${newName} correctamente.`
+        });
+        setNewName("");
+        setNewEmail("");
+        setNewPassword("");
+        setIsCreateModalOpen(false);
+      },
+      onError: (error: any) => {
+        toast.error("Error", {
+          description: error.message || "No se pudo crear la cuenta."
+        });
       }
-
-      toast.success("Manager creado", {
-        description: `Se ha creado la cuenta para ${newName} correctamente.`
-      });
-      
-      // Reset and close
-      setNewName("");
-      setNewEmail("");
-      setNewPassword("");
-      setIsCreateModalOpen(false);
-      
-      // Refresh list
-      fetchManagers();
-    } catch (error: any) {
-      toast.error("Error", {
-        description: error.message || "No se pudo crear la cuenta."
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   };
 
   return (
@@ -228,10 +184,10 @@ export default function ManagersPage() {
                 <DialogFooter className="pt-4">
                   <Button 
                     type="submit" 
-                    disabled={isSubmitting}
-                    className="w-full bg-primary hover:bg-primary/90 font-black uppercase italic tracking-widest rounded-none h-12 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={createMutation.isPending}
+                    className="w-full bg-primary hover:bg-primary/90 font-black uppercase italic tracking-widest rounded-none h-12 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isSubmitting ? (
+                    {createMutation.isPending ? (
                       <div className="flex items-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin" />
                         CREANDO...
@@ -272,7 +228,7 @@ export default function ManagersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {managers.map((manager) => (
+                {managers.map((manager: Manager) => (
                   <TableRow key={manager.id} className="border-b-2 border-black/10 transition-colors hover:bg-primary/5 group">
                     <TableCell className="font-black py-5 px-6 italic text-lg uppercase tracking-tight group-hover:text-primary transition-colors">
                       {manager.name}

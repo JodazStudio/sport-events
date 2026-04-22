@@ -46,6 +46,7 @@ import { toast } from "sonner";
 import { useAuthStore } from "@/store";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useRegistrations, useUpdateRegistrationStatus } from "@/hooks/queries/useRegistrations";
 
 interface Registration {
   id: string;
@@ -71,69 +72,36 @@ interface RegistrationManagementProps {
 }
 
 export function RegistrationManagement({ eventId }: RegistrationManagementProps) {
-  const { session } = useAuthStore();
-  const [registrations, setRegistrations] = useState<Registration[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // React Query Hooks
+  const { data: regData, isLoading } = useRegistrations(eventId);
+  const statusMutation = useUpdateRegistrationStatus();
+  
+  const registrations = regData?.registrations || [];
+
+  // State
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const fetchRegistrations = async () => {
-    if (!session?.access_token) return;
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/admin/registrations?eventId=${eventId}`, {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setRegistrations(data.registrations || []);
-      } else {
-        toast.error(data.error || "Error al cargar inscripciones");
-      }
-    } catch (error) {
-      toast.error("Error de conexión");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchRegistrations();
-  }, [eventId, session]);
 
   const handleUpdateStatus = async (regId: string, status: string) => {
-    if (!session?.access_token) return;
-    setIsProcessing(true);
-    try {
-      const response = await fetch(`/api/admin/registrations/status`, {
-        method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}` 
-        },
-        body: JSON.stringify({ registrationId: regId, status })
-      });
-      
-      if (response.ok) {
+    statusMutation.mutate({ 
+      registrationId: regId, 
+      status,
+      eventId 
+    }, {
+      onSuccess: () => {
         toast.success(`Estado actualizado a ${status}`);
-        fetchRegistrations();
         setIsDetailOpen(false);
-      } else {
-        const err = await response.json();
-        toast.error(err.error || "Error al actualizar estado");
+      },
+      onError: (error: any) => {
+        toast.error(error.message || "Error al actualizar estado");
       }
-    } catch (error) {
-      toast.error("Error de conexión");
-    } finally {
-      setIsProcessing(false);
-    }
+    });
   };
 
-  const filteredRegistrations = registrations.filter(reg => {
+  const filteredRegistrations = registrations.filter((reg: Registration) => {
     const matchesSearch = 
       `${reg.first_name} ${reg.last_name}`.toLowerCase().includes(search.toLowerCase()) ||
       reg.dni.includes(search) ||
@@ -218,7 +186,7 @@ export function RegistrationManagement({ eventId }: RegistrationManagementProps)
                 </TableCell>
               </TableRow>
             ) : (
-              filteredRegistrations.map((reg) => (
+              filteredRegistrations.map((reg: Registration) => (
                 <TableRow key={reg.id} className="border-b border-black/10 dark:border-white/10 hover:bg-muted/30">
                   <TableCell className="font-bold text-foreground">
                     <div className="flex flex-col">
@@ -349,19 +317,19 @@ export function RegistrationManagement({ eventId }: RegistrationManagementProps)
                 <>
                   <Button 
                     variant="destructive"
-                    disabled={isProcessing}
+                    disabled={statusMutation.isPending}
                     onClick={() => handleUpdateStatus(selectedReg.id, 'REJECTED')}
                     className="rounded-none border-2 border-black dark:border-white font-black uppercase text-xs italic shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
                   >
-                    {isProcessing ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <XCircle className="mr-2 h-4 w-4" />}
+                    {statusMutation.isPending ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <XCircle className="mr-2 h-4 w-4" />}
                     Rechazar
                   </Button>
                   <Button 
-                    disabled={isProcessing}
+                    disabled={statusMutation.isPending}
                     onClick={() => handleUpdateStatus(selectedReg.id, 'APPROVED')}
                     className="rounded-none border-2 border-black dark:border-white bg-primary text-white font-black uppercase text-xs italic shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
                   >
-                    {isProcessing ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+                    {statusMutation.isPending ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <CheckCircle className="mr-2 h-4 w-4" />}
                     Aprobar Inscripción
                   </Button>
                 </>

@@ -7,46 +7,96 @@ import {
   DollarSign, 
   TrendingUp,
   AlertCircle,
-  Activity
+  Activity,
+  Globe
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
+import { useAuthStore } from "@/store";
+import { useDashboardStats } from "@/hooks/queries/useDashboardStats";
 
 export function OverviewView() {
-  const kpis = [
+  const { role } = useAuthStore();
+  const { data: statsData, isLoading } = useDashboardStats();
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-48 bg-muted/20 animate-pulse border-2 border-dashed border-black/10 dark:border-white/10" />
+        ))}
+      </div>
+    );
+  }
+
+  const stats = statsData?.stats;
+
+  const kpis = role === 'superadmin' ? [
     {
       title: "Inscripciones Totales",
-      value: "250 / 500",
-      description: "Inscritos vs Capacidad Total",
+      value: stats?.registrations_total || "0",
+      description: "Todas las inscripciones activas",
       icon: Users,
-      progress: 50,
-      detail: "Crecimiento +12% esta semana",
+      detail: "Métrica global de plataforma",
+      color: "border-primary"
+    },
+    {
+      title: "Eventos Totales",
+      value: stats?.events_total || "0",
+      description: "Eventos creados en total",
+      icon: Globe,
+      detail: "Crecimiento sostenido",
+      color: "border-blue-500"
+    },
+    {
+      title: "Estado de Sincronización",
+      value: stats?.sync_status || "OK",
+      description: "Estado de servicios externos",
+      icon: Activity,
+      detail: "Akomo API & Cloudinary",
+      color: "border-green-500"
+    },
+    {
+      title: "Logs de la Plataforma",
+      value: "Activo",
+      description: "Últimas acciones registradas",
+      icon: Activity,
+      detail: "Ver detalles abajo",
+      color: "border-orange-500"
+    }
+  ] : [
+    {
+      title: "Recaudación Estimada",
+      value: `$${(stats?.revenue_estimated || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      description: "Ingresos por inscripciones aprobadas",
+      icon: DollarSign,
+      detail: "Consolidado total en USD",
+      color: "border-green-600"
+    },
+    {
+      title: "Inscripciones Totales",
+      value: stats?.registrations_total || "0",
+      description: "Atletas registrados en tus eventos",
+      icon: Users,
+      detail: "Incluye todos los estados",
       color: "border-primary"
     },
     {
       title: "Pagos Pendientes",
-      value: "15",
-      description: "Pagos por revisar",
+      value: stats?.pending_payments || "0",
+      description: "Pagos por revisar (REPORTED)",
       icon: Clock,
-      status: "critical",
-      detail: "Urgente: 5 con más de 24h",
-      color: "border-destructive animate-pulse"
+      status: (stats?.pending_payments || 0) > 0 ? "critical" : undefined,
+      detail: "Acción requerida en aprobaciones",
+      color: (stats?.pending_payments || 0) > 0 ? "border-destructive animate-pulse" : "border-muted"
     },
     {
       title: "Etapa Actual",
-      value: "Preventa 1",
-      description: "128 cupos restantes",
+      value: stats?.current_stage || "N/A",
+      description: "Fase de inscripción activa",
       icon: MapPin,
-      detail: "Precio de preventa activo",
+      detail: "Basado en tu evento más reciente",
       color: "border-orange-500"
-    },
-    {
-      title: "Recaudación Estimada",
-      value: "$12,500.00",
-      description: "Consolidado: 457,250 VES",
-      icon: DollarSign,
-      detail: "Calculado a tasa BCV actual",
-      color: "border-green-600"
     }
   ];
 
@@ -54,7 +104,7 @@ export function OverviewView() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
         <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight italic mb-2">
-          Resumen de <span className="text-primary">Dashboard</span>
+          Resumen de <span className="text-primary">{role === 'superadmin' ? 'Plataforma' : 'Dashboard'}</span>
         </h2>
         <p className="text-muted-foreground font-mono text-[10px] md:text-xs uppercase tracking-wider">
           Métricas de rendimiento en tiempo real
@@ -78,12 +128,6 @@ export function OverviewView() {
                 {kpi.description}
               </p>
               
-              {kpi.progress !== undefined && (
-                <div className="space-y-2 mb-4">
-                  <Progress value={kpi.progress} className="h-1 rounded-none" />
-                </div>
-              )}
-
               {kpi.status === "critical" && (
                 <div className="flex items-center gap-1 text-destructive mb-4">
                   <span className="h-2 w-2 rounded-full bg-destructive animate-ping" />
@@ -102,46 +146,51 @@ export function OverviewView() {
         ))}
       </div>
 
-      {/* Secondary Data Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="col-span-1 md:col-span-2 rounded-none border-2 border-black dark:border-white p-4 md:p-6 bg-muted/20 border-dashed overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]">
-            <div className="flex items-center gap-3 mb-4">
-              <Activity className="size-4 text-primary" />
-              <h3 className="font-black italic uppercase text-lg">Logs de la Plataforma</h3>
-            </div>
-            <div className="space-y-3">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="flex items-start md:items-center gap-4 py-2 border-b border-border/50 font-mono text-[10px] uppercase last:border-0">
-                  <span className="text-muted-foreground whitespace-nowrap">12:34 PM</span>
-                  <span className="px-1 bg-green-500/10 text-green-600 font-bold whitespace-nowrap">ÉXITO</span>
-                  <span className="line-clamp-1">Pago aprobado para ID: AB123456</span>
-                </div>
-              ))}
-            </div>
-        </Card>
+      {/* Secondary Data Section - Only for Superadmins */}
+      {role === 'superadmin' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="col-span-1 md:col-span-2 rounded-none border-2 border-black dark:border-white p-4 md:p-6 bg-muted/20 border-dashed overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]">
+              <div className="flex items-center gap-3 mb-4">
+                <Activity className="size-4 text-primary" />
+                <h3 className="font-black italic uppercase text-lg">Logs de la Plataforma</h3>
+              </div>
+              <div className="space-y-3">
+                {(stats?.logs || []).map((log: any) => (
+                  <div key={log.id} className="flex items-start md:items-center gap-4 py-2 border-b border-border/50 font-mono text-[10px] uppercase last:border-0">
+                    <span className="text-muted-foreground whitespace-nowrap">{log.time}</span>
+                    <span className={`px-1 ${log.status === 'SUCCESS' ? 'bg-green-500/10 text-green-600' : 'bg-blue-500/10 text-blue-600'} font-bold whitespace-nowrap`}>
+                      {log.status}
+                    </span>
+                    <span className="line-clamp-1">{log.message}</span>
+                  </div>
+                ))}
+              </div>
+          </Card>
 
-        <Card className="col-span-1 rounded-none border-2 border-black dark:border-white p-4 md:p-6 bg-primary/5 border-dashed shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]">
-           <div className="flex items-center gap-3 mb-4">
-              <AlertCircle className="size-4 text-primary" />
-              <h3 className="font-black italic uppercase text-lg">Estado de Sincronización</h3>
-            </div>
-            <div className="space-y-4 font-mono text-[10px] uppercase text-muted-foreground">
-              <div className="flex justify-between">
-                <span>Base de Datos</span>
-                <span className="text-primary font-bold">OK</span>
+          <Card className="col-span-1 rounded-none border-2 border-black dark:border-white p-4 md:p-6 bg-primary/5 border-dashed shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]">
+             <div className="flex items-center gap-3 mb-4">
+                <AlertCircle className="size-4 text-primary" />
+                <h3 className="font-black italic uppercase text-lg">Estado de Sincronización</h3>
               </div>
-              <div className="flex justify-between">
-                <span>Akomo API</span>
-                <span className="text-primary font-bold">OK</span>
+              <div className="space-y-4 font-mono text-[10px] uppercase text-muted-foreground">
+                <div className="flex justify-between">
+                  <span>Base de Datos</span>
+                  <span className="text-primary font-bold">OK</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Akomo API</span>
+                  <span className="text-primary font-bold">OK</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Almacenamiento</span>
+                  <span className="text-primary font-bold">OK</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>Almacenamiento</span>
-                <span className="text-primary font-bold">OK</span>
-              </div>
-            </div>
-        </Card>
-      </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
+
 

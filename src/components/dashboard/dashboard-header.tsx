@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { 
   RefreshCw, 
   User, 
@@ -28,6 +28,7 @@ import { useAuthStore } from "@/store";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
+import { useExchangeRates } from "@/hooks/queries/useAkomo";
 
 interface ExchangeRate {
   id: string;
@@ -37,14 +38,23 @@ interface ExchangeRate {
 }
 
 export function DashboardHeader() {
-  const [bcvRate, setBcvRate] = useState<string>("36.54");
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState<string>("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const { role, logout } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
+
+  // React Query for exchange rates
+  const { data: rateData, isFetching: isSyncing, refetch } = useExchangeRates();
+
+  // Calculate formatted rate
+  const bcvRate = React.useMemo(() => {
+    if (!rateData?.rates) return "36.54";
+    const bcv = rateData.rates.find((r: any) => r.label === "USD" || r.label === "Dólar BCV");
+    if (!bcv) return "36.54";
+    const formattedValue = bcv.value.replace(",", ".");
+    return parseFloat(formattedValue).toFixed(2);
+  }, [rateData]);
 
   const adminNavItems = [
     { title: "Resumen", url: "/dashboard/overview", icon: LayoutDashboard },
@@ -57,28 +67,9 @@ export function DashboardHeader() {
     !item.superadminOnly || role === 'superadmin'
   );
 
-  const fetchRates = async () => {
-    setIsSyncing(true);
-    try {
-      const response = await fetch("https://api.akomo.xyz/api/exchange-rates");
-      const data = await response.json();
-      const bcv = data.rates.find((r: ExchangeRate) => r.label === "USD");
-      if (bcv) {
-        // Handle comma as decimal separator from API string
-        const formattedValue = bcv.value.replace(",", ".");
-        setBcvRate(parseFloat(formattedValue).toFixed(2));
-        setLastUpdate(new Date(data.lastUpdate).toLocaleTimeString());
-      }
-    } catch (error) {
-      console.error("Error fetching rates:", error);
-    } finally {
-      setIsSyncing(false);
-    }
+  const handleRefreshRates = () => {
+    refetch();
   };
-
-  useEffect(() => {
-    fetchRates();
-  }, []);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -133,7 +124,7 @@ export function DashboardHeader() {
           <Badge 
             variant="outline" 
             className="hidden sm:flex bg-muted/30 border-dashed py-1.5 px-3 items-center gap-2 group cursor-pointer hover:bg-muted"
-            onClick={fetchRates}
+            onClick={handleRefreshRates}
           >
             <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">
               BCV:

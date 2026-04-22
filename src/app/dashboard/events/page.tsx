@@ -29,6 +29,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/store';
 import { FormInput, FormSelect } from '@/components/ui/forms';
 import { ConfigView } from '@/components/dashboard/config-view';
+import { useAdminEvents, useProvisionEvent } from '@/hooks/queries/useEvents';
 import { 
   Plus, 
   ExternalLink, 
@@ -67,17 +68,17 @@ interface Event {
 }
 
 export default function EventsPage() {
-  const { session } = useAuthStore();
   const router = useRouter();
   
-  // State
-  const [events, setEvents] = useState<Event[]>([]);
-  const [managers, setManagers] = useState<Manager[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [search, setSearch] = useState("");
+  // React Query Hooks
+  const { data: adminData, isLoading } = useAdminEvents();
+  const provisionMutation = useProvisionEvent();
   
-  // Modal States
+  const events = adminData?.events || [];
+  const managers = adminData?.managers || [];
+  
+  // Local UI State
+  const [search, setSearch] = useState("");
   const [isProvisionModalOpen, setIsProvisionModalOpen] = useState(false);
   
   // Form State for Provisioning
@@ -115,34 +116,7 @@ export default function EventsPage() {
     return () => subscription.unsubscribe();
   }, [watch, setValue]);
 
-  const fetchData = async () => {
-    if (!session?.access_token) return;
-    
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/admin/events', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
-      
-      if (!response.ok) throw new Error('Error al cargar datos');
-      
-      const data = await response.json();
-      setEvents(data.events || []);
-      setManagers(data.managers || []);
-    } catch (error) {
-      toast.error('No se pudieron cargar los eventos');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [session]);
-
-  const filteredEvents = events.filter(event => 
+  const filteredEvents = events.filter((event: Event) => 
     event.name.toLowerCase().includes(search.toLowerCase()) || 
     event.managers?.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -157,30 +131,16 @@ export default function EventsPage() {
   };
 
   const handleProvisionSubmit = async (values: EventFormValues) => {
-    if (!session?.access_token) return;
-    
-    setIsSubmitting(true);
-    try {
-      const response = await fetch('/api/admin/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify(values)
-      });
-      
-      if (!response.ok) throw new Error('Error al aprovisionar evento');
-      
-      toast.success('Evento creado correctamente');
-      setIsProvisionModalOpen(false);
-      form.reset();
-      fetchData();
-    } catch (error) {
-      toast.error('Error al crear el evento');
-    } finally {
-      setIsSubmitting(false);
-    }
+    provisionMutation.mutate(values, {
+      onSuccess: () => {
+        toast.success('Evento creado correctamente');
+        setIsProvisionModalOpen(false);
+        form.reset();
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Error al crear el evento');
+      }
+    });
   };
 
 
@@ -235,7 +195,7 @@ export default function EventsPage() {
                       name="manager_id"
                       label="Organizador Responsable"
                       placeholder="Seleccionar organizador"
-                      options={managers.map(m => ({ value: m.id, label: m.name, email: m.email }))}
+                      options={managers.map((m: Manager) => ({ value: m.id, label: m.name, email: m.email }))}
                     />
                     
                     <FormInput
@@ -269,8 +229,8 @@ export default function EventsPage() {
                   </div>
 
                   <DialogFooter className="p-6 bg-muted/30 border-t-2 border-black/5">
-                    <Button type="submit" disabled={isSubmitting} className="w-full rounded-none border-2 border-black bg-black text-white font-black italic uppercase py-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
-                      {isSubmitting ? <Loader2 className="animate-spin" /> : 'Confirmar Provisión'}
+                    <Button type="submit" disabled={provisionMutation.isPending} className="w-full rounded-none border-2 border-black bg-black text-white font-black italic uppercase py-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
+                      {provisionMutation.isPending ? <Loader2 className="animate-spin" /> : 'Confirmar Provisión'}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -308,7 +268,7 @@ export default function EventsPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredEvents.map((event) => (
+              filteredEvents.map((event: Event) => (
                 <TableRow key={event.id} className="hover:bg-muted/30 transition-colors border-b border-black/5 last:border-0">
                   <TableCell className="font-black italic text-lg py-5">{event.name}</TableCell>
                   <TableCell>

@@ -36,18 +36,18 @@ import {
 import { FormInput } from '@/components/ui/forms';
 import { useAuthStore } from '@/store';
 import { registrationStageFormSchema, type RegistrationStage } from '@/features/events/schemas';
+import { useStages, useMutationStage } from '@/hooks/queries/useStages';
 
 interface StageManagementProps {
   eventId: string;
 }
 
 export function StageManagement({ eventId }: StageManagementProps) {
-  const { session } = useAuthStore();
+  // React Query Hooks
+  const { data: stages = [], isLoading } = useStages(eventId);
+  const stageMutation = useMutationStage();
   
   // State
-  const [stages, setStages] = useState<RegistrationStage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedStage, setSelectedStage] = useState<RegistrationStage | null>(null);
@@ -61,30 +61,6 @@ export function StageManagement({ eventId }: StageManagementProps) {
       is_active: false,
     },
   });
-
-  // Load stages
-  const fetchStages = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/stages?event_id=${eventId}`, {
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`
-        }
-      });
-      if (!response.ok) throw new Error('Failed to fetch stages');
-      const result = await response.json();
-      setStages(result.data || []);
-    } catch (error) {
-      console.error(error);
-      toast.error('Error al cargar etapas');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (eventId) fetchStages();
-  }, [eventId]);
 
   // Handlers
   const handleOpenAdd = () => {
@@ -115,88 +91,61 @@ export function StageManagement({ eventId }: StageManagementProps) {
   };
 
   const onSubmit = async (values: any) => {
-    if (!session?.access_token) return;
-
-    setIsSubmitting(true);
-    try {
-      const method = selectedStage ? 'PUT' : 'POST';
-      const body = {
+    const method = selectedStage ? 'PUT' : 'POST';
+    stageMutation.mutate({
+      method,
+      body: {
         ...values,
         id: selectedStage?.id,
         event_id: eventId,
-      };
-
-      const response = await fetch('/api/stages', {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al procesar etapa');
       }
-
-      toast.success(selectedStage ? 'Etapa actualizada' : 'Etapa creada');
-      setIsDialogOpen(false);
-      fetchStages();
-    } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, {
+      onSuccess: () => {
+        toast.success(selectedStage ? 'Etapa actualizada' : 'Etapa creada');
+        setIsDialogOpen(false);
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Error al procesar etapa');
+      }
+    });
   };
 
   const onToggleActive = async (stage: RegistrationStage, isActive: boolean) => {
-    if (!session?.access_token) return;
-
-    try {
-      const response = await fetch('/api/stages', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          ...stage,
-          is_active: isActive,
-        }),
-      });
-
-      if (!response.ok) throw new Error('Error al actualizar estado');
-      
-      setStages(prev => prev.map(s => s.id === stage.id ? { ...s, is_active: isActive } : s));
-      toast.success(isActive ? 'Etapa activada' : 'Etapa pausada');
-    } catch (error) {
-      toast.error('Error al actualizar estado');
-    }
+    stageMutation.mutate({
+      method: 'PUT',
+      body: {
+        ...stage,
+        is_active: isActive,
+        event_id: eventId,
+      }
+    }, {
+      onSuccess: () => {
+        toast.success(isActive ? 'Etapa activada' : 'Etapa pausada');
+      },
+      onError: () => {
+        toast.error('Error al actualizar estado');
+      }
+    });
   };
 
   const onDelete = async () => {
-    if (!session?.access_token || !selectedStage) return;
+    if (!selectedStage) return;
 
-    setIsSubmitting(true);
-    try {
-      const response = await fetch(`/api/stages?id=${selectedStage.id}&event_id=${eventId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Error al eliminar');
-
-      toast.success('Etapa eliminada');
-      setIsDeleteModalOpen(false);
-      fetchStages();
-    } catch (error) {
-      toast.error('Error al eliminar etapa');
-    } finally {
-      setIsSubmitting(false);
-    }
+    stageMutation.mutate({
+      method: 'DELETE',
+      body: {
+        id: selectedStage.id,
+        event_id: eventId,
+      }
+    }, {
+      onSuccess: () => {
+        toast.success('Etapa eliminada');
+        setIsDeleteModalOpen(false);
+      },
+      onError: () => {
+        toast.error('Error al eliminar etapa');
+      }
+    });
   };
 
   return (
@@ -247,7 +196,7 @@ export function StageManagement({ eventId }: StageManagementProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {stages.map((stage) => (
+                {stages.map((stage: RegistrationStage) => (
                   <TableRow key={stage.id} className="hover:bg-muted/50 border-b-2 border-black/10 dark:border-white/10">
                     <TableCell className="font-bold py-4">
                       <span className="uppercase tracking-tight text-foreground">{stage.name}</span>
@@ -371,10 +320,10 @@ export function StageManagement({ eventId }: StageManagementProps) {
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={isSubmitting}
+                  disabled={stageMutation.isPending}
                   className="rounded-none border-2 border-black dark:border-white bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all px-8"
                 >
-                  {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  {stageMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   {selectedStage ? 'Actualizar' : 'Guardar'}
                 </Button>
               </DialogFooter>
@@ -408,10 +357,10 @@ export function StageManagement({ eventId }: StageManagementProps) {
               <Button 
                 variant="destructive"
                 onClick={onDelete}
-                disabled={isSubmitting}
+                disabled={stageMutation.isPending}
                 className="rounded-none border-2 border-black dark:border-white bg-destructive text-destructive-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               >
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sí, eliminar'}
+                {stageMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sí, eliminar'}
               </Button>
             </div>
           </div>

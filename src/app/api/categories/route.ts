@@ -72,49 +72,74 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { event_id, name, gender, min_age, max_age } = body;
+    const isBulk = Array.isArray(body);
+    const items = isBulk ? body : [body];
 
-    if (!event_id || !name || !gender || min_age === undefined || max_age === undefined) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (items.length === 0) {
+      return NextResponse.json({ error: 'No items provided' }, { status: 400 });
     }
 
-    const { error: authError, status } = await validateOwnership(request, event_id);
+    // Validate required fields for all items
+    for (const item of items) {
+      const { event_id, name, gender, min_age, max_age } = item;
+      if (!event_id || !name || !gender || min_age === undefined || max_age === undefined) {
+        return NextResponse.json({ error: 'Missing required fields in one or more items' }, { status: 400 });
+      }
+    }
+
+    const eventId = items[0].event_id;
+    const { error: authError, status } = await validateOwnership(request, eventId);
     if (authError) return NextResponse.json({ error: authError }, { status });
 
     // 1. Fetch existing categories for overlap check
     const { data: existingCategories, error: fetchError } = await supabaseAdmin!
       .from('categories')
       .select('id, gender, min_age, max_age')
-      .eq('event_id', event_id);
+      .eq('event_id', eventId);
 
     if (fetchError) throw fetchError;
 
-    // 2. Check for overlap
-    const hasOverlap = checkAgeOverlap(
-      { gender, min_age, max_age },
-      existingCategories || []
-    );
+    const currentCategories = [...(existingCategories || [])];
+    const newItemsToInsert = [];
 
-    if (hasOverlap) {
-      return NextResponse.json({ 
-        error: 'Overlap detected', 
-        message: 'Ya existe una categoría para este género con un rango de edad que se solapa.' 
-      }, { status: 400 });
+    // 2. Check for overlap for each item
+    for (const item of items) {
+      const hasOverlap = checkAgeOverlap(
+        { gender: item.gender, min_age: item.min_age, max_age: item.max_age },
+        currentCategories
+      );
+
+      if (hasOverlap) {
+        return NextResponse.json({ 
+          error: 'Overlap detected', 
+          message: `Solapamiento detectado para "${item.name}". Ya existe una categoría con este género y rango de edad.` 
+        }, { status: 400 });
+      }
+
+      const newItem = { 
+        event_id: item.event_id, 
+        name: item.name, 
+        gender: item.gender, 
+        min_age: item.min_age, 
+        max_age: item.max_age 
+      };
+      newItemsToInsert.push(newItem);
+      // Add to currentCategories to check against other items in the same batch
+      currentCategories.push(newItem as any);
     }
 
     // 3. Insert
     const { data, error } = await supabaseAdmin!
       .from('categories')
-      .insert([
-        { event_id, name, gender, min_age, max_age }
-      ])
-      .select()
-      .single();
-
+      .insert(newItemsToInsert)
+      .select();
 
     if (error) throw error;
 
-    return NextResponse.json({ status: 'success', data }, { status: 201 });
+    return NextResponse.json({ 
+      status: 'success', 
+      data: isBulk ? data : data[0] 
+    }, { status: 201 });
 
   } catch (err) {
     console.error('Error creating category:', err);
@@ -125,6 +150,7 @@ export async function POST(request: Request) {
     }, { status: 500 });
   }
 }
+
 
 export async function PUT(request: Request) {
   try {
