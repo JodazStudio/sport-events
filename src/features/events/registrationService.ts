@@ -245,6 +245,9 @@ export const registrationService = {
    * Updates registration status and sends appropriate notifications
    */
   async updateRegistrationStatus(registrationId: string, status: string, reason?: string) {
+    if (!supabaseAdmin) {
+      throw new Error('Supabase Admin client not configured');
+    }
     console.log(`[RegistrationService] Updating status of ${registrationId} to ${status}`);
     
     // 1. Update status in database

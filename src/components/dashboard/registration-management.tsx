@@ -159,7 +159,7 @@ export function RegistrationManagement({ eventId }: RegistrationManagementProps)
             <option value="REJECTED">Rechazados</option>
           </select>
 
-          <Button variant="outline" className="rounded-none border-2 border-black dark:border-white h-10 font-black uppercase text-xs italic bg-background hover:bg-muted">
+          <Button variant="outline" className="hidden rounded-none border-2 border-black dark:border-white h-10 font-black uppercase text-xs italic bg-background hover:bg-muted">
             <Download className="mr-2 h-4 w-4" /> Exportar CSV
           </Button>
         </div>

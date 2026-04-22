@@ -142,7 +142,7 @@ export default async function RegistrationStatusPage({ params }: StatusPageProps
           </p>
 
           {registration.status === 'APPROVED' && (
-            <Button className="mt-4 rounded-none border-4 border-black dark:border-white bg-foreground text-background hover:bg-background hover:text-foreground font-black uppercase italic tracking-widest px-8 h-14 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] transition-all">
+            <Button className="hidden mt-4 rounded-none border-4 border-black dark:border-white bg-foreground text-background hover:bg-background hover:text-foreground font-black uppercase italic tracking-widest px-8 h-14 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] transition-all">
               <Download className="mr-2 h-5 w-5" /> Descargar Comprobante
             </Button>
           )}
