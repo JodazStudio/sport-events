@@ -6,23 +6,32 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 
-const navLinks = [
-  { label: "Detalles", href: "#detalles" },
-  { label: "Ruta", href: "#ruta" },
-  { label: "Precios", href: "#precios" },
-  { label: "Reglamento", href: "#reglamento" },
-  { label: "Galería", href: "#galeria" },
-  { label: "Resultados", href: "#resultados" },
-];
-
 interface StickyNavProps {
   eventSlug?: string;
   eventName?: string;
+  showGallery?: boolean;
+  showSponsors?: boolean;
+  showResults?: boolean;
 }
 
-export const StickyNav = ({ eventSlug, eventName }: StickyNavProps) => {
+export const StickyNav = ({ 
+  eventSlug, 
+  eventName, 
+  showGallery = true, 
+  showSponsors = true, 
+  showResults = true 
+}: StickyNavProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const activeNavLinks = [
+    { label: "Detalles", href: "#detalles" },
+    { label: "Ruta", href: "#ruta" },
+    { label: "Precios", href: "#precios" },
+    { label: "Reglamento", href: "#reglamento" },
+    ...(showGallery ? [{ label: "Galería", href: "#galeria" }] : []),
+    ...(showResults ? [{ label: "Resultados", href: "#resultados" }] : []),
+  ];
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 100);
@@ -83,7 +92,7 @@ export const StickyNav = ({ eventSlug, eventName }: StickyNavProps) => {
 
         {/* Desktop Links - hidden on mobile */}
         <div className="hidden lg:flex items-center gap-2">
-          {navLinks.map((link) => (
+          {activeNavLinks.map((link) => (
             <button
               key={link.href}
               onClick={() => scrollTo(link.href)}
@@ -123,7 +132,7 @@ export const StickyNav = ({ eventSlug, eventName }: StickyNavProps) => {
                 </span>
               </div>
             )}
-            {navLinks.map((link) => (
+            {activeNavLinks.map((link) => (
               <button
                 key={link.href}
                 onClick={() => scrollTo(link.href)}

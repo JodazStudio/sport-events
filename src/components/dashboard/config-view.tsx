@@ -45,6 +45,7 @@ import { toast } from "sonner";
 import { useAuthStore } from "@/store";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CategoryManagement } from "./category-management";
+import { StageManagement } from "./stage-management";
 
 // --- ZOD SCHEMA ---
 const configSchema = z.object({
@@ -73,16 +74,13 @@ const configSchema = z.object({
 
 type ConfigFormValues = z.infer<typeof configSchema>;
 
-const stages = [
-  { id: 1, name: "Preventa 1", price: "25.00", capacity: 100, active: true },
-  { id: 2, name: "Fase 2", price: "35.00", capacity: 200, active: false },
-  { id: 3, name: "Último Llamado", price: "45.00", capacity: 200, active: false },
-];
+// Removed hardcoded stages
 
 interface ConfigViewProps {
   eventId: string;
   onDelete?: () => void;
   onUpdate?: () => void;
+  onLoaded?: (event: any) => void;
   isPage?: boolean;
 }
 
@@ -92,7 +90,7 @@ interface Manager {
   email: string;
 }
 
-export function ConfigView({ eventId, onDelete, onUpdate, isPage = false }: ConfigViewProps) {
+export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = false }: ConfigViewProps) {
   const { session } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -138,6 +136,7 @@ export function ConfigView({ eventId, onDelete, onUpdate, isPage = false }: Conf
       
       const event = data.events?.find((e: any) => e.id === eventId || e.slug === eventId);
       if (event) {
+        if (onLoaded) onLoaded(event);
         form.reset({
           id: event.id,
           manager_id: event.manager_id,
@@ -435,66 +434,7 @@ export function ConfigView({ eventId, onDelete, onUpdate, isPage = false }: Conf
         </TabsContent>
 
         <TabsContent value="stages" className="space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-muted/30 p-4 border-2 border-dashed border-black gap-4">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-              <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground text-balance">Precio Activo: Preventa 1</span>
-            </div>
-            <Button className="rounded-none border-2 border-black bg-primary hover:bg-primary/90 text-white font-black italic uppercase text-xs tracking-widest px-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
-               <Plus className="mr-2 h-4 w-4" /> Nueva Etapa
-            </Button>
-          </div>
-
-          <div className="border-2 border-black bg-white overflow-x-auto shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-            <div className="min-w-[600px]">
-              <Table>
-                <TableHeader className="bg-muted/50 border-b-2 border-black">
-                  <TableRow className="hover:bg-transparent border-0">
-                    <TableHead className="font-mono text-[10px] uppercase tracking-widest py-4">Nombre</TableHead>
-                    <TableHead className="font-mono text-[10px] uppercase tracking-widest py-4">Precio (USD)</TableHead>
-                    <TableHead className="font-mono text-[10px] uppercase tracking-widest py-4">Capacidad</TableHead>
-                    <TableHead className="font-mono text-[10px] uppercase tracking-widest py-4">Estado</TableHead>
-                    <TableHead className="text-right py-4"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {stages.map((stage) => (
-                    <TableRow key={stage.id} className="border-b border-black/10 hover:bg-muted/30 transition-colors">
-                      <TableCell className="font-black italic uppercase tracking-tight py-4">{stage.name}</TableCell>
-                      <TableCell className="font-mono font-bold py-4">${stage.price}</TableCell>
-                      <TableCell className="font-mono py-4 text-muted-foreground">{stage.capacity} PAX</TableCell>
-                      <TableCell className="py-4">
-                        <div className="flex items-center space-x-2">
-                          <Switch checked={stage.active} className="data-[state=checked]:bg-primary" />
-                          <span className={`font-mono text-[9px] uppercase font-bold ${stage.active ? "text-primary" : "text-muted-foreground"}`}>
-                            {stage.active ? "Activo" : "Inactivo"}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right py-4 px-6">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-black hover:text-white rounded-none">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="rounded-none border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                            <DropdownMenuItem className="cursor-pointer font-bold italic uppercase text-xs">
-                              <Edit2 className="mr-2 h-4 w-4" /> Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-black/10" />
-                            <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive font-bold italic uppercase text-xs">
-                              <Trash2 className="mr-2 h-4 w-4" /> Eliminar
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
+          <StageManagement eventId={form.getValues('id') || eventId} />
         </TabsContent>
       </Tabs>
     </div>

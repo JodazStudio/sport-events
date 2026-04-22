@@ -5,11 +5,23 @@ import * as z from 'zod';
  */
 export const registrationStageSchema = z.object({
   id: z.string(),
-  name: z.string(),
-  price_usd: z.number(),
-  total_capacity: z.number().nullable().optional(),
-  used_capacity: z.number().nullable().optional(),
+  event_id: z.string().optional(),
+  name: z.string().min(1, 'El nombre es requerido'),
+  price_usd: z.coerce.number().min(0, 'El precio no puede ser negativo'),
+  total_capacity: z.coerce.number().min(1, 'La capacidad debe ser al menos 1'),
+  used_capacity: z.number().default(0),
   is_active: z.boolean().default(false),
+  created_at: z.string().optional(),
+});
+
+/**
+ * Form Schema for creating/editing stages
+ */
+export const registrationStageFormSchema = registrationStageSchema.omit({ 
+  id: true, 
+  event_id: true, 
+  used_capacity: true, 
+  created_at: true 
 });
 
 /**

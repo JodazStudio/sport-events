@@ -9,3 +9,5 @@ export * from './live-results-view';
 export * from './overview-view';
 export * from './payment-drawer';
 export * from './payments-view';
+export * from './category-management';
+export * from './stage-management';

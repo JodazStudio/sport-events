@@ -73,7 +73,13 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
 
   return (
     <div className="min-h-screen bg-charcoal text-foreground selection:bg-ember selection:text-white">
-      <StickyNav eventSlug={tenant.id} eventName={tenant.title || tenant.name} />
+      <StickyNav 
+        eventSlug={tenant.id} 
+        eventName={tenant.title || tenant.name} 
+        showGallery={galleryImages.length > 0}
+        showSponsors={sponsors.length > 0}
+        showResults={false} // Keeping it false for now as per ResultsCenter visible={false}
+      />
       
       <main>
         <EventHero 
@@ -93,12 +99,12 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
         
         <RulesSection rules={rules} />
         
-        <GallerySection images={galleryImages} />
+        {galleryImages.length > 0 && <GallerySection images={galleryImages} />}
 
         {/* Results section - only visible when event is finished or results uploaded */}
         <ResultsCenter visible={false} />
         
-        <EventSponsors sponsors={sponsors} />
+        {sponsors.length > 0 && <EventSponsors sponsors={sponsors} />}
       </main>
 
       <Footer 
