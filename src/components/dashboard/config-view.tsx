@@ -5,53 +5,32 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { 
-  Plus, 
-  MoreHorizontal, 
-  Edit2, 
-  Trash2, 
   Layers, 
   Tag,
-  Settings,
   Info,
-  Save,
   Loader2,
   ImageIcon,
-  Activity,
   CreditCard,
   User,
   AlertTriangle
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "../ui/table";
-import { Button } from "../ui/button";
-import { Switch } from "../ui/switch";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "../ui/dropdown-menu";
-import { 
   Form, 
 } from "../ui/form";
-import { FormInput, FormTextarea, FormSelect, FormSwitch } from "@/components/ui/forms";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { toast } from "sonner";
-import { useAuthStore } from "@/store";
 import { cn } from "@/lib";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CategoryManagement } from "./category-management";
 import { StageManagement } from "./stage-management";
 import { RegistrationManagement } from "./registration-management";
 import { useAdminEvents, useUpdateEvent } from "@/hooks/queries/useEvents";
+
+// Sub-components
+import { GeneralTab } from "./config/general-tab";
+import { MediaTab } from "./config/media-tab";
+import { BankDataTab } from "./config/bank-data-tab";
+import { ConfigActions } from "./config/config-actions";
 
 // --- ZOD SCHEMA ---
 const configSchema = z.object({
@@ -306,211 +285,25 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <TabsContent value="general" className="space-y-8">
-              <Card className="border-2 border-black dark:border-white rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] bg-card">
-                <CardHeader className="bg-muted/30 border-b-2 border-black dark:border-white">
-                  <CardTitle className="font-satoshi font-black italic uppercase text-xl">Información General</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6 pt-6">
-                  <FormSelect
-                    control={form.control}
-                    name="manager_id"
-                    label="Organizador / Dueño"
-                    placeholder="Seleccionar organizador"
-                    options={managers.map((m: Manager) => ({ value: m.id, label: m.name, email: m.email }))}
-                  />
-
-                  <FormInput
-                    control={form.control}
-                    name="name"
-                    label="Nombre del Evento"
-                    onChange={(e) => {
-                      const slug = handleSlugify(e.target.value);
-                      form.setValue('slug', slug, { shouldValidate: true });
-                    }}
-                  />
-
-                  <FormInput
-                    control={form.control}
-                    name="slug"
-                    label="Slug URL"
-                    inputClassName="font-mono text-sm"
-                  />
-
-                  <div className="grid grid-cols-2 gap-6">
-                    <FormInput
-                      control={form.control}
-                      name="event_date"
-                      label="Fecha"
-                      type="date"
-                    />
-                    <FormInput
-                      control={form.control}
-                      name="event_time"
-                      label="Hora"
-                      type="time"
-                    />
-                  </div>
-
-                  <FormTextarea
-                    control={form.control}
-                    name="description"
-                    label="Descripción"
-                  />
-                </CardContent>
-              </Card>
+              <GeneralTab 
+                managers={managers} 
+                onSlugify={handleSlugify} 
+              />
             </TabsContent>
 
             <TabsContent value="media" className="space-y-8">
-              <Card className="border-2 border-black dark:border-white rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] bg-card">
-                <CardHeader className="bg-muted/30 border-b-2 border-black dark:border-white">
-                  <CardTitle className="font-satoshi font-black italic uppercase text-xl">Media y Ruta</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6 pt-6">
-                  <FormInput
-                    control={form.control}
-                    name="banner_url"
-                    label="URL del Banner"
-                  />
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormInput
-                      control={form.control}
-                      name="route_image_url"
-                      label="URL Mapa de Ruta"
-                    />
-                    <FormInput
-                      control={form.control}
-                      name="strava_url"
-                      label="Link de Strava"
-                    />
-                  </div>
-
-                  <div className="pt-4 border-t-2 border-black/5 space-y-6">
-                    <h3 className="font-black italic uppercase text-lg text-primary">Redes Sociales</h3>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormInput
-                        control={form.control}
-                        name="social_media.instagram"
-                        label="Instagram URL"
-                        placeholder="https://instagram.com/..."
-                      />
-                      
-                      <FormInput
-                        control={form.control}
-                        name="social_media.facebook"
-                        label="Facebook URL"
-                        placeholder="https://facebook.com/..."
-                      />
-
-                      <FormInput
-                        control={form.control}
-                        name="social_media.twitter"
-                        label="X (Twitter) URL"
-                        placeholder="https://x.com/..."
-                      />
-
-                      <FormInput
-                        control={form.control}
-                        name="social_media.threads"
-                        label="Threads URL"
-                        placeholder="https://threads.net/..."
-                      />
-
-                      <FormInput
-                        control={form.control}
-                        name="social_media.tiktok"
-                        label="TikTok URL"
-                        placeholder="https://tiktok.com/@..."
-                      />
-                    </div>
-                  </div>
-
-                  <FormSwitch
-                    control={form.control}
-                    name="has_inventory"
-                    label="Gestionar Inventario (Tallas)"
-                    description="Solicitar talla durante el registro."
-                  />
-
-                  <FormTextarea
-                    control={form.control}
-                    name="rules_text"
-                    label="Reglamento"
-                    className="min-h-[150px]"
-                  />
-                </CardContent>
-              </Card>
+              <MediaTab />
             </TabsContent>
 
             <TabsContent value="payments" className="space-y-8">
-              <Card className="border-2 border-black dark:border-white rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] bg-card">
-                <CardHeader className="bg-muted/30 border-b-2 border-black dark:border-white">
-                  <CardTitle className="font-satoshi font-black italic uppercase text-xl">Datos Bancarios</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6 pt-6">
-                  <p className="text-[10px] font-mono text-muted-foreground uppercase mb-2">
-                    Estos datos se mostrarán a los atletas durante el proceso de pago.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormInput
-                      control={form.control}
-                      name="payment_info.bank_name"
-                      label="Nombre del Banco"
-                      placeholder="Ej: Bancamiga"
-                    />
-                    <FormInput
-                      control={form.control}
-                      name="payment_info.phone_number"
-                      label="Número de Teléfono (Pago Móvil)"
-                      placeholder="Ej: 0424-0000000"
-                    />
-                    <FormInput
-                      control={form.control}
-                      name="payment_info.id_number"
-                      label="Cédula / RIF"
-                      placeholder="Ej: V-12345678"
-                    />
-                    <FormInput
-                      control={form.control}
-                      name="payment_info.account_number"
-                      label="Número de Cuenta (Opcional)"
-                      placeholder="0123..."
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+              <BankDataTab />
             </TabsContent>
 
-            {/* Sticky/Fixed Actions Bar for General/Media/Payments tabs */}
-            {(activeTab === 'general' || activeTab === 'media' || activeTab === 'payments') && (
-              <div className={cn(
-                "flex items-center gap-4 pt-4",
-                activeTab === 'payments' ? "justify-end" : "justify-between"
-              )}>
-                {activeTab !== 'payments' && (
-                  <Button 
-                    type="button" 
-                    variant="destructive" 
-                    onClick={onDelete}
-                    className="rounded-none border-2 border-black dark:border-white font-black uppercase italic tracking-widest py-6 px-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
-                  >
-                    <Trash2 className="w-5 h-5 mr-2" />
-                    Eliminar Evento
-                  </Button>
-                )}
-
-                <Button 
-                  type="submit" 
-                  disabled={updateMutation.isPending}
-                  className="rounded-none border-2 border-black dark:border-white bg-black dark:bg-white text-white dark:text-black font-black uppercase italic tracking-widest py-6 px-12 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
-                >
-                  {updateMutation.isPending ? <Loader2 className="animate-spin mr-2" /> : <Save className="w-5 h-5 mr-2" />}
-                  Guardar Cambios
-                </Button>
-              </div>
-            )}
+            <ConfigActions 
+              activeTab={activeTab} 
+              isPending={updateMutation.isPending} 
+              onDelete={onDelete} 
+            />
           </form>
         </Form>
 
