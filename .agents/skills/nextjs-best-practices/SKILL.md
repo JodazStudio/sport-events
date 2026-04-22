@@ -190,6 +190,11 @@ Does it need...?
 - Re-export all public components, hooks, schemas, and utilities.
 - **Standardize imports** using the root alias: `import { Button } from '@/components/ui'` or `import { useAuth } from '@/hooks'`.
 
+### Environment Variable Management
+- **Centralize Configuration**: Export all environment variables from a single file (e.g., `src/lib/env.ts`).
+- **Standardized Access**: Import from the centralized file instead of using `process.env` directly. This allows for validation, default values, and better IDE support.
+- **Example File**: Maintain a root-level `env.example` file that is kept in sync with all variables used in the project.
+
 ### Features Directory
 - Organize by **features** rather than technical layers (e.g., `src/features/auth`, `src/features/events`).
 - Each feature must contain an `index.ts` re-exporting its public API.

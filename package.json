@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3583",
     "lint": "eslint",
     "test": "jest",
     "type-check": "tsc --noEmit 2>&1 | tee type-check.log"

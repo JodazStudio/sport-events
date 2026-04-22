@@ -1,10 +1,11 @@
 import { Telegraf } from 'telegraf';
+import { env } from './env';
 
 // Singleton instance of the bot
 let botInstance: Telegraf | null = null;
 
 export const getTelegramBot = (): Telegraf | null => {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const token = env.TELEGRAM_BOT_TOKEN;
   if (!token) {
     console.warn('TELEGRAM_BOT_TOKEN is not defined in environment variables');
     return null;

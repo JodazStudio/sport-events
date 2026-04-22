@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTelegramBot } from '@/lib/telegram';
 import { supabaseAdmin } from '@/lib';
 import { Telegraf } from 'telegraf';
+import { env } from '@/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
   try {
     // Validate Secret Token if configured
     const secretToken = request.headers.get('X-Telegram-Bot-Api-Secret-Token');
-    const expectedToken = process.env.TELEGRAM_WEBHOOK_SECRET;
+    const expectedToken = env.TELEGRAM_WEBHOOK_SECRET;
 
     if (expectedToken && secretToken !== expectedToken) {
       console.warn('Unauthorized Telegram webhook attempt');
