@@ -11,7 +11,7 @@ export default async function Image(props: { params: Promise<{ event: string }> 
   const tenantId = params.event;
   
   let tenantTitle = 'Evento Deportivo';
-  let tenantLocation = '';
+  let tenantCity = '';
   let tenantDate = '';
   let primaryColor = '#ff3333';
 
@@ -21,7 +21,7 @@ export default async function Image(props: { params: Promise<{ event: string }> 
       const fileContents = fs.readFileSync(filePath, "utf8");
       const data = JSON.parse(fileContents);
       tenantTitle = data.title || tenantTitle;
-      tenantLocation = data.location || tenantLocation;
+      tenantCity = data.city || tenantCity;
       tenantDate = data.eventDate || tenantDate;
       primaryColor = data.primaryColor || primaryColor;
     }
@@ -59,8 +59,8 @@ export default async function Image(props: { params: Promise<{ event: string }> 
             {tenantDate && (
               <span style={{ fontSize: 36, color: '#f0f0f0', fontWeight: 500 }}>📅 {tenantDate}</span>
             )}
-            {tenantLocation && (
-              <span style={{ fontSize: 36, color: '#a0a0a0' }}>📍 {tenantLocation}</span>
+            {tenantCity && (
+              <span style={{ fontSize: 36, color: '#a0a0a0' }}>📍 {tenantCity}</span>
             )}
           </div>
           <div style={{ 

@@ -1,4 +1,5 @@
 import * as Schemas from './schemas';
+import { env } from '@/lib/env';
 
 /**
  * Service for fetching events from the internal API
@@ -9,7 +10,7 @@ export const eventService = {
    */
   async getEvents() {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const baseUrl = env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
       const response = await fetch(`${baseUrl}/api/events`, {
         cache: 'no-store', // Ensure fresh data
       });
@@ -35,7 +36,7 @@ export const eventService = {
    */
   async getEventBySlug(slug: string) {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const baseUrl = env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
       const response = await fetch(`${baseUrl}/api/events?slug=${slug}`, {
         cache: 'no-store',
       });
@@ -48,8 +49,6 @@ export const eventService = {
 
       const result = Schemas.singleEventResponseSchema.safeParse(json);
 
-      console.log("Result ", result)
-      
       if (!result.success || result.data.status !== 'success') {
         return null;
       }

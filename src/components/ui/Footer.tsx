@@ -13,6 +13,7 @@ interface FooterProps {
   };
   saasName?: string;
   saasUrl?: string;
+  logoUrl?: string;
 }
 
 export const Footer = ({ 
@@ -20,7 +21,8 @@ export const Footer = ({
   contact, 
   socialMedia,
   saasName = "ZonaCrono", 
-  saasUrl = "/" 
+  saasUrl = "/",
+  logoUrl
 }: FooterProps) => {
   const currentYear = new Date().getFullYear();
 
@@ -30,6 +32,15 @@ export const Footer = ({
         {/* Row 1: Event Details (Only for event pages) */}
         {isEvent && (
           <div className="flex flex-col gap-10 mb-10 pb-10 border-b border-border/30">
+            {logoUrl && (
+              <div className="flex justify-center mb-4">
+                <img 
+                  src={logoUrl} 
+                  alt="Evento Logo" 
+                  className="h-16 w-auto object-contain brightness-0 invert opacity-40 hover:opacity-100 transition-opacity duration-300" 
+                />
+              </div>
+            )}
             <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10">
               {contact?.phone && (
                 <a 

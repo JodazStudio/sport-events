@@ -79,10 +79,32 @@ export const EventHero = ({ event, countdownTarget }: HeroSectionProps) => {
         <div className="absolute inset-0 bg-gradient-to-b from-charcoal/60 via-charcoal/40 to-charcoal" />
       </div>
 
+      {/* Corner Logo */}
+      {event?.logoUrl && (
+        <div className="absolute top-6 right-6 sm:top-10 sm:right-10 z-20 group">
+          <div className="absolute -inset-4 bg-ember/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity rounded-full" />
+          <img 
+            src={event.logoUrl} 
+            alt={`${event.name} Logo`} 
+            className="relative h-16 sm:h-24 md:h-32 w-auto object-contain opacity-20 group-hover:opacity-100 transition-all duration-500 drop-shadow-2xl"
+          />
+        </div>
+      )}
+
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
         <AnimatedContent>
           <h1 className="font-satoshi font-black text-4xl sm:text-6xl md:text-8xl lg:text-9xl text-white leading-none mb-6 tracking-tight italic uppercase">
+            {event?.city && (
+              <span className="block text-ember text-sm sm:text-base md:text-xl tracking-[0.3em] mb-2 font-black not-italic">
+                {event.city}
+              </span>
+            )}
+            {event?.organization?.name && (
+              <span className="block text-white/50 text-[10px] uppercase tracking-[0.4em] mb-4 font-black">
+                Organizado por <span className="text-ember">{event.organization.name}</span>
+              </span>
+            )}
             {event?.name || "Nombre del Evento"}
           </h1>
         </AnimatedContent>
@@ -99,10 +121,6 @@ export const EventHero = ({ event, countdownTarget }: HeroSectionProps) => {
             <span className="flex items-center gap-2">
               <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-ember" />
               {event?.time || "Hora por confirmar"}
-            </span>
-            <span className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-ember" />
-              {event?.location || "Ubicación por confirmar"}
             </span>
           </div>
         </AnimatedContent>
@@ -161,9 +179,9 @@ export const EventHero = ({ event, countdownTarget }: HeroSectionProps) => {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      {/* <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
         <ChevronDown className="w-6 h-6 text-white/50" />
-      </div>
+      </div> */}
     </section>
   );
 };

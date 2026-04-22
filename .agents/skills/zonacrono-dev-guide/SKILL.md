@@ -163,3 +163,21 @@ Notifications should be triggered asynchronously in API routes or Server Actions
   }
 })();
 ```
+---
+
+## 9. Environment Configuration
+
+Zonacrono uses a centralized environment variable management pattern to ensure type safety and consistent defaults across the codebase.
+
+- **Centralized Export**: All environment variables must be exported from **`src/lib/env.ts`** via a single `env` object.
+- **Import Pattern**: Always import `env` from `@/lib/env` instead of using `process.env` directly.
+- **Required Variables**: All variables used in the code must be defined in **`env.example`** at the project root.
+- **Client Exposure**: Variables prefixed with `NEXT_PUBLIC_` are automatically exposed to the browser. Sensitive keys (like `SUPABASE_SERVICE_ROLE_KEY` or `TELEGRAM_BOT_TOKEN`) must NEVER have this prefix.
+
+### Example: Using centralized env
+```typescript
+import { env } from '@/lib/env';
+
+const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+const botToken = env.TELEGRAM_BOT_TOKEN;
+```

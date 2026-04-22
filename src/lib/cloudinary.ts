@@ -1,10 +1,11 @@
 // src/lib/cloudinary.ts
 import { Cloudinary } from '@cloudinary/url-gen';
+import { env } from './env';
 
 // Initialize Cloudinary instance
 export const cld = new Cloudinary({
   cloud: {
-    cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_ACCOUNT_NAME || ''
+    cloudName: env.NEXT_PUBLIC_CLOUDINARY_ACCOUNT_NAME || ''
   },
   url: {
     secure: true
@@ -14,7 +15,7 @@ export const cld = new Cloudinary({
 // Helper to get optimized Cloudinary fetch URL
 export const getOptimizedCloudinaryUrl = (sourceUrl: string, width = 300): string => {
   // Return source URL in development, optimized URL in production
-  // if (process.env.NODE_ENV === 'development') {
+  // if (env.NODE_ENV === 'development') {
   //   return sourceUrl;
   // }
 

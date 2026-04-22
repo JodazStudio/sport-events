@@ -52,6 +52,7 @@ import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { GoogleAnalytics } from '@next/third-parties/google';
+import { env } from "@/lib/env";
 
 export default function RootLayout({
   children,
@@ -76,8 +77,8 @@ export default function RootLayout({
             </AuthInitializer>
           </QueryProvider>
         </ThemeProvider>
-        {process.env.NEXT_PUBLIC_GA_ID && (
-          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+        {env.NEXT_PUBLIC_GA_ID && (
+          <GoogleAnalytics gaId={env.NEXT_PUBLIC_GA_ID} />
         )}
       </body>
     </html>

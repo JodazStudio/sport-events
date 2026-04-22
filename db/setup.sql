@@ -29,6 +29,8 @@ CREATE TABLE public.events (
     slug VARCHAR(100) UNIQUE NOT NULL,
     description TEXT,
     banner_url VARCHAR(255),
+    logo_url VARCHAR(255),
+    city VARCHAR(100),
     has_inventory BOOLEAN DEFAULT FALSE,
     rules_text TEXT,
     route_image_url VARCHAR(255),

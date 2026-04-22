@@ -3,9 +3,17 @@ export interface EventData {
   date: string;
   time: string;
   location: string;
+  city?: string;
   description: string;
   bannerUrl?: string;
+  logoUrl?: string;
   slug: string;
+  organization?: {
+    name: string;
+    logo_url?: string;
+    email?: string;
+    phone?: string;
+  };
 }
 
 export interface Distance {

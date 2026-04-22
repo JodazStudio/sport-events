@@ -25,7 +25,9 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
   }
 
   return {
-    title: `${event.name} | ZonaCrono`,
+    title: event.organization?.name 
+      ? `${event.name} | Organizado por ${event.organization.name} | ZonaCrono`
+      : `${event.name} | ZonaCrono`,
     description: event.description || `Inscríbete en ${event.name} a través de ZonaCrono.`,
     openGraph: {
       title: event.name,
@@ -72,12 +74,12 @@ export default async function EventPage({ params }: EventPageProps) {
     title: event.name,
     description: event.description || '',
     heroImage: event.banner_url || 'https://images.unsplash.com/photo-1530549387074-d76f964b3489?q=80&w=2072&auto=format&fit=crop',
-    logo: '/logo.png', // Default logo
+    logo: event.logo_url || '/logo.png',
     primaryColor: '#6d28d9', // Standard purple
     registrationLink: `/${event.slug}/inscripciones`,
     eventDate: event.event_date || '',
     eventTime: event.event_time || undefined,
-    location: "Venezuela",
+    city: event.city || "Venezuela",
     pricingStages: event.registration_stages?.map((stage: any) => ({
       id: stage.id,
       name: stage.name,
@@ -91,7 +93,7 @@ export default async function EventPage({ params }: EventPageProps) {
     eventDetails: {
       route: {
         title: "Ruta del Evento",
-        description: "Mapa oficial de la ruta.",
+        description: event.route_description || "Mapa oficial de la ruta.",
         image: event.route_image_url || '',
         stravaLinks: event.strava_url ? [{ label: "Segmento Strava", url: event.strava_url }] : []
       },
@@ -107,6 +109,7 @@ export default async function EventPage({ params }: EventPageProps) {
       ogTitle: event.name,
       ogDescription: event.description || ''
     },
+    organization: (event as any).organization,
     social_media: (event as any).social_media
   };
 

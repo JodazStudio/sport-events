@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const bucket = (formData.get('bucket') as string) || 'receipts';
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Upload to Supabase Storage
     const { data, error: uploadError } = await supabaseAdmin.storage
-      .from('receipts')
+      .from(bucket)
       .upload(fileName, buffer, {
         contentType: file.type,
         upsert: false
@@ -61,12 +62,12 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
       console.error('Upload error:', uploadError);
-      return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
+      return NextResponse.json({ error: `Failed to upload file to ${bucket}` }, { status: 500 });
     }
 
     // 4. Get Public URL
     const { data: { publicUrl } } = supabaseAdmin.storage
-      .from('receipts')
+      .from(bucket)
       .getPublicUrl(fileName);
 
     return NextResponse.json({ url: publicUrl }, { status: 201 });

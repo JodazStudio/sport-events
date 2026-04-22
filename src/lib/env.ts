@@ -1,0 +1,15 @@
+// src/lib/env.ts
+export const env = {
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+  TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '',
+  TELEGRAM_WEBHOOK_SECRET: process.env.TELEGRAM_WEBHOOK_SECRET || '',
+  NEXT_PUBLIC_GA_ID: process.env.NEXT_PUBLIC_GA_ID || '',
+  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  NEXT_PUBLIC_CLOUDINARY_ACCOUNT_NAME: process.env.NEXT_PUBLIC_CLOUDINARY_ACCOUNT_NAME || '',
+  MEGA_S4_ENDPOINT: process.env.MEGA_S4_ENDPOINT || '',
+  MEGA_S4_ACCESS_KEY: process.env.MEGA_S4_ACCESS_KEY || '',
+  MEGA_S4_SECRET_KEY: process.env.MEGA_S4_SECRET_KEY || '',
+  NODE_ENV: process.env.NODE_ENV || 'development',
+} as const;

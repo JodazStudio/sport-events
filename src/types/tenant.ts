@@ -62,7 +62,7 @@ export interface TenantData {
   registrationLink: string;
   eventDate: string;
   eventTime?: string;
-  location: string;
+    city: string;
   infoCards?: TenantInfoCard[];
   sponsors?: TenantSponsor[];
   organizers?: TenantOrganizer[];
@@ -74,6 +74,12 @@ export interface TenantData {
     twitter?: string;
     threads?: string;
     tiktok?: string;
+  };
+  organization?: {
+    name: string;
+    logo_url?: string;
+    email?: string;
+    phone?: string;
   };
   contact?: {
     whatsapp?: string;

@@ -6,16 +6,54 @@ interface DistancesSectionProps {
   description?: string;
   distances?: Distance[];
   routeMapUrl?: string;
+  routeDescription?: string;
   stravaUrl?: string;
+  logoUrl?: string;
+  organization?: {
+    name: string;
+    logo_url?: string;
+  };
 }
 
-export const DistancesSection = ({ description, distances, routeMapUrl, stravaUrl }: DistancesSectionProps) => {
+export const DistancesSection = ({ 
+  description, 
+  distances, 
+  routeMapUrl, 
+  routeDescription,
+  stravaUrl, 
+  logoUrl,
+  organization
+}: DistancesSectionProps) => {
   return (
     <>
       {/* Detalles */}
       <section id="detalles" className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <AnimatedContent>
+            {organization?.name && (
+              <div className="mb-6 flex flex-col items-center gap-4">
+                {organization.logo_url && (
+                  <img 
+                    src={organization.logo_url} 
+                    alt={organization.name} 
+                    className="h-12 w-auto object-contain opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all"
+                  />
+                )}
+                <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-black">
+                  Organizado por <span className="text-ember">{organization.name}</span>
+                </span>
+              </div>
+            )}
+            
+            {!organization?.name && logoUrl && (
+              <div className="mb-10 flex justify-center">
+                <img 
+                  src={logoUrl} 
+                  alt="Logo del Evento" 
+                  className="h-20 sm:h-28 w-auto object-contain filter grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
+                />
+              </div>
+            )}
             <h2 className="font-satoshi font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-foreground mb-12 text-center italic uppercase tracking-tighter">
               Detalles del Evento
             </h2>
@@ -70,6 +108,14 @@ export const DistancesSection = ({ description, distances, routeMapUrl, stravaUr
               La Ruta
             </h2>
           </AnimatedContent>
+
+          {routeDescription && (
+            <AnimatedContent delay={0.1} distance={20}>
+              <p className="text-muted-foreground font-satoshi text-base sm:text-lg md:text-xl max-w-3xl mx-auto text-center mb-12 leading-relaxed">
+                {routeDescription}
+              </p>
+            </AnimatedContent>
+          )}
 
           <div className="max-w-4xl mx-auto">
             <AnimatedContent delay={0.2} distance={50}>
