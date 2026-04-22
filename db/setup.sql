@@ -14,6 +14,8 @@ CREATE TABLE public.managers (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
+    telegram_chat_id BIGINT UNIQUE,
+    telegram_notifications_enabled BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -129,6 +131,15 @@ CREATE TABLE public.results (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Tabla de Códigos de Verificación de Telegram
+CREATE TABLE public.telegram_verification_codes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    manager_id UUID REFERENCES public.managers(id) ON DELETE CASCADE NOT NULL,
+    code VARCHAR(6) NOT NULL,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- ========================================================================================
 -- 3. ÍNDICES (CRÍTICOS PARA EL RENDIMIENTO Y VELOCIDAD DE CONSULTA)
 -- ========================================================================================
@@ -148,6 +159,10 @@ CREATE INDEX idx_payments_reference ON public.payments(reference_number);
 -- Optimización para renderizar la tabla de resultados de un evento
 CREATE INDEX idx_results_event_id ON public.results(event_id);
 
+-- Optimización para el bot de Telegram
+CREATE INDEX idx_managers_telegram_chat_id ON public.managers(telegram_chat_id);
+CREATE INDEX idx_telegram_verification_codes_code ON public.telegram_verification_codes(code);
+
 -- ========================================================================================
 -- 4. SEGURIDAD A NIVEL DE FILAS (RLS - ROW LEVEL SECURITY)
 -- Habilita RLS en las tablas para asegurar los endpoints de tu API en Supabase
@@ -161,6 +176,7 @@ ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.event_sponsors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.event_gallery ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.telegram_verification_codes ENABLE ROW LEVEL SECURITY;
 
 -- Nota: Deberás crear las "Policies" específicas desde el panel de Supabase 
 -- o vía SQL para permitir lectura pública a las landings y escritura a los gestores logueados.

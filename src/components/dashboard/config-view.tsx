@@ -241,42 +241,63 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="bg-muted p-1 rounded-none border-2 border-black dark:border-white h-auto mb-8 grid grid-cols-2 lg:grid-cols-4 lg:inline-flex">
-          <TabsTrigger value="general" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
+        <TabsList className="bg-muted p-1 rounded-none border-2 border-black dark:border-white h-auto mb-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1">
+          <TabsTrigger value="general" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 py-3 tracking-tight text-xs md:text-sm">
             <Info className="mr-2 size-4 hidden sm:inline" />
             General
           </TabsTrigger>
-          <TabsTrigger value="media" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
+          <TabsTrigger value="media" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 py-3 tracking-tight text-xs md:text-sm">
             <ImageIcon className="mr-2 size-4 hidden sm:inline" />
             Media
           </TabsTrigger>
-          <TabsTrigger value="categories" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
+          <TabsTrigger value="categories" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 py-3 tracking-tight text-xs md:text-sm">
             <Tag className="mr-2 size-4 hidden sm:inline" />
             Categorías
           </TabsTrigger>
-          <TabsTrigger value="stages" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
+          <TabsTrigger value="stages" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 py-3 tracking-tight text-xs md:text-sm">
             <Layers className="mr-2 size-4 hidden sm:inline" />
             Etapas
           </TabsTrigger>
-          <TabsTrigger value="registrations" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
+          <TabsTrigger value="registrations" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 py-3 tracking-tight text-xs md:text-sm">
             <User className="mr-2 size-4 hidden sm:inline" />
             Inscritos
           </TabsTrigger>
-          <TabsTrigger value="sponsors" disabled className="rounded-none opacity-60 cursor-not-allowed font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm flex flex-col items-center justify-center gap-0">
+          <TabsTrigger value="awards" disabled className="rounded-none opacity-60 cursor-not-allowed font-black uppercase italic px-4 py-3 tracking-tight text-xs md:text-sm flex flex-col items-center justify-center gap-0">
+            <div className="flex items-center">
+              <AlertTriangle className="mr-2 size-3 text-amber-500" />
+              Premiación
+            </div>
+            <span className="text-[7px] font-mono tracking-widest text-amber-500/80">PRÓXIMAMENTE</span>
+          </TabsTrigger>
+          <TabsTrigger value="kits" disabled className="rounded-none opacity-60 cursor-not-allowed font-black uppercase italic px-4 py-3 tracking-tight text-xs md:text-sm flex flex-col items-center justify-center gap-0">
+            <div className="flex items-center">
+              <AlertTriangle className="mr-2 size-3 text-amber-500" />
+              Kits
+            </div>
+            <span className="text-[7px] font-mono tracking-widest text-amber-500/80">PRÓXIMAMENTE</span>
+          </TabsTrigger>
+          <TabsTrigger value="sponsors" disabled className="rounded-none opacity-60 cursor-not-allowed font-black uppercase italic px-4 py-3 tracking-tight text-xs md:text-sm flex flex-col items-center justify-center gap-0">
             <div className="flex items-center">
               <AlertTriangle className="mr-2 size-3 text-amber-500" />
               Sponsors
             </div>
             <span className="text-[7px] font-mono tracking-widest text-amber-500/80">PRÓXIMAMENTE</span>
           </TabsTrigger>
-          <TabsTrigger value="gallery" disabled className="rounded-none opacity-60 cursor-not-allowed font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm flex flex-col items-center justify-center gap-0">
+          <TabsTrigger value="gallery" disabled className="rounded-none opacity-60 cursor-not-allowed font-black uppercase italic px-4 py-3 tracking-tight text-xs md:text-sm flex flex-col items-center justify-center gap-0">
             <div className="flex items-center">
               <AlertTriangle className="mr-2 size-3 text-amber-500" />
               Galería
             </div>
             <span className="text-[7px] font-mono tracking-widest text-amber-500/80">PRÓXIMAMENTE</span>
           </TabsTrigger>
-          <TabsTrigger value="payments" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
+          <TabsTrigger value="surprises" disabled className="rounded-none opacity-60 cursor-not-allowed font-black uppercase italic px-4 py-3 tracking-tight text-xs md:text-sm flex flex-col items-center justify-center gap-0">
+            <div className="flex items-center">
+              <AlertTriangle className="mr-2 size-3 text-amber-500" />
+              Sorpresas
+            </div>
+            <span className="text-[7px] font-mono tracking-widest text-amber-500/80">PRÓXIMAMENTE</span>
+          </TabsTrigger>
+          <TabsTrigger value="payments" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 py-3 tracking-tight text-xs md:text-sm">
             <CreditCard className="mr-2 size-4 hidden sm:inline" />
             Datos Bancarios
           </TabsTrigger>

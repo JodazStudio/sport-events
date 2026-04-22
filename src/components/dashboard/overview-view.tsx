@@ -8,11 +8,13 @@ import {
   TrendingUp,
   AlertCircle,
   Activity,
-  Globe
+  Globe,
+  AlertTriangle
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
 import { useAuthStore } from "@/store";
+import { cn } from "@/lib";
 import { useDashboardStats } from "@/hooks/queries/useDashboardStats";
 
 export function OverviewView() {
@@ -112,38 +114,51 @@ export function OverviewView() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {kpis.map((kpi, index) => (
-          <Card key={index} className={`rounded-none border-2 ${kpi.color} shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[10px_10px_0px_0px_rgba(255,255,255,1)] transition-all duration-200 bg-card`}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 text-balance">
-              <CardTitle className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
-                {kpi.title}
-              </CardTitle>
-              <kpi.icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-black italic uppercase tracking-tighter mb-1">
-                {kpi.value}
-              </div>
-              <p className="text-[10px] text-muted-foreground uppercase font-mono mb-4">
-                {kpi.description}
-              </p>
-              
-              {kpi.status === "critical" && (
-                <div className="flex items-center gap-1 text-destructive mb-4">
-                  <span className="h-2 w-2 rounded-full bg-destructive animate-ping" />
-                  <span className="font-mono text-[9px] uppercase font-bold">Acción Requerida</span>
+        {kpis.map((kpi, index) => {
+          const isComingSoon = kpi.title === "Estado de Sincronización" || kpi.title === "Logs de la Plataforma";
+          
+          return (
+            <Card key={index} className={`rounded-none border-2 ${kpi.color} shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[10px_10px_0px_0px_rgba(255,255,255,1)] transition-all duration-200 bg-card relative overflow-hidden`}>
+              {isComingSoon && (
+                <div className="absolute top-2 right-2 flex items-center gap-1 bg-amber-500/10 text-amber-600 px-2 py-0.5 border border-amber-500/20 rounded-none z-10">
+                  <AlertTriangle className="size-2" />
+                  <span className="font-mono text-[7px] font-black uppercase tracking-widest">PRÓXIMAMENTE</span>
                 </div>
               )}
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 text-balance">
+                <CardTitle className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
+                  {kpi.title}
+                </CardTitle>
+                <kpi.icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              </CardHeader>
+              <CardContent>
+                <div className={cn(
+                  "text-2xl font-black italic uppercase tracking-tighter mb-1",
+                  isComingSoon && "blur-[2px] opacity-40 grayscale"
+                )}>
+                  {kpi.value}
+                </div>
+                <p className="text-[10px] text-muted-foreground uppercase font-mono mb-4">
+                  {kpi.description}
+                </p>
+                
+                {kpi.status === "critical" && (
+                  <div className="flex items-center gap-1 text-destructive mb-4">
+                    <span className="h-2 w-2 rounded-full bg-destructive animate-ping" />
+                    <span className="font-mono text-[9px] uppercase font-bold">Acción Requerida</span>
+                  </div>
+                )}
 
-              <div className="pt-2 border-t border-dashed flex items-center gap-2">
-                <TrendingUp className="size-3 text-muted-foreground" />
-                <span className="font-mono text-[9px] uppercase text-muted-foreground lg:truncate">
-                  {kpi.detail}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                <div className="pt-2 border-t border-dashed flex items-center gap-2">
+                  <TrendingUp className="size-3 text-muted-foreground" />
+                  <span className="font-mono text-[9px] uppercase text-muted-foreground lg:truncate">
+                    {kpi.detail}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Secondary Data Section - Only for Superadmins */}

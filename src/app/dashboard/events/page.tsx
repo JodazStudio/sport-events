@@ -27,6 +27,7 @@ import { z } from 'zod';
 import { Form, Input } from '@/components/ui';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store';
+import { cn } from '@/lib';
 import { FormInput, FormSelect } from '@/components/ui/forms';
 import { ConfigView } from '@/components/dashboard/config-view';
 import { useAdminEvents, useProvisionEvent } from '@/hooks/queries/useEvents';
@@ -42,10 +43,14 @@ import {
   Globe,
   Activity,
   Users,
-  ArrowUpRight
+  ArrowUpRight,
+  MapPin,
+  DollarSign,
+  AlertTriangle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useDashboardStats } from '@/hooks/queries/useDashboardStats';
 
 interface Manager {
   id: string;
@@ -71,8 +76,10 @@ export default function EventsPage() {
   const router = useRouter();
   
   // React Query Hooks
-  const { data: adminData, isLoading } = useAdminEvents();
+  const { data: adminData, isLoading: isEventsLoading } = useAdminEvents();
+  const { data: statsData, isLoading: isStatsLoading } = useDashboardStats();
   const provisionMutation = useProvisionEvent();
+  const { role } = useAuthStore();
   
   const events = adminData?.events || [];
   const managers = adminData?.managers || [];
@@ -240,6 +247,50 @@ export default function EventsPage() {
         </div>
       </div>
 
+      {/* Stats Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        {isStatsLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-32 bg-muted/20 animate-pulse border-2 border-dashed border-black/10 dark:border-white/10" />
+          ))
+        ) : (
+          (role === 'superadmin' ? [
+            { label: "Inscripciones Totales", value: statsData?.stats?.registrations_total || "0", icon: Users, color: "border-primary" },
+            { label: "Eventos Totales", value: statsData?.stats?.events_total || "0", icon: Globe, color: "border-blue-500" },
+            { label: "Estado de Sincronización", value: statsData?.stats?.sync_status || "OK", icon: Activity, color: "border-green-500" },
+            { label: "Logs de Plataforma", value: "Activo", icon: Activity, color: "border-orange-500" },
+          ] : [
+            { label: "Recaudación Estimada", value: `$${(statsData?.stats?.revenue_estimated || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`, icon: DollarSign, color: "border-green-600" },
+            { label: "Inscripciones Totales", value: statsData?.stats?.registrations_total || "0", icon: Users, color: "border-primary" },
+            { label: "Pagos Pendientes", value: statsData?.stats?.pending_payments || "0", icon: Clock, color: statsData?.stats?.pending_payments > 0 ? "border-destructive animate-pulse" : "border-muted" },
+            { label: "Etapa Actual", value: statsData?.stats?.current_stage || "N/A", icon: MapPin, color: "border-orange-500" },
+          ]).map((stat, i) => {
+            const isComingSoon = stat.label === "Estado de Sincronización" || stat.label === "Logs de Plataforma" || stat.label === "Tasa de Conversión";
+            
+            return (
+              <div key={i} className={`bg-card border-2 ${stat.color} p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] group hover:translate-x-1 transition-transform relative overflow-hidden`}>
+                {isComingSoon && (
+                  <div className="absolute top-2 right-2 flex items-center gap-1 bg-amber-500/10 text-amber-600 px-2 py-0.5 border border-amber-500/20 rounded-none">
+                    <AlertTriangle className="size-2" />
+                    <span className="font-mono text-[7px] font-black uppercase tracking-widest">PRÓXIMAMENTE</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{stat.label}</span>
+                  <stat.icon className="h-4 w-4 text-primary" />
+                </div>
+                <div className={cn(
+                  "font-satoshi text-3xl font-black italic uppercase tracking-tighter truncate",
+                  isComingSoon && "blur-[2px] opacity-40 grayscale"
+                )}>
+                  {stat.value}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
       {/* Main Table */}
       <div className="bg-card border-2 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] rounded-none overflow-hidden">
         <Table>
@@ -253,7 +304,7 @@ export default function EventsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {isEventsLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i} className="border-b border-black/5">
                   <TableCell colSpan={5} className="py-6">
@@ -314,24 +365,6 @@ export default function EventsPage() {
             )}
           </TableBody>
         </Table>
-      </div>
-
-      {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {[
-          { label: "Total Registros", value: "2,450", icon: Users },
-          { label: "Eventos Activos", value: events.length.toString(), icon: Globe },
-          { label: "Ingresos Proyectados", value: "$12.4k", icon: ArrowUpRight },
-          { label: "Tasa de Conversión", value: "18%", icon: Activity },
-        ].map((stat, i) => (
-          <div key={i} className="bg-card border-2 border-black dark:border-white p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] group hover:translate-x-1 transition-transform">
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{stat.label}</span>
-              <stat.icon className="h-4 w-4 text-primary" />
-            </div>
-            <div className="font-satoshi text-3xl font-black italic">{stat.value}</div>
-          </div>
-        ))}
       </div>
 
     </div>

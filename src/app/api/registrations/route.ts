@@ -122,6 +122,43 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // --- TELEGRAM NOTIFICATION ---
+    // We do this asynchronously to avoid blocking the response
+    (async () => {
+      try {
+        // 1. Get event and manager info
+        const { data: eventData } = await supabaseAdmin
+          .from('events')
+          .select('name, manager_id, managers(telegram_chat_id, telegram_notifications_enabled)')
+          .eq('id', event_id)
+          .single();
+
+        const manager = eventData?.managers as any;
+
+        if (manager?.telegram_chat_id && manager?.telegram_notifications_enabled) {
+          const { sendTelegramNotification, formatRegistrationAlert } = await import('@/lib/telegram');
+          
+          // Get category name for better alert
+          const { data: catData } = await supabaseAdmin
+            .from('categories')
+            .select('name')
+            .eq('id', category.id)
+            .single();
+
+          const message = formatRegistrationAlert({
+            eventName: eventData.name,
+            athleteName: `${first_name} ${last_name}`,
+            categoryName: catData?.name || 'N/A',
+            amount: payment_data ? `${payment_data.amount_usd} USD` : 'Pendiente'
+          });
+
+          await sendTelegramNotification(manager.telegram_chat_id, message);
+        }
+      } catch (tgError) {
+        console.error('Failed to send Telegram notification:', tgError);
+      }
+    })();
+
     return NextResponse.json({
       registration_id: registrationId
     }, { status: 201 });

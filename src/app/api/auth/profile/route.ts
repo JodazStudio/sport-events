@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     // 2. Fetch the profile from the managers table
     const { data: profile, error: dbError } = await supabaseAdmin
       .from('managers')
-      .select('id, name, email, role, is_active, created_at')
+      .select('id, name, email, role, is_active, telegram_chat_id, telegram_notifications_enabled, created_at')
       .eq('id', user.id)
       .single();
 

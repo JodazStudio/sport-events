@@ -61,6 +61,7 @@ export function DashboardHeader() {
     { title: "Eventos", url: "/dashboard/events", icon: Globe },
     { title: "Gestores", url: "/dashboard/managers", icon: Users, superadminOnly: true },
     { title: "Aprobaciones", url: "/dashboard/payments", icon: CreditCard },
+    { title: "Configuración", url: "/dashboard/settings", icon: Settings2 },
   ];
 
   const currentNavItems = adminNavItems.filter(item => 
@@ -152,9 +153,12 @@ export function DashboardHeader() {
             <DropdownMenuContent align="end" className="w-64 rounded-none border-2 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] p-0 overflow-hidden">
               <DropdownMenuLabel className="font-satoshi uppercase italic font-black bg-black dark:bg-white text-white dark:text-black p-3">Mi Cuenta</DropdownMenuLabel>
               <div className="p-1">
-                <DropdownMenuItem className="cursor-pointer font-bold italic py-2">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Perfil Personal</span>
+                <DropdownMenuItem 
+                  className="cursor-pointer font-bold italic py-2"
+                  onClick={() => router.push("/dashboard/settings")}
+                >
+                  <Settings2 className="mr-2 h-4 w-4" />
+                  <span>Configuración</span>
                 </DropdownMenuItem>
                 
                 <DropdownMenuSeparator className="bg-black/10" />
