@@ -62,10 +62,18 @@ export default function ManagersPage() {
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
+  const { session } = useAuthStore();
+
   const fetchManagers = useCallback(async () => {
+    if (!session?.access_token) return;
+    
     setIsLoading(true);
     try {
-      const response = await fetch('/api/managers');
+      const response = await fetch('/api/managers', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
       if (!response.ok) throw new Error('Error al cargar managers');
       const data = await response.json();
       setManagers(data);
@@ -92,6 +100,7 @@ export default function ManagersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
         },
         body: JSON.stringify({
           name: newName,

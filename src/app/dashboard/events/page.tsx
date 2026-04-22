@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
   Table, 
@@ -21,37 +22,27 @@ import {
   DialogTrigger 
 } from '@/components/ui';
 import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from '@/components/ui';
-import { Input } from '@/components/ui';
-import { Label } from '@/components/ui';
-import { 
   Select, 
   SelectContent, 
   SelectItem, 
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui';
+import { Input } from '@/components/ui';
+import { Label } from '@/components/ui';
 import { Badge } from '@/components/ui';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store';
+import { ConfigView } from '@/components/dashboard/config-view';
 import { 
-  MoreHorizontal, 
   Plus, 
   ExternalLink, 
-  UserCircle, 
   Settings, 
   Trash2, 
   Loader2,
   Calendar,
   Clock,
   Search,
-  Filter,
   Globe,
   Activity,
   Users,
@@ -70,16 +61,19 @@ interface Event {
   id: string;
   name: string;
   slug: string;
+  description: string;
+  social_media?: any;
   event_date: string;
   event_time: string;
   manager_id: string;
   managers: Manager;
   created_at: string;
-  status?: string; // For compatibility with badge logic
+  status?: string;
 }
 
-export default function SuperadminEventsPage() {
+export default function EventsPage() {
   const { session } = useAuthStore();
+  const router = useRouter();
   
   // State
   const [events, setEvents] = useState<Event[]>([]);
@@ -90,11 +84,8 @@ export default function SuperadminEventsPage() {
   
   // Modal States
   const [isProvisionModalOpen, setIsProvisionModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   
-  // Form State
+  // Form State for Provisioning
   const [formData, setFormData] = useState({
     manager_id: '',
     name: '',
@@ -110,7 +101,7 @@ export default function SuperadminEventsPage() {
     
     setIsLoading(true);
     try {
-      const response = await fetch('/api/superadmin/events', {
+      const response = await fetch('/api/admin/events', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
@@ -158,7 +149,7 @@ export default function SuperadminEventsPage() {
     
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/superadmin/events', {
+      const response = await fetch('/api/admin/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -180,89 +171,9 @@ export default function SuperadminEventsPage() {
     }
   };
 
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!session?.access_token || !selectedEvent) return;
-    
-    setIsSubmitting(true);
-    try {
-      const response = await fetch('/api/superadmin/events', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({
-          id: selectedEvent.id,
-          ...formData
-        })
-      });
-      
-      if (!response.ok) throw new Error('Error al actualizar');
-      
-      toast.success('Evento actualizado');
-      setIsEditModalOpen(false);
-      fetchData();
-    } catch (error) {
-      toast.error('Error al actualizar');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
-  const handleDeleteSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!session?.access_token || !selectedEvent) return;
-    
-    if (deleteConfirmName !== selectedEvent.name) {
-      toast.error('El nombre no coincide');
-      return;
-    }
-    
-    setIsSubmitting(true);
-    try {
-      const response = await fetch(`/api/superadmin/events?id=${selectedEvent.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
-      
-      if (!response.ok) throw new Error('Error al eliminar');
-      
-      toast.success('Evento eliminado');
-      setIsDeleteModalOpen(false);
-      fetchData();
-    } catch (error) {
-      toast.error('Error al eliminar');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "public":
-        return <Badge className="bg-green-500 text-white rounded-none italic uppercase text-[9px] tracking-widest px-2">PÚBLICO</Badge>;
-      case "draft":
-        return <Badge variant="outline" className="border-2 rounded-none italic uppercase text-[9px] tracking-widest px-2">BORRADOR</Badge>;
-      case "finished":
-        return <Badge variant="secondary" className="rounded-none italic uppercase text-[9px] tracking-widest px-2">FINALIZADO</Badge>;
-      default:
-        return <Badge className="bg-primary text-white rounded-none italic uppercase text-[9px] tracking-widest px-2">ACTIVO</Badge>;
-    }
-  };
-
-  const openEditModal = (event: Event) => {
-    setSelectedEvent(event);
-    setFormData({
-      manager_id: event.manager_id,
-      name: event.name,
-      slug: event.slug,
-      event_date: event.event_date,
-      event_time: event.event_time
-    });
-    setIsEditModalOpen(true);
+  const openConfigPage = (event: Event) => {
+    router.push(`/dashboard/events/${event.id}/configs?tab=general`);
   };
 
   return (
@@ -271,10 +182,10 @@ export default function SuperadminEventsPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="font-satoshi text-4xl font-black uppercase tracking-tight italic text-foreground">
-            Eventos <span className="text-primary">Globales</span>
+            Gestión de <span className="text-primary">Eventos</span>
           </h1>
           <p className="text-muted-foreground font-medium italic">
-            Panel maestro de control para todos los eventos de la plataforma.
+            Panel de control para todos los eventos de la plataforma.
           </p>
         </div>
         
@@ -299,14 +210,14 @@ export default function SuperadminEventsPage() {
             <DialogContent className="sm:max-w-[500px] rounded-none border-4 border-black">
               <form onSubmit={handleProvisionSubmit}>
                 <DialogHeader>
-                  <DialogTitle className="font-satoshi text-2xl font-black italic uppercase">Provision Event</DialogTitle>
+                  <DialogTitle className="font-satoshi text-2xl font-black italic uppercase text-foreground">Crear Evento</DialogTitle>
                   <DialogDescription className="font-medium italic">
                     Crea un nuevo evento y asígnalo a un organizador.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-6 py-6">
                   <div className="grid gap-2">
-                    <Label className="font-mono text-[10px] uppercase tracking-widest">Organizador Responsable</Label>
+                    <Label className="font-mono text-[10px] uppercase tracking-widest text-foreground">Organizador Responsable</Label>
                     <Select 
                       onValueChange={(val) => setFormData(p => ({ ...p, manager_id: val }))}
                       value={formData.manager_id}
@@ -325,7 +236,7 @@ export default function SuperadminEventsPage() {
                   </div>
                   
                   <div className="grid gap-2">
-                    <Label className="font-mono text-[10px] uppercase tracking-widest">Nombre del Evento</Label>
+                    <Label className="font-mono text-[10px] uppercase tracking-widest text-foreground">Nombre del Evento</Label>
                     <Input 
                       placeholder="Ej. Maratón de la Ciudad" 
                       value={formData.name}
@@ -336,7 +247,7 @@ export default function SuperadminEventsPage() {
                   </div>
                   
                   <div className="grid gap-2">
-                    <Label className="font-mono text-[10px] uppercase tracking-widest">Slug URL</Label>
+                    <Label className="font-mono text-[10px] uppercase tracking-widest text-foreground">Slug URL</Label>
                     <Input 
                       placeholder="maraton-ciudad" 
                       value={formData.slug}
@@ -348,7 +259,7 @@ export default function SuperadminEventsPage() {
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label className="font-mono text-[10px] uppercase tracking-widest">Fecha</Label>
+                      <Label className="font-mono text-[10px] uppercase tracking-widest text-foreground">Fecha</Label>
                       <Input 
                         type="date" 
                         value={formData.event_date}
@@ -358,7 +269,7 @@ export default function SuperadminEventsPage() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label className="font-mono text-[10px] uppercase tracking-widest">Hora</Label>
+                      <Label className="font-mono text-[10px] uppercase tracking-widest text-foreground">Hora</Label>
                       <Input 
                         type="time" 
                         value={formData.event_time}
@@ -440,30 +351,14 @@ export default function SuperadminEventsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-10 w-10 p-0 hover:bg-black hover:text-white rounded-none">
-                          <MoreHorizontal className="h-5 w-5" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-[220px] rounded-none border-2 border-black font-medium italic">
-                        <DropdownMenuLabel className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">Control Maestro</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => openEditModal(event)} className="cursor-pointer">
-                          <Settings className="mr-2 h-4 w-4" />
-                          Override Settings
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => {
-                            setSelectedEvent(event);
-                            setIsDeleteModalOpen(true);
-                          }} 
-                          className="cursor-pointer text-destructive focus:bg-destructive/5"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete Event
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => openConfigPage(event)}
+                      className="h-10 w-10 p-0 hover:bg-black hover:text-white rounded-none border-2 border-transparent hover:border-black"
+                    >
+                      <Settings className="h-5 w-5" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -472,7 +367,7 @@ export default function SuperadminEventsPage() {
         </Table>
       </div>
 
-      {/* Stats Summary for Superadmin */}
+      {/* Stats Summary */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
           { label: "Total Registros", value: "2,450", icon: Users },
@@ -489,124 +384,6 @@ export default function SuperadminEventsPage() {
           </div>
         ))}
       </div>
-
-      {/* Edit Modal */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-[500px] rounded-none border-4 border-black">
-          <form onSubmit={handleEditSubmit}>
-            <DialogHeader>
-              <DialogTitle className="font-satoshi text-2xl font-black italic uppercase">Override Event</DialogTitle>
-              <DialogDescription className="font-medium italic">
-                Sobrescribe la configuración global de este evento.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-6 py-6">
-              <div className="grid gap-2">
-                <Label className="font-mono text-[10px] uppercase tracking-widest">Re-asignar Dueño</Label>
-                <Select 
-                  onValueChange={(val) => setFormData(p => ({ ...p, manager_id: val }))}
-                  value={formData.manager_id}
-                >
-                  <SelectTrigger className="rounded-none border-2 border-black">
-                    <SelectValue placeholder="Seleccionar nuevo dueño" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-none border-2 border-black">
-                    {managers.map((m) => (
-                      <SelectItem key={m.id} value={m.id} className="font-medium italic">
-                        {m.name} ({m.email})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="grid gap-2">
-                <Label className="font-mono text-[10px] uppercase tracking-widest">Nombre del Evento</Label>
-                <Input 
-                  value={formData.name}
-                  onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
-                  className="rounded-none border-2 border-black italic font-bold"
-                  required
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label className="font-mono text-[10px] uppercase tracking-widest">URL Slug</Label>
-                <Input 
-                  value={formData.slug}
-                  onChange={(e) => setFormData(p => ({ ...p, slug: e.target.value }))}
-                  className="rounded-none border-2 border-black font-mono text-sm"
-                  required
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label className="font-mono text-[10px] uppercase tracking-widest">Fecha</Label>
-                  <Input 
-                    type="date" 
-                    value={formData.event_date}
-                    onChange={(e) => setFormData(p => ({ ...p, event_date: e.target.value }))}
-                    className="rounded-none border-2 border-black"
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label className="font-mono text-[10px] uppercase tracking-widest">Hora</Label>
-                  <Input 
-                    type="time" 
-                    value={formData.event_time}
-                    onChange={(e) => setFormData(p => ({ ...p, event_time: e.target.value }))}
-                    className="rounded-none border-2 border-black"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit" disabled={isSubmitting} className="w-full rounded-none border-2 border-black bg-black text-white font-black italic uppercase py-6">
-                {isSubmitting ? <Loader2 className="animate-spin" /> : 'Guardar Cambios'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Modal */}
-      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent className="sm:max-w-[425px] rounded-none border-4 border-destructive">
-          <form onSubmit={handleDeleteSubmit}>
-            <DialogHeader>
-              <DialogTitle className="font-satoshi text-2xl font-black italic uppercase text-destructive">Confirm Deletion</DialogTitle>
-              <DialogDescription className="font-medium italic">
-                Esta acción es irreversible y eliminará todos los datos asociados.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-6 space-y-4">
-              <p className="text-sm font-medium italic">
-                Escribe <span className="font-bold underline uppercase">{selectedEvent?.name}</span> para confirmar:
-              </p>
-              <Input 
-                value={deleteConfirmName}
-                onChange={(e) => setDeleteConfirmName(e.target.value)}
-                placeholder="Nombre del evento"
-                className="rounded-none border-2 border-destructive italic font-bold"
-                required
-              />
-            </div>
-            <DialogFooter>
-              <Button 
-                type="submit" 
-                variant="destructive" 
-                disabled={isSubmitting || deleteConfirmName !== selectedEvent?.name}
-                className="w-full rounded-none font-black italic uppercase py-6"
-              >
-                Eliminar Permanentemente
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

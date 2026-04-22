@@ -61,12 +61,20 @@ export interface TenantData {
   secondaryColor?: string;
   registrationLink: string;
   eventDate: string;
+  eventTime?: string;
   location: string;
   infoCards?: TenantInfoCard[];
   sponsors?: TenantSponsor[];
   organizers?: TenantOrganizer[];
   pricingStages?: TenantPricingStage[];
   rules?: TenantRule[];
+  social_media?: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+    threads?: string;
+    tiktok?: string;
+  };
   contact?: {
     whatsapp?: string;
     email?: string;

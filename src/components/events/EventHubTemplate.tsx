@@ -9,6 +9,7 @@ import { ResultsCenter } from "./ResultsCenter";
 import { StickyNav } from "./StickyNav";
 import { Footer } from "@/components/ui/Footer";
 import type { EventData, Distance, Sponsor, GalleryImage, PricingStage, RuleSection } from "./types";
+import { parseEventDate } from "@/lib/utils";
 
 interface EventHubTemplateProps {
   tenant: TenantData;
@@ -21,7 +22,7 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
   const eventData: EventData = {
     name: tenant.title || tenant.name,
     date: tenant.eventDate,
-    time: "07:00 AM", // Default or extract from subtitle if possible
+    time: tenant.eventTime || "07:00 AM",
     location: tenant.location,
     description: tenant.description,
     bannerUrl: tenant.heroImage,
@@ -72,12 +73,12 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
 
   return (
     <div className="min-h-screen bg-charcoal text-foreground selection:bg-ember selection:text-white">
-      <StickyNav eventSlug={tenant.id} />
+      <StickyNav eventSlug={tenant.id} eventName={tenant.title || tenant.name} />
       
       <main>
         <EventHero 
           event={eventData} 
-          countdownTarget={tenant.eventDate ? new Date(tenant.eventDate) : new Date("2025-08-30T07:00:00")} 
+          countdownTarget={parseEventDate(tenant.eventDate) || new Date("2026-12-31T23:59:59")} 
         />
         
         <DistancesSection 
@@ -106,6 +107,7 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
           whatsapp: tenant.contact?.whatsapp || "584120000000", 
           email: tenant.contact?.email || "info@zonacrono.com" 
         }} 
+        socialMedia={tenant.social_media}
         saasName="ZonaCrono"
         saasUrl="/"
       />

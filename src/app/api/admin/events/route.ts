@@ -1,56 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin, supabase } from '@/lib';
+import { supabaseAdmin, checkAdmin, checkSuperadmin } from '@/lib';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * Helper to check if the current user is a superadmin
- */
-async function checkSuperadmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return { error: 'Missing or invalid authorization header', status: 401 };
-  }
-
-  const token = authHeader.split(' ')[1];
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-  if (authError || !user) {
-    return { error: 'Unauthorized', status: 401 };
-  }
-
-  // Check role in managers table using admin client (bypassing RLS)
-  const { data: profile, error: profileError } = await supabaseAdmin!
-    .from('managers')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (profileError || profile?.role !== 'superadmin') {
-    return { error: 'Forbidden: Superadmin access required', status: 403 };
-  }
-
-  return { user };
-}
-
-/**
  * @swagger
- * /api/superadmin/events:
+ * /api/admin/events:
  *   get:
- *     summary: Fetch all events and managers (Superadmin only)
+ *     summary: Fetch all events and managers (Admin only)
  *     description: Returns a list of all events with manager details and a list of all managers.
- *     tags: [Superadmin Events]
+ *     tags: [Admin Events]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Success
  *       403:
- *         description: Forbidden - Superadmin only
+ *         description: Forbidden - Admin only
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = await checkSuperadmin(request);
+    const auth = await checkAdmin(request);
     if ('error' in auth) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
@@ -77,7 +47,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (err) {
-    console.error('Error in GET /api/superadmin/events:', err);
+    console.error('Error in GET /api/admin/events:', err);
     return NextResponse.json({
       error: 'Internal Server Error',
       details: err instanceof Error ? err.message : String(err)
@@ -87,10 +57,10 @@ export async function GET(request: NextRequest) {
 
 /**
  * @swagger
- * /api/superadmin/events:
+ * /api/admin/events:
  *   post:
- *     summary: Provision a new event (Superadmin only)
- *     tags: [Superadmin Events]
+ *     summary: Provision a new event (Admin only)
+ *     tags: [Admin Events]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -102,9 +72,11 @@ export async function GET(request: NextRequest) {
  *             required: [manager_id, name, slug, event_date, event_time]
  *             properties:
  *               manager_id: { type: string }
- *               name: { type: string }
  *               slug: { type: string }
+ *               description: { type: string }
+ *               social_media: { type: object }
  *               event_date: { type: string, format: date }
+
  *               event_time: { type: string }
  *     responses:
  *       201:
@@ -112,13 +84,13 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const auth = await checkSuperadmin(request);
+    const auth = await checkAdmin(request);
     if ('error' in auth) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
     const body = await request.json();
-    const { manager_id, name, slug, event_date, event_time } = body;
+    const { manager_id, name, slug, event_date, event_time, description, social_media } = body;
 
     if (!manager_id || !name || !slug || !event_date || !event_time) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -133,9 +105,10 @@ export async function POST(request: NextRequest) {
           slug,
           event_date,
           event_time,
+          description: description || '',
+          social_media: social_media || {},
           // Genesis defaults
           has_inventory: false,
-          description: '',
           rules_text: ''
         }
       ])
@@ -152,7 +125,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data, { status: 201 });
 
   } catch (err) {
-    console.error('Error in POST /api/superadmin/events:', err);
+    console.error('Error in POST /api/admin/events:', err);
     return NextResponse.json({
       error: 'Internal Server Error',
       details: err instanceof Error ? err.message : String(err)
@@ -162,10 +135,10 @@ export async function POST(request: NextRequest) {
 
 /**
  * @swagger
- * /api/superadmin/events:
+ * /api/admin/events:
  *   patch:
- *     summary: Override event settings (Superadmin only)
- *     tags: [Superadmin Events]
+ *     summary: Override event settings (Admin only)
+ *     tags: [Admin Events]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -186,7 +159,7 @@ export async function POST(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   try {
-    const auth = await checkSuperadmin(request);
+    const auth = await checkAdmin(request);
     if ('error' in auth) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
@@ -215,7 +188,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json(data);
 
   } catch (err) {
-    console.error('Error in PATCH /api/superadmin/events:', err);
+    console.error('Error in PATCH /api/admin/events:', err);
     return NextResponse.json({
       error: 'Internal Server Error',
       details: err instanceof Error ? err.message : String(err)
@@ -225,10 +198,10 @@ export async function PATCH(request: NextRequest) {
 
 /**
  * @swagger
- * /api/superadmin/events:
+ * /api/admin/events:
  *   delete:
- *     summary: Delete an event (Superadmin only)
- *     tags: [Superadmin Events]
+ *     summary: Delete an event (Admin only)
+ *     tags: [Admin Events]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -244,7 +217,7 @@ export async function PATCH(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const auth = await checkSuperadmin(request);
+    const auth = await checkAdmin(request);
     if ('error' in auth) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
@@ -266,7 +239,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ message: 'Event deleted successfully' });
 
   } catch (err) {
-    console.error('Error in DELETE /api/superadmin/events:', err);
+    console.error('Error in DELETE /api/admin/events:', err);
     return NextResponse.json({
       error: 'Internal Server Error',
       details: err instanceof Error ? err.message : String(err)

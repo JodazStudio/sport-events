@@ -1,9 +1,9 @@
 "use client";
+import { useState, useEffect } from "react";
 import { Button, AnimatedContent } from "@/components/ui";
-
-
 import { CalendarDays, MapPin, Clock, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds, isValid, isBefore } from "date-fns";
 import type { EventData } from "./types";
 
 interface HeroSectionProps {
@@ -12,6 +12,55 @@ interface HeroSectionProps {
 }
 
 export const EventHero = ({ event, countdownTarget }: HeroSectionProps) => {
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    isFinished: false
+  });
+
+  useEffect(() => {
+    if (!countdownTarget || !isValid(countdownTarget)) return;
+
+    const calculateTimeLeft = () => {
+      const now = new Date();
+
+      if (isBefore(countdownTarget, now)) {
+        return { days: 0, hours: 0, minutes: 0, seconds: 0, isFinished: true };
+      }
+
+      return {
+        days: differenceInDays(countdownTarget, now),
+        hours: differenceInHours(countdownTarget, now) % 24,
+        minutes: differenceInMinutes(countdownTarget, now) % 60,
+        seconds: differenceInSeconds(countdownTarget, now) % 60,
+        isFinished: false
+      };
+    };
+
+    // Initial calculation
+    setTimeLeft(calculateTimeLeft());
+
+    const timer = setInterval(() => {
+      const newTimeLeft = calculateTimeLeft();
+      setTimeLeft(newTimeLeft);
+      
+      if (newTimeLeft.isFinished) {
+        clearInterval(timer);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [countdownTarget]);
+
+  const countdownItems = [
+    { label: "Días", value: timeLeft.days },
+    { label: "Horas", value: timeLeft.hours },
+    { label: "Min", value: timeLeft.minutes },
+    { label: "Seg", value: timeLeft.seconds },
+  ];
+
   return (
     <section
       id="hero"
@@ -54,20 +103,32 @@ export const EventHero = ({ event, countdownTarget }: HeroSectionProps) => {
           </div>
         </AnimatedContent>
 
-        {/* Countdown placeholder */}
-        {countdownTarget && (
+        {/* Countdown */}
+        {countdownTarget && !timeLeft.isFinished && (
           <div className="flex justify-center flex-wrap gap-4 mb-10">
-            {["Días", "Horas", "Min", "Seg"].map((label, idx) => (
-              <AnimatedContent key={label} delay={0.4 + idx * 0.1} distance={50}>
+            {countdownItems.map((item, idx) => (
+              <AnimatedContent key={item.label} delay={0.4 + idx * 0.1} distance={50}>
                 <div className="flex flex-col items-center min-w-[70px]">
-                  <span className="font-satoshi font-black text-3xl sm:text-4xl md:text-5xl text-ember italic">--</span>
+                  <span className="font-satoshi font-black text-3xl sm:text-4xl md:text-5xl text-ember italic">
+                    {item.value.toString().padStart(2, '0')}
+                  </span>
                   <span className="text-[10px] sm:text-xs text-white/50 uppercase tracking-wider font-satoshi">
-                    {label}
+                    {item.label}
                   </span>
                 </div>
               </AnimatedContent>
             ))}
           </div>
+        )}
+
+        {timeLeft.isFinished && (
+          <AnimatedContent delay={0.4}>
+            <div className="mb-10">
+              <span className="font-satoshi font-black text-2xl sm:text-3xl text-ember uppercase italic">
+                ¡El evento ha comenzado!
+              </span>
+            </div>
+          </AnimatedContent>
         )}
 
         <AnimatedContent delay={0.8}>
@@ -98,4 +159,5 @@ export const EventHero = ({ event, countdownTarget }: HeroSectionProps) => {
     </section>
   );
 };
+
 

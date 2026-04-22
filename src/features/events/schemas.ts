@@ -20,6 +20,9 @@ export const categorySchema = z.object({
   name: z.string(),
   description: z.string().optional().nullable(),
   distance: z.string().optional().nullable(),
+  gender: z.enum(['Masculino', 'Femenino', 'Mixto']),
+  min_age: z.number().min(0, 'La edad mínima no puede ser negativa'),
+  max_age: z.number().min(0, 'La edad máxima no puede ser negativa'),
 });
 
 /**

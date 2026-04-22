@@ -127,6 +127,7 @@ export async function GET(request: Request) {
  *               banner_url: { type: string }
  *               route_image_url: { type: string }
  *               strava_url: { type: string }
+ *               social_media: { type: object }
  *     responses:
  *       201:
  *         description: Event created successfully
@@ -160,7 +161,8 @@ export async function POST(request: Request) {
       has_inventory, 
       banner_url, 
       route_image_url, 
-      strava_url 
+      strava_url,
+      social_media
     } = body;
 
     if (!name || !slug || !event_date || !event_time) {
@@ -181,6 +183,7 @@ export async function POST(request: Request) {
           banner_url,
           route_image_url,
           strava_url,
+          social_media: social_media || {},
           manager_id: user.id
         }
       ])
@@ -228,6 +231,7 @@ export async function POST(request: Request) {
  *               banner_url: { type: string }
  *               route_image_url: { type: string }
  *               strava_url: { type: string }
+ *               social_media: { type: object }
  *     responses:
  *       200:
  *         description: Event updated successfully

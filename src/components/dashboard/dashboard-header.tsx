@@ -11,8 +11,7 @@ import {
   CreditCard, 
   Activity,
   Users,
-  Globe,
-  ShieldCheck
+  Globe
 } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -46,20 +45,16 @@ export function DashboardHeader() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const showSuperadminUI = role === 'superadmin';
-
   const adminNavItems = [
     { title: "Resumen", url: "/dashboard/overview", icon: LayoutDashboard },
-    { title: "Configuración", url: "/dashboard/config", icon: Settings2 },
+    { title: "Eventos", url: "/dashboard/events", icon: Globe },
+    { title: "Gestores", url: "/dashboard/managers", icon: Users, superadminOnly: true },
     { title: "Aprobaciones", url: "/dashboard/payments", icon: CreditCard },
   ];
 
-  const superadminNavItems = [
-    { title: "Gestores", url: "/dashboard/superadmin/managers", icon: Users },
-    { title: "Eventos", url: "/dashboard/superadmin/events", icon: Globe },
-  ];
-
-  const currentNavItems = showSuperadminUI ? superadminNavItems : adminNavItems;
+  const currentNavItems = adminNavItems.filter(item => 
+    !item.superadminOnly || role === 'superadmin'
+  );
 
   const fetchRates = async () => {
     setIsSyncing(true);
@@ -88,24 +83,19 @@ export function DashboardHeader() {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
-  console.log(showSuperadminUI, role)
+
   return (
     <>
       <header className="sticky top-0 z-50 flex h-16 w-full items-center border-b bg-white/95 backdrop-blur px-4 md:px-8">
         {/* Logo Section */}
         <Link href="/dashboard" className="flex items-center gap-3 mr-8 shrink-0">
           <div className="h-9 w-9 bg-black flex items-center justify-center font-black text-white italic shadow-[3px_3px_0px_0px_hsl(var(--primary))]">
-            {showSuperadminUI ? <ShieldCheck className="size-5 text-primary" /> : "ZC"}
+            ZC
           </div>
           <div className="flex flex-col">
             <span className="font-satoshi font-black uppercase tracking-tight text-xl italic leading-none">
               Zona<span className="text-primary">crono</span>
             </span>
-            {showSuperadminUI && (
-              <span className="font-mono text-[7px] uppercase tracking-[0.2em] text-primary font-bold">
-                Superadmin
-              </span>
-            )}
           </div>
         </Link>
 
@@ -173,26 +163,6 @@ export function DashboardHeader() {
                   <span>Perfil Personal</span>
                 </DropdownMenuItem>
                 
-                {role === 'superadmin' && (
-                  <>
-                    <DropdownMenuSeparator className="bg-black/10" />
-                    <DropdownMenuItem 
-                      className="cursor-pointer font-black italic py-2 text-primary"
-                      onClick={() => router.push("/dashboard/superadmin/managers")}
-                    >
-                      <Users className="mr-2 h-4 w-4" />
-                      <span>Cuentas de Managers</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className="cursor-pointer font-bold italic py-2"
-                      onClick={() => router.push("/dashboard/superadmin/events")}
-                    >
-                      <Globe className="mr-2 h-4 w-4" />
-                      <span>Control de Eventos</span>
-                    </DropdownMenuItem>
-                  </>
-                )}
-
                 <DropdownMenuSeparator className="bg-black/10" />
                 <DropdownMenuItem 
                   className="cursor-pointer text-destructive focus:text-destructive font-black italic py-2"

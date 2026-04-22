@@ -29,6 +29,7 @@ CREATE TABLE public.events (
     rules_text TEXT,
     route_image_url VARCHAR(255),
     strava_url VARCHAR(255),
+    social_media JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

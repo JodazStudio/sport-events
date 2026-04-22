@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib';
+import { supabaseAdmin, checkSuperadmin } from '@/lib';
 
 /**
  * Manager Profile type based on the database schema
@@ -15,8 +15,13 @@ export interface Manager {
 /**
  * GET: Fetch all managers from the public.managers table
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const auth = await checkSuperadmin(request);
+    if ('error' in auth) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
     if (!supabaseAdmin) {
       return NextResponse.json(
         { error: 'Supabase Admin client not configured' },
@@ -49,6 +54,11 @@ export async function GET() {
  */
 export async function POST(request: NextRequest) {
   try {
+    const auth = await checkSuperadmin(request);
+    if ('error' in auth) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
     if (!supabaseAdmin) {
       return NextResponse.json(
         { error: 'Supabase Admin client not configured' },

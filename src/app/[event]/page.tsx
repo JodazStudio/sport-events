@@ -42,6 +42,7 @@ export default function EventPage() {
               primaryColor: '#ff0000',
               registrationLink: `/${event.slug}/inscripciones`,
               eventDate: event.event_date,
+              eventTime: event.event_time,
               location: "Venezuela",
               pricingStages: event.registration_stages?.map((stage: any) => ({
                 id: stage.id,
@@ -71,7 +72,8 @@ export default function EventPage() {
                 ogImage: event.banner_url || '',
                 ogTitle: event.name,
                 ogDescription: event.description || ''
-              }
+              },
+              social_media: event.social_media
             };
             setData(mappedData);
           }
