@@ -36,19 +36,10 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "../ui/dropdown-menu";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Textarea } from "../ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { 
   Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
 } from "../ui/form";
+import { FormInput, FormTextarea, FormSelect, FormSwitch } from "@/components/ui/forms";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store";
@@ -281,108 +272,50 @@ export function ConfigView({ eventId, onDelete, onUpdate, isPage = false }: Conf
                   <CardTitle className="font-satoshi font-black italic uppercase text-xl">Información General</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
-                  <FormField
+                  <FormSelect
                     control={form.control}
                     name="manager_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-mono text-[10px] uppercase tracking-widest">Organizador / Dueño</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="rounded-none border-2 border-black h-11 font-bold italic">
-                              <SelectValue placeholder="Seleccionar organizador" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="rounded-none border-2 border-black">
-                            {managers.map((m) => (
-                              <SelectItem key={m.id} value={m.id} className="font-medium italic">
-                                {m.name} ({m.email})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Organizador / Dueño"
+                    placeholder="Seleccionar organizador"
+                    options={managers.map(m => ({ value: m.id, label: m.name, email: m.email }))}
                   />
 
-                  <FormField
+                  <FormInput
                     control={form.control}
                     name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-mono text-[10px] uppercase tracking-widest">Nombre del Evento</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            onChange={(e) => {
-                              field.onChange(e);
-                              const slug = handleSlugify(e.target.value);
-                              form.setValue('slug', slug, { shouldValidate: true });
-                            }}
-                            className="rounded-none border-2 border-black italic font-bold h-11" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Nombre del Evento"
+                    onChange={(e) => {
+                      const slug = handleSlugify(e.target.value);
+                      form.setValue('slug', slug, { shouldValidate: true });
+                    }}
                   />
 
-                  <FormField
+                  <FormInput
                     control={form.control}
                     name="slug"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-mono text-[10px] uppercase tracking-widest">Slug URL</FormLabel>
-                        <FormControl>
-                          <Input {...field} className="rounded-none border-2 border-black font-mono text-sm h-11" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Slug URL"
+                    inputClassName="font-mono text-sm"
                   />
 
                   <div className="grid grid-cols-2 gap-6">
-                    <FormField
+                    <FormInput
                       control={form.control}
                       name="event_date"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-mono text-[10px] uppercase tracking-widest">Fecha</FormLabel>
-                          <FormControl>
-                            <Input type="date" {...field} className="rounded-none border-2 border-black h-11" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      label="Fecha"
+                      type="date"
                     />
-                    <FormField
+                    <FormInput
                       control={form.control}
                       name="event_time"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-mono text-[10px] uppercase tracking-widest">Hora</FormLabel>
-                          <FormControl>
-                            <Input type="time" {...field} className="rounded-none border-2 border-black h-11" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      label="Hora"
+                      type="time"
                     />
                   </div>
 
-                  <FormField
+                  <FormTextarea
                     control={form.control}
                     name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-mono text-[10px] uppercase tracking-widest">Descripción</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} className="rounded-none border-2 border-black italic min-h-[100px]" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Descripción"
                   />
                 </CardContent>
               </Card>
@@ -394,153 +327,78 @@ export function ConfigView({ eventId, onDelete, onUpdate, isPage = false }: Conf
                   <CardTitle className="font-satoshi font-black italic uppercase text-xl">Media y Ruta</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
-                  <FormField
+                  <FormInput
                     control={form.control}
                     name="banner_url"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-mono text-[10px] uppercase tracking-widest">URL del Banner</FormLabel>
-                        <FormControl>
-                          <Input {...field} className="rounded-none border-2 border-black h-11" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="URL del Banner"
                   />
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
+                    <FormInput
                       control={form.control}
                       name="route_image_url"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-mono text-[10px] uppercase tracking-widest">URL Mapa de Ruta</FormLabel>
-                          <FormControl>
-                            <Input {...field} className="rounded-none border-2 border-black h-11" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      label="URL Mapa de Ruta"
                     />
-                    <FormField
+                    <FormInput
                       control={form.control}
                       name="strava_url"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-mono text-[10px] uppercase tracking-widest">Link de Strava</FormLabel>
-                          <FormControl>
-                            <Input {...field} className="rounded-none border-2 border-black h-11" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      label="Link de Strava"
                     />
                   </div>
 
                   <div className="pt-4 border-t-2 border-black/5 space-y-6">
-                    <h3 className="font-black italic uppercase text-lg">Redes Sociales</h3>
+                    <h3 className="font-black italic uppercase text-lg text-primary">Redes Sociales</h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField
+                      <FormInput
                         control={form.control}
                         name="social_media.instagram"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="font-mono text-[10px] uppercase tracking-widest">Instagram URL</FormLabel>
-                            <FormControl>
-                              <Input placeholder="https://instagram.com/..." {...field} className="rounded-none border-2 border-black h-11" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        label="Instagram URL"
+                        placeholder="https://instagram.com/..."
                       />
                       
-                      <FormField
+                      <FormInput
                         control={form.control}
                         name="social_media.facebook"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="font-mono text-[10px] uppercase tracking-widest">Facebook URL</FormLabel>
-                            <FormControl>
-                              <Input placeholder="https://facebook.com/..." {...field} className="rounded-none border-2 border-black h-11" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        label="Facebook URL"
+                        placeholder="https://facebook.com/..."
                       />
 
-                      <FormField
+                      <FormInput
                         control={form.control}
                         name="social_media.twitter"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="font-mono text-[10px] uppercase tracking-widest">X (Twitter) URL</FormLabel>
-                            <FormControl>
-                              <Input placeholder="https://x.com/..." {...field} className="rounded-none border-2 border-black h-11" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        label="X (Twitter) URL"
+                        placeholder="https://x.com/..."
                       />
 
-                      <FormField
+                      <FormInput
                         control={form.control}
                         name="social_media.threads"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="font-mono text-[10px] uppercase tracking-widest">Threads URL</FormLabel>
-                            <FormControl>
-                              <Input placeholder="https://threads.net/..." {...field} className="rounded-none border-2 border-black h-11" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        label="Threads URL"
+                        placeholder="https://threads.net/..."
                       />
 
-                      <FormField
+                      <FormInput
                         control={form.control}
                         name="social_media.tiktok"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="font-mono text-[10px] uppercase tracking-widest">TikTok URL</FormLabel>
-                            <FormControl>
-                              <Input placeholder="https://tiktok.com/@..." {...field} className="rounded-none border-2 border-black h-11" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        label="TikTok URL"
+                        placeholder="https://tiktok.com/@..."
                       />
                     </div>
                   </div>
 
-                  <FormField
+                  <FormSwitch
                     control={form.control}
                     name="has_inventory"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-none border-2 border-black p-4 shadow-inner bg-muted/10">
-                        <div className="space-y-0.5">
-                          <FormLabel className="font-bold italic uppercase text-sm">Gestionar Inventario (Tallas)</FormLabel>
-                          <FormDescription className="italic text-xs">Solicitar talla durante el registro.</FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} className="data-[state=checked]:bg-primary" />
-                        </FormControl>
-                      </FormItem>
-                    )}
+                    label="Gestionar Inventario (Tallas)"
+                    description="Solicitar talla durante el registro."
                   />
 
-                  <FormField
+                  <FormTextarea
                     control={form.control}
                     name="rules_text"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-mono text-[10px] uppercase tracking-widest">Reglamento</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} className="rounded-none border-2 border-black italic min-h-[150px]" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Reglamento"
+                    className="min-h-[150px]"
                   />
                 </CardContent>
               </Card>

@@ -21,7 +21,6 @@ import { toast } from 'sonner';
 
 import { 
   Button, 
-  Input, 
   Table, 
   TableBody, 
   TableCell, 
@@ -35,18 +34,9 @@ import {
   DialogHeader,
   DialogTitle,
   Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Badge,
 } from '@/components/ui';
+import { FormInput, FormSelect } from '@/components/ui/forms';
 import { useAuthStore } from '@/store';
 import { checkAgeOverlap } from '@/features/events/utils';
 
@@ -344,45 +334,24 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit as any)} className="p-6 space-y-6">
-              <FormField<CategoryFormValues>
+              <FormInput
                 control={form.control as any}
                 name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-mono text-[10px] uppercase tracking-widest font-black">Nombre de la Categoría</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ej: Master A Masculino" {...field} className="rounded-none border-2 border-black italic font-bold h-11" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label="Nombre de la Categoría"
+                placeholder="Ej: Master A Masculino"
               />
 
-              <div className="grid grid-cols-2 gap-6">
-                <FormField<CategoryFormValues>
-                  control={form.control as any}
-                  name="gender"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-mono text-[10px] uppercase tracking-widest font-black">Género</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value as string}>
-                        <FormControl>
-                          <SelectTrigger className="rounded-none border-2 border-black h-11 font-bold italic">
-                            <SelectValue placeholder="Selecciona género" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="rounded-none border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                          <SelectItem value="MALE">Masculino</SelectItem>
-                          <SelectItem value="FEMALE">Femenino</SelectItem>
-                          <SelectItem value="MIXED">Mixto</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-              </div>
+              <FormSelect
+                control={form.control as any}
+                name="gender"
+                label="Género"
+                placeholder="Selecciona género"
+                options={[
+                  { value: 'MALE', label: 'Masculino' },
+                  { value: 'FEMALE', label: 'Femenino' },
+                  { value: 'MIXED', label: 'Mixto' },
+                ]}
+              />
 
               <div className="bg-muted/30 p-4 border-2 border-dashed border-black space-y-4">
                 <div className="flex items-center gap-2 mb-2">
@@ -390,31 +359,21 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
                   <span className="font-mono text-[9px] uppercase font-black">Rango de Edad</span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField<CategoryFormValues>
+                  <FormInput
                     control={form.control as any}
                     name="min_age"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-mono text-[9px] uppercase tracking-tight">Edad Mínima</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} className="rounded-none border-2 border-black h-10 font-mono font-bold" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Edad Mínima"
+                    type="number"
+                    labelClassName="text-[9px]"
+                    inputClassName="h-10 font-mono"
                   />
-                  <FormField<CategoryFormValues>
+                  <FormInput
                     control={form.control as any}
                     name="max_age"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-mono text-[9px] uppercase tracking-tight">Edad Máxima</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} className="rounded-none border-2 border-black h-10 font-mono font-bold" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Edad Máxima"
+                    type="number"
+                    labelClassName="text-[9px]"
+                    inputClassName="h-10 font-mono"
                   />
                 </div>
               </div>
