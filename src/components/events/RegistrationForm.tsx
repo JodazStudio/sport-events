@@ -110,11 +110,30 @@ export function RegistrationForm({ event, activeStage, bcvRate, slug }: Registra
     if (event.has_inventory) fieldsToValidate.push("shirt_size");
     
     const isValid = await form.trigger(fieldsToValidate as any);
-    if (isValid) {
+    if (!isValid) {
+      toast.error("Por favor completa los campos requeridos correctamente.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const dni = form.getValues("dni");
+      
+      const res = await fetch(`/api/registrations/check-dni?eventId=${event.id}&dni=${dni}`);
+      const data = await res.json();
+
+      if (data.exists) {
+        toast.error(data.message || "Ya existe una inscripción con esta cédula.");
+        return;
+      }
+
       setStep(2);
       window.scrollTo(0, 0);
-    } else {
-      toast.error("Por favor completa los campos requeridos correctamente.");
+    } catch (error) {
+      console.error("DNI check error:", error);
+      toast.error("Error al validar la información. Inténtalo de nuevo.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -329,7 +348,7 @@ ${event.payment_info.account_number ? `Cuenta: ${event.payment_info.account_numb
 
                 <div className="mt-6 p-4 bg-primary/5 border-l-4 border-primary">
                   <p className="text-[10px] font-mono uppercase text-muted-foreground leading-relaxed">
-                     Nota: Tu categoría será asignada automáticamente en función de tu edad y género al momento de la inscripción.
+                     Nota: Tu categoría será asignada automáticamente en función de tu edad y género. <strong>Solo se permite una inscripción por cédula para este evento.</strong>
                   </p>
                 </div>
               </div>
@@ -383,9 +402,13 @@ ${event.payment_info.account_number ? `Cuenta: ${event.payment_info.account_numb
                 <Button 
                   type="button"
                   onClick={handleNextStep}
+                  disabled={submitting}
                   className="rounded-none border-2 border-black bg-primary text-white text-sm uppercase font-black px-12 py-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
                 >
-                  Continuar al Pago
+                  {submitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
+                  {submitting ? "Validando..." : "Continuar al Pago"}
                 </Button>
               </div>
             </div>

@@ -66,6 +66,13 @@ export async function POST(request: NextRequest) {
     console.error('Unexpected error in POST /api/registrations:', err);
     return NextResponse.json({ 
       error: err.message || 'Internal Server Error' 
-    }, { status: err.message?.includes('category') ? 400 : 500 });
+    }, { 
+      status: (
+        err.message?.includes('category') || 
+        err.message?.includes('inscripción') || 
+        err.message?.includes('identificación') ||
+        err.message?.includes('registrada')
+      ) ? 400 : 500 
+    });
   }
 }

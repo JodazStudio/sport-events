@@ -30,7 +30,24 @@ export const registrationService = {
       payment_data
     } = data;
 
-    // Calculate Category automatically (Age at End of Year)
+    // 1. Check for duplicate registration by DNI for this event
+    const { data: existing, error: checkError } = await supabaseAdmin
+      .from('registrations')
+      .select('id, status')
+      .eq('event_id', event_id)
+      .eq('dni', dni)
+      .in('status', ['PENDING', 'REPORTED', 'APPROVED'])
+      .maybeSingle();
+
+    if (existing) {
+      let message = 'Ya existe una inscripción registrada con esta cédula.';
+      if (existing.status === 'PENDING') message = 'Ya tienes una reserva pendiente para este evento. Por favor, completa tu pago.';
+      if (existing.status === 'REPORTED') message = 'Tu pago ya ha sido reportado y está siendo verificado.';
+      if (existing.status === 'APPROVED') message = 'Ya te encuentras inscrito exitosamente en este evento.';
+      throw new Error(message);
+    }
+
+    // 2. Calculate Category automatically (Age at End of Year)
     const birthDateObj = new Date(birth_date);
     const today = new Date();
     const age = today.getFullYear() - birthDateObj.getFullYear();

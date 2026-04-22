@@ -25,19 +25,34 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
-    // 1. Fetch all events with manager details
-    const { data: events, error: eventsError } = await supabaseAdmin!
+    const { user, profile } = auth;
+
+    // 1. Fetch events
+    let eventsQuery = supabaseAdmin!
       .from('events')
       .select('*, managers(name, email)')
       .order('created_at', { ascending: false });
 
+    // Filter by manager if not superadmin
+    if (profile.role !== 'superadmin') {
+      eventsQuery = eventsQuery.eq('manager_id', user.id);
+    }
+
+    const { data: events, error: eventsError } = await eventsQuery;
+
     if (eventsError) throw eventsError;
 
-    // 2. Fetch all managers for the assignment dropdown
-    const { data: managers, error: managersError } = await supabaseAdmin!
+    // 2. Fetch managers (only for superadmins to see all, or just the current manager)
+    let managersQuery = supabaseAdmin!
       .from('managers')
       .select('id, name, email')
       .order('name', { ascending: true });
+
+    if (profile.role !== 'superadmin') {
+      managersQuery = managersQuery.eq('id', user.id);
+    }
+
+    const { data: managers, error: managersError } = await managersQuery;
 
     if (managersError) throw managersError;
 
@@ -89,9 +104,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
+    const { user, profile } = auth;
+
     const body = await request.json();
     const { 
-      manager_id, 
+      manager_id: providedManagerId, 
       name, 
       slug, 
       event_date, 
@@ -110,8 +127,11 @@ export async function POST(request: NextRequest) {
       payment_info
     } = body;
 
-    if (!manager_id || !name || !slug || !event_date || !event_time || !city) {
-      return NextResponse.json({ error: 'Missing required fields (manager_id, name, slug, date, time, city)' }, { status: 400 });
+    // Regular managers can only create events for themselves
+    const manager_id = profile.role === 'superadmin' ? (providedManagerId || user.id) : user.id;
+
+    if (!name || !slug || !event_date || !event_time || !city) {
+      return NextResponse.json({ error: 'Missing required fields (name, slug, date, time, city)' }, { status: 400 });
     }
 
     const { data, error } = await supabaseAdmin!
@@ -197,6 +217,8 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
+    const { user, profile } = auth;
+
     const body = await request.json();
     const { id, ...bodyUpdates } = body;
 
@@ -218,12 +240,16 @@ export async function PATCH(request: NextRequest) {
       }
     });
 
-    const { data, error } = await supabaseAdmin!
+    let updateQuery = supabaseAdmin!
       .from('events')
       .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
+      .eq('id', id);
+
+    if (profile.role !== 'superadmin') {
+      updateQuery = updateQuery.eq('manager_id', user.id);
+    }
+
+    const { data, error } = await updateQuery.select().single();
 
     if (error) {
       if (error.code === '23505') {
@@ -269,6 +295,8 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
+    const { user, profile } = auth;
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -276,10 +304,16 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Event ID is required' }, { status: 400 });
     }
 
-    const { error } = await supabaseAdmin!
+    let deleteQuery = supabaseAdmin!
       .from('events')
       .delete()
       .eq('id', id);
+
+    if (profile.role !== 'superadmin') {
+      deleteQuery = deleteQuery.eq('manager_id', user.id);
+    }
+
+    const { error } = await deleteQuery;
 
     if (error) throw error;
 

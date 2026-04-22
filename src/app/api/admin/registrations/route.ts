@@ -37,6 +37,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Event ID is required' }, { status: 400 });
     }
 
+    const { user, profile } = auth;
+
+    // Verify event ownership
+    if (profile.role !== 'superadmin') {
+      const { data: event, error: eventError } = await supabaseAdmin!
+        .from('events')
+        .select('manager_id')
+        .eq('id', eventId)
+        .single();
+      
+      if (eventError || !event || event.manager_id !== user.id) {
+        return NextResponse.json({ error: 'Forbidden: You do not have access to this event' }, { status: 403 });
+      }
+    }
+
     // Fetch registrations with relations
     const { data: registrations, error } = await supabaseAdmin!
       .from('registrations')

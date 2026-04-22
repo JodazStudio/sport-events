@@ -37,6 +37,22 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    const { user, profile } = auth;
+
+    // Verify ownership
+    if (profile.role !== 'superadmin') {
+      const { data: registration, error: regError } = await supabaseAdmin!
+        .from('registrations')
+        .select('event_id, events(manager_id)')
+        .eq('id', registrationId)
+        .single();
+      
+      const event = registration?.events as any;
+      if (regError || !registration || event?.manager_id !== user.id) {
+        return NextResponse.json({ error: 'Forbidden: You do not have access to this registration' }, { status: 403 });
+      }
+    }
+
     const registration = await registrationService.updateRegistrationStatus(registrationId, status, reason);
 
     return NextResponse.json({ registration });
