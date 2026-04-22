@@ -111,6 +111,15 @@ function setupBot(): Telegraf | null {
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate Secret Token if configured
+    const secretToken = request.headers.get('X-Telegram-Bot-Api-Secret-Token');
+    const expectedToken = process.env.TELEGRAM_WEBHOOK_SECRET;
+
+    if (expectedToken && secretToken !== expectedToken) {
+      console.warn('Unauthorized Telegram webhook attempt');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const bot = setupBot();
     
     if (!bot) {
