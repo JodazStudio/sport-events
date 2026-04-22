@@ -19,8 +19,11 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 import { supabaseAdmin } from '@/lib';
+import { getBcvRate } from '@/lib/currency';
+import { cn } from '@/lib/utils';
 import { Button, Badge, Separator } from '@/components/ui';
 import { ThemeToggle } from '@/components/dashboard/theme-toggle';
+import { ReportPaymentForm } from '@/components/events/ReportPaymentForm';
 
 interface StatusPageProps {
   params: Promise<{ id: string }>;
@@ -34,7 +37,7 @@ async function getRegistration(id: string) {
     .select(`
       *,
       event:events(name, slug, banner_url),
-      stage:registration_stages(name),
+      stage:registration_stages(name, price_usd),
       category:categories(name),
       payment:payments(amount_usd, reference_number, reported_at)
     `)
@@ -44,6 +47,7 @@ async function getRegistration(id: string) {
   if (error || !data) return null;
   return data;
 }
+
 
 export default async function RegistrationStatusPage({ params }: StatusPageProps) {
   const { id } = await params;
@@ -87,6 +91,10 @@ export default async function RegistrationStatusPage({ params }: StatusPageProps
   };
 
   const currentStatus = statusMap[registration.status as keyof typeof statusMap];
+
+  // Fetch BCV rate only when needed (PENDING status)
+  const bcvRate = registration.status === 'PENDING' ? await getBcvRate() : 0;
+  const stagePrice = registration.stage?.price_usd ?? 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -184,7 +192,7 @@ export default async function RegistrationStatusPage({ params }: StatusPageProps
             </div>
           </div>
 
-          {/* Payment Info */}
+          {/* Payment Info (when reported/approved) */}
           {registration.payment && (
             <div className="md:col-span-2 border-4 border-black dark:border-white bg-card p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)]">
               <h3 className="font-satoshi text-xl font-black uppercase italic tracking-tight mb-6 flex items-center gap-2 text-foreground">
@@ -205,6 +213,15 @@ export default async function RegistrationStatusPage({ params }: StatusPageProps
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Report Payment Form (only for PENDING registrations) */}
+          {registration.status === 'PENDING' && (
+            <ReportPaymentForm
+              registrationId={registration.id}
+              priceUsd={stagePrice}
+              bcvRate={bcvRate}
+            />
           )}
         </div>
 
@@ -227,6 +244,3 @@ export default async function RegistrationStatusPage({ params }: StatusPageProps
   );
 }
 
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
-}

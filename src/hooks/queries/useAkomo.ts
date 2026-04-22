@@ -1,23 +1,22 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 
 export const akomoKeys = {
-  rates: (date: string) => ["akomo", "rates", date] as const,
+  all: ["akomo"] as const,
+  rates: ["akomo", "rates"] as const,
 };
 
 export function useExchangeRates() {
-  const today = format(new Date(), "yyyy-MM-dd");
-
   return useQuery({
-    queryKey: akomoKeys.rates(today),
+    queryKey: akomoKeys.rates,
     queryFn: async () => {
-      const response = await fetch("https://api.akomo.xyz/api/exchange-rates");
+      const response = await fetch("/api/akomo");
       if (!response.ok) throw new Error("Failed to fetch exchange rates");
       return response.json();
     },
-    staleTime: 1000 * 60 * 60 * 24, // 24 hours
-    gcTime: 1000 * 60 * 60 * 24, // Keep in cache for 24 hours
+    // Refresh every 15 minutes in background
+    staleTime: 1000 * 60 * 15,
+    refetchInterval: 1000 * 60 * 15,
   });
 }
