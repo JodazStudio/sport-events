@@ -12,24 +12,16 @@ import {
   CreditCard, 
   ShirtIcon, 
   CheckCircle, 
-  CalendarIcon,
   Upload,
   Loader2,
   AlertCircle
 } from "lucide-react";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import { cn } from "@/lib";
 import { 
-  Input, 
   Label, 
   RadioGroup, 
   RadioGroupItem, 
   Button, 
-  Calendar, 
-  Popover, 
-  PopoverContent, 
-  PopoverTrigger, 
   Separator,
   Form,
   FormControl,
@@ -56,6 +48,10 @@ interface EventData {
     id_number: string;
     phone_number: string;
   } | null;
+  categories?: {
+    min_age: number;
+    gender: string;
+  }[];
 }
 
 interface RegistrationStage {
@@ -79,6 +75,16 @@ export function RegistrationForm({ event, activeStage, bcvRate, slug }: Registra
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [paymentFile, setPaymentFile] = useState<File | null>(null);
+
+  // Calculate the lowest minimum age from categories
+  const minAge = event.categories && event.categories.length > 0
+    ? Math.min(...event.categories.map(c => c.min_age))
+    : 0;
+
+  const maxBirthDate = new Date();
+  maxBirthDate.setFullYear(maxBirthDate.getFullYear() - minAge);
+  // Set to end of day to be inclusive
+  const maxBirthDateStr = maxBirthDate.toISOString().split('T')[0];
 
   const form = useForm<any>({
     resolver: zodResolver(registrationSchema),
@@ -263,45 +269,12 @@ export function RegistrationForm({ event, activeStage, bcvRate, slug }: Registra
                     placeholder="juan@email.com"
                   />
                   
-                  <FormField
+                  <FormInput
                     control={form.control}
                     name="birth_date"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel className="font-mono text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
-                          Fecha de Nacimiento *
-                        </FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full justify-start text-left font-normal rounded-none border-2 border-black h-10",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.value ? format(new Date(field.value), "dd/MM/yyyy", { locale: es }) : "Seleccionar fecha"}
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 rounded-none border-2 border-black" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value ? new Date(field.value) : undefined}
-                              onSelect={(date) => field.onChange(date?.toISOString().split('T')[0])}
-                              disabled={(date) => date > new Date()}
-                              initialFocus
-                              captionLayout="dropdown"
-                              fromYear={1920}
-                              toYear={new Date().getFullYear()}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage className="text-[10px] font-bold uppercase" />
-                      </FormItem>
-                    )}
+                    label="Fecha de Nacimiento *"
+                    type="date"
+                    max={maxBirthDateStr}
                   />
 
                   <FormField

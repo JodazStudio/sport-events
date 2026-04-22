@@ -48,7 +48,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (categoryError || !category) {
-      console.error('Error finding category:', categoryError);
       return NextResponse.json({ 
         error: 'No suitable category found for your age and gender.' 
       }, { status: 400 });
