@@ -3,13 +3,15 @@ import { Telegraf } from 'telegraf';
 // Singleton instance of the bot
 let botInstance: Telegraf | null = null;
 
-export const getTelegramBot = () => {
-  if (!process.env.TELEGRAM_BOT_TOKEN) {
-    throw new Error('TELEGRAM_BOT_TOKEN is not defined in environment variables');
+export const getTelegramBot = (): Telegraf | null => {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) {
+    console.warn('TELEGRAM_BOT_TOKEN is not defined in environment variables');
+    return null;
   }
 
   if (!botInstance) {
-    botInstance = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
+    botInstance = new Telegraf(token);
   }
   return botInstance;
 };
@@ -28,6 +30,10 @@ export const escapeMarkdown = (text: string): string => {
 export const sendTelegramNotification = async (chatId: string | number, message: string) => {
   try {
     const bot = getTelegramBot();
+    if (!bot) {
+      console.error('Cannot send notification: Telegram Bot is not configured (missing token)');
+      return { success: false, error: 'Bot not configured' };
+    }
     await bot.telegram.sendMessage(chatId, message, {
       parse_mode: 'MarkdownV2',
     });
