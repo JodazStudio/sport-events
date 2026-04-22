@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
             .single();
 
           const message = formatRegistrationAlert({
-            eventName: eventData.name,
+            eventName: eventData?.name || 'Evento',
             athleteName: `${first_name} ${last_name}`,
             categoryName: catData?.name || 'N/A',
             amount: payment_data ? `${payment_data.amount_usd} USD` : 'Pendiente'
