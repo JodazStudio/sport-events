@@ -63,7 +63,7 @@ export function OverviewView() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {kpis.map((kpi, index) => (
-          <Card key={index} className={`rounded-none border-2 ${kpi.color} shadow-[8px_8px_0px_0px_rgba(0,0,0,0.05)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,0.1)] transition-all duration-200`}>
+          <Card key={index} className={`rounded-none border-2 ${kpi.color} shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[10px_10px_0px_0px_rgba(255,255,255,1)] transition-all duration-200 bg-card`}>
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 text-balance">
               <CardTitle className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
                 {kpi.title}
@@ -104,7 +104,7 @@ export function OverviewView() {
 
       {/* Secondary Data Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="col-span-1 md:col-span-2 rounded-none border-2 border-border p-4 md:p-6 bg-muted/20 border-dashed overflow-hidden">
+        <Card className="col-span-1 md:col-span-2 rounded-none border-2 border-black dark:border-white p-4 md:p-6 bg-muted/20 border-dashed overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]">
             <div className="flex items-center gap-3 mb-4">
               <Activity className="size-4 text-primary" />
               <h3 className="font-black italic uppercase text-lg">Logs de la Plataforma</h3>
@@ -120,7 +120,7 @@ export function OverviewView() {
             </div>
         </Card>
 
-        <Card className="col-span-1 rounded-none border-2 border-border p-4 md:p-6 bg-primary/5 border-dashed">
+        <Card className="col-span-1 rounded-none border-2 border-black dark:border-white p-4 md:p-6 bg-primary/5 border-dashed shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]">
            <div className="flex items-center gap-3 mb-4">
               <AlertCircle className="size-4 text-primary" />
               <h3 className="font-black italic uppercase text-lg">Estado de Sincronización</h3>

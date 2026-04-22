@@ -42,13 +42,13 @@ export const AthleteModal = ({ athlete, isOpen, onClose }: AthleteModalProps) =>
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-card border-2 p-0 border-primary shadow-xl">
+      <DialogContent className="max-w-2xl bg-card border-2 p-0 border-primary shadow-xl dark:shadow-primary/20">
         <DialogHeader className="p-6 pb-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
                <span className="text-4xl">{getCountryFlag(athlete.country)}</span>
                <div>
-                  <DialogTitle className="font-satoshi font-black text-2xl uppercase tracking-tighter">
+                  <DialogTitle className="font-satoshi font-black text-2xl uppercase tracking-tighter text-foreground">
                     {athlete.name}
                   </DialogTitle>
                   <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
@@ -61,21 +61,21 @@ export const AthleteModal = ({ athlete, isOpen, onClose }: AthleteModalProps) =>
             </Badge>
           </div>
           
-          <div className="grid grid-cols-3 gap-px bg-border border mt-6 overflow-hidden">
+          <div className="grid grid-cols-3 gap-px bg-border dark:bg-white/10 border mt-6 overflow-hidden">
             <div className="bg-muted/30 p-3 text-center">
               <Timer className="h-3.5 w-3.5 mx-auto mb-1 text-primary" />
               <div className="font-mono text-xs text-muted-foreground uppercase">Tiempo</div>
-              <div className="font-mono text-lg font-bold">{athlete.totalTime || '--:--:--'}</div>
+              <div className="font-mono text-lg font-bold text-foreground">{athlete.totalTime || '--:--:--'}</div>
             </div>
             <div className="bg-muted/30 p-3 text-center">
               <Zap className="h-3.5 w-3.5 mx-auto mb-1 text-blue-500" />
               <div className="font-mono text-xs text-muted-foreground uppercase">Ritmo Medio</div>
-              <div className="font-mono text-lg font-bold">{athlete.pace || '--:--'}</div>
+              <div className="font-mono text-lg font-bold text-foreground">{athlete.pace || '--:--'}</div>
             </div>
             <div className="bg-muted/30 p-3 text-center">
               <Map className="h-3.5 w-3.5 mx-auto mb-1 text-green-500" />
               <div className="font-mono text-xs text-muted-foreground uppercase">Distancia</div>
-              <div className="font-mono text-lg font-bold">{athlete.lastCheckpoint.toFixed(1)} km</div>
+              <div className="font-mono text-lg font-bold text-foreground">{athlete.lastCheckpoint.toFixed(1)} km</div>
             </div>
           </div>
         </DialogHeader>
@@ -103,8 +103,8 @@ export const AthleteModal = ({ athlete, isOpen, onClose }: AthleteModalProps) =>
                   domain={[3.5, 5.5]}
                 />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#111', border: '1px solid #333', fontSize: '10px', fontFamily: 'monospace' }} 
-                  itemStyle={{ color: '#f97316' }}
+                  contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', fontSize: '10px', fontFamily: 'monospace', color: 'hsl(var(--foreground))' }} 
+                  itemStyle={{ color: 'hsl(var(--primary))' }}
                 />
                 <Line 
                   type="monotone" 

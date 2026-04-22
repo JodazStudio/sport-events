@@ -30,6 +30,14 @@ CREATE TABLE public.events (
     route_image_url VARCHAR(255),
     strava_url VARCHAR(255),
     social_media JSONB DEFAULT '{}'::jsonb,
+    payment_info JSONB DEFAULT '{
+      "bank_name": "",
+      "account_number": "",
+      "id_number": "",
+      "phone_number": ""
+    }'::jsonb,
+    event_date DATE,
+    event_time TIME,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -156,3 +164,68 @@ ALTER TABLE public.results ENABLE ROW LEVEL SECURITY;
 
 -- Nota: Deberás crear las "Policies" específicas desde el panel de Supabase 
 -- o vía SQL para permitir lectura pública a las landings y escritura a los gestores logueados.
+
+-- ========================================================================================
+-- 5. FUNCIONES Y TRIGGERS (LÓGICA DE NEGOCIO)
+-- ========================================================================================
+
+-- Función para registrar un atleta y actualizar el cupo de forma atómica
+CREATE OR REPLACE FUNCTION public.register_athlete(
+    p_event_id UUID,
+    p_stage_id UUID,
+    p_category_id UUID,
+    p_first_name VARCHAR,
+    p_last_name VARCHAR,
+    p_dni VARCHAR,
+    p_email VARCHAR,
+    p_birth_date DATE,
+    p_gender public.gender_type,
+    p_shirt_size VARCHAR,
+    p_status public.registration_status,
+    p_expires_at TIMESTAMP WITH TIME ZONE,
+    p_payment_data JSONB DEFAULT NULL
+) RETURNS UUID AS $$
+DECLARE
+    v_registration_id UUID;
+    v_current_capacity INTEGER;
+    v_total_capacity INTEGER;
+BEGIN
+    -- 1. Verificar cupo y bloquear fila para evitar condiciones de carrera
+    SELECT used_capacity, total_capacity INTO v_current_capacity, v_total_capacity
+    FROM public.registration_stages
+    WHERE id = p_stage_id
+    FOR UPDATE;
+
+    IF v_current_capacity >= v_total_capacity THEN
+        RAISE EXCEPTION 'No hay cupos disponibles en esta etapa.';
+    END IF;
+
+    -- 2. Insertar inscripción
+    INSERT INTO public.registrations (
+        event_id, stage_id, category_id, first_name, last_name, dni, email, birth_date, gender, shirt_size, status, expires_at
+    ) VALUES (
+        p_event_id, p_stage_id, p_category_id, p_first_name, p_last_name, p_dni, p_email, p_birth_date, p_gender, p_shirt_size, p_status, p_expires_at
+    ) RETURNING id INTO v_registration_id;
+
+    -- 3. Actualizar cupo
+    UPDATE public.registration_stages
+    SET used_capacity = used_capacity + 1
+    WHERE id = p_stage_id;
+
+    -- 4. Insertar pago si existe
+    IF p_payment_data IS NOT NULL THEN
+        INSERT INTO public.payments (
+            registration_id, amount_usd, exchange_rate_bcv, amount_ves, reference_number, receipt_url
+        ) VALUES (
+            v_registration_id,
+            (p_payment_data->>'amount_usd')::DECIMAL,
+            (p_payment_data->>'exchange_rate_bcv')::DECIMAL,
+            (p_payment_data->>'amount_ves')::DECIMAL,
+            p_payment_data->>'reference_number',
+            p_payment_data->>'receipt_url'
+        );
+    END IF;
+
+    RETURN v_registration_id;
+END;
+$$ LANGUAGE plpgsql;

@@ -75,8 +75,8 @@ export default async function EventPage({ params }: EventPageProps) {
     logo: '/logo.png', // Default logo
     primaryColor: '#6d28d9', // Standard purple
     registrationLink: `/${event.slug}/inscripciones`,
-    eventDate: event.event_date,
-    eventTime: event.event_time,
+    eventDate: event.event_date || '',
+    eventTime: event.event_time || undefined,
     location: "Venezuela",
     pricingStages: event.registration_stages?.map((stage: any) => ({
       id: stage.id,

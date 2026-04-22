@@ -281,9 +281,9 @@ export default function EventsPage() {
       </div>
 
       {/* Main Table */}
-      <div className="bg-card border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-none overflow-hidden">
+      <div className="bg-card border-2 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] rounded-none overflow-hidden">
         <Table>
-          <TableHeader className="bg-muted/50 border-b-2 border-black">
+          <TableHeader className="bg-muted/50 border-b-2 border-black dark:border-white">
             <TableRow className="hover:bg-transparent">
               <TableHead className="font-mono text-[10px] uppercase tracking-widest py-5">Evento</TableHead>
               <TableHead className="font-mono text-[10px] uppercase tracking-widest py-5">URL</TableHead>
@@ -364,7 +364,7 @@ export default function EventsPage() {
           { label: "Ingresos Proyectados", value: "$12.4k", icon: ArrowUpRight },
           { label: "Tasa de Conversión", value: "18%", icon: Activity },
         ].map((stat, i) => (
-          <div key={i} className="bg-card border-2 border-black p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group hover:translate-x-1 transition-transform">
+          <div key={i} className="bg-card border-2 border-black dark:border-white p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] group hover:translate-x-1 transition-transform">
             <div className="flex items-center justify-between mb-2">
               <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{stat.label}</span>
               <stat.icon className="h-4 w-4 text-primary" />
@@ -373,6 +373,7 @@ export default function EventsPage() {
           </div>
         ))}
       </div>
+
     </div>
   );
 }

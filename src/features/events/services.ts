@@ -1,4 +1,4 @@
-import { eventListResponseSchema, singleEventResponseSchema } from './schemas';
+import * as Schemas from './schemas';
 
 /**
  * Service for fetching events from the internal API
@@ -17,7 +17,7 @@ export const eventService = {
       if (!response.ok) return [];
       
       const json = await response.json();
-      const result = eventListResponseSchema.safeParse(json);
+      const result = Schemas.eventListResponseSchema.safeParse(json);
       
       if (!result.success || result.data.status !== 'success') {
         return [];
@@ -25,7 +25,7 @@ export const eventService = {
       
       return result.data.data || [];
     } catch (error) {
-      console.error('Error fetching events list:', error);
+      console.error('Error fetching events:', error);
       return [];
     }
   },
@@ -43,7 +43,12 @@ export const eventService = {
       if (!response.ok) return null;
       
       const json = await response.json();
-      const result = singleEventResponseSchema.safeParse(json);
+
+      console.log(json)
+
+      const result = Schemas.singleEventResponseSchema.safeParse(json);
+
+      console.log("Result ", result)
       
       if (!result.success || result.data.status !== 'success') {
         return null;

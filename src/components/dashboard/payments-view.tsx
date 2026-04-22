@@ -97,17 +97,17 @@ export function PaymentsView() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input 
             placeholder="Buscar por atleta o referencia..." 
-            className="pl-10 rounded-none border-2 border-border focus-visible:ring-primary focus-visible:border-primary font-mono text-xs uppercase"
+            className="pl-10 rounded-none border-2 border-black dark:border-white focus-visible:ring-primary focus-visible:border-primary font-mono text-xs uppercase"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="outline" className="rounded-none border-2 border-border font-black uppercase italic tracking-tight w-full sm:w-auto">
+        <Button variant="outline" className="rounded-none border-2 border-black dark:border-white font-black uppercase italic tracking-tight w-full sm:w-auto shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
           <Filter className="mr-2 size-4" /> Filtrar
         </Button>
       </div>
 
-      <div className="border-2 border-border bg-card shadow-[10px_10px_0px_0px_rgba(0,0,0,0.05)] overflow-x-auto">
+      <div className="border-2 border-border bg-card shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] dark:shadow-[10px_10px_0px_0px_rgba(255,255,255,1)] overflow-x-auto">
         <div className="min-w-[800px]">
           <Table>
             <TableHeader className="bg-muted/50 border-b-2">

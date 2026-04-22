@@ -201,9 +201,9 @@ export function StageManagement({ eventId }: StageManagementProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-2 border-black dark:border-white bg-white dark:bg-card shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]">
         <div>
-          <h2 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
+          <h2 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2 text-foreground">
             <Layers className="w-5 h-5 text-primary" />
             Gestión de Etapas de Venta
           </h2>
@@ -211,14 +211,14 @@ export function StageManagement({ eventId }: StageManagementProps) {
         </div>
         <Button 
           onClick={handleOpenAdd}
-          className="rounded-none border-2 border-black bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all h-12"
+          className="rounded-none border-2 border-black dark:border-white bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all h-12"
         >
           <Plus className="w-5 h-5 mr-2" />
           Nueva Etapa
         </Button>
       </div>
 
-      <div className="border-2 border-black bg-white overflow-hidden shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+      <div className="border-2 border-black dark:border-white bg-white dark:bg-card overflow-hidden shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)]">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <Loader2 className="w-10 h-10 animate-spin text-primary" />
@@ -237,29 +237,29 @@ export function StageManagement({ eventId }: StageManagementProps) {
         ) : (
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader className="bg-black">
+              <TableHeader className="bg-black dark:bg-white">
                 <TableRow className="hover:bg-transparent border-none">
-                  <TableHead className="text-white font-mono uppercase font-black text-[10px] tracking-widest h-12">Nombre</TableHead>
-                  <TableHead className="text-white font-mono uppercase font-black text-[10px] tracking-widest h-12">Precio (USD)</TableHead>
-                  <TableHead className="text-white font-mono uppercase font-black text-[10px] tracking-widest h-12 text-center">Cupos</TableHead>
-                  <TableHead className="text-white font-mono uppercase font-black text-[10px] tracking-widest h-12 text-center">Estado</TableHead>
-                  <TableHead className="text-white font-mono uppercase font-black text-[10px] tracking-widest h-12 text-right">Acciones</TableHead>
+                  <TableHead className="text-white dark:text-black font-mono uppercase font-black text-[10px] tracking-widest h-12">Nombre</TableHead>
+                  <TableHead className="text-white dark:text-black font-mono uppercase font-black text-[10px] tracking-widest h-12">Precio (USD)</TableHead>
+                  <TableHead className="text-white dark:text-black font-mono uppercase font-black text-[10px] tracking-widest h-12 text-center">Cupos</TableHead>
+                  <TableHead className="text-white dark:text-black font-mono uppercase font-black text-[10px] tracking-widest h-12 text-center">Estado</TableHead>
+                  <TableHead className="text-white dark:text-black font-mono uppercase font-black text-[10px] tracking-widest h-12 text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {stages.map((stage) => (
-                  <TableRow key={stage.id} className="hover:bg-muted/50 border-b-2 border-black/10">
+                  <TableRow key={stage.id} className="hover:bg-muted/50 border-b-2 border-black/10 dark:border-white/10">
                     <TableCell className="font-bold py-4">
-                      <span className="uppercase tracking-tight">{stage.name}</span>
+                      <span className="uppercase tracking-tight text-foreground">{stage.name}</span>
                     </TableCell>
-                    <TableCell className="font-mono font-bold text-lg">${stage.price_usd}</TableCell>
+                    <TableCell className="font-mono font-bold text-lg text-foreground">${stage.price_usd}</TableCell>
                     <TableCell className="text-center font-mono font-bold">
                       <div className="flex flex-col items-center">
                         <span className="text-xs uppercase text-muted-foreground mb-1">Usados / Total</span>
                         <div className="flex items-center gap-2">
-                          <span className="bg-black text-white px-2 py-0.5 text-[10px]">{stage.used_capacity}</span>
+                          <span className="bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 text-[10px]">{stage.used_capacity}</span>
                           <span className="text-xs text-muted-foreground">/</span>
-                          <span className="border-2 border-black px-2 py-0.5 text-[10px]">{stage.total_capacity}</span>
+                          <span className="border-2 border-black dark:border-white px-2 py-0.5 text-[10px] text-foreground">{stage.total_capacity}</span>
                         </div>
                       </div>
                     </TableCell>
@@ -281,7 +281,7 @@ export function StageManagement({ eventId }: StageManagementProps) {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleOpenEdit(stage)}
-                          className="rounded-none border-2 border-transparent hover:border-black hover:bg-white transition-all h-8 w-8"
+                          className="rounded-none border-2 border-transparent hover:border-black dark:hover:border-white hover:bg-white dark:hover:bg-card transition-all h-8 w-8 text-foreground"
                         >
                           <Edit2 className="w-4 h-4" />
                         </Button>
@@ -289,7 +289,7 @@ export function StageManagement({ eventId }: StageManagementProps) {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleOpenDelete(stage)}
-                          className="rounded-none border-2 border-transparent hover:border-black hover:bg-destructive/10 hover:text-destructive transition-all h-8 w-8"
+                          className="rounded-none border-2 border-transparent hover:border-black dark:hover:border-white hover:bg-destructive/10 hover:text-destructive transition-all h-8 w-8"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -305,13 +305,13 @@ export function StageManagement({ eventId }: StageManagementProps) {
 
       {/* STAGE FORM DIALOG */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="rounded-none border-4 border-black p-0 overflow-hidden max-w-md shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
-          <DialogHeader className="bg-black p-6">
-            <DialogTitle className="text-white font-black uppercase tracking-widest flex items-center gap-2">
+        <DialogContent className="rounded-none border-4 border-black dark:border-white p-0 overflow-hidden max-w-md shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] dark:shadow-[10px_10px_0px_0px_rgba(255,255,255,1)] bg-card">
+          <DialogHeader className="bg-black dark:bg-white p-6">
+            <DialogTitle className="text-white dark:text-black font-black uppercase tracking-widest flex items-center gap-2">
               {selectedStage ? <Edit2 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
               {selectedStage ? 'Editar Etapa' : 'Nueva Etapa'}
             </DialogTitle>
-            <DialogDescription className="text-gray-400 font-mono text-xs">
+            <DialogDescription className="text-gray-400 dark:text-gray-500 font-mono text-xs">
               Configura los detalles de la fase de venta.
             </DialogDescription>
           </DialogHeader>
@@ -343,9 +343,9 @@ export function StageManagement({ eventId }: StageManagementProps) {
                 />
               </div>
 
-              <div className="bg-muted/30 p-4 border-2 border-dashed border-black flex items-center justify-between">
+              <div className="bg-muted/30 p-4 border-2 border-dashed border-black dark:border-white flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <div className="font-black uppercase text-xs">Estado Inicial</div>
+                  <div className="font-black uppercase text-xs text-foreground">Estado Inicial</div>
                   <div className="text-[10px] text-muted-foreground font-mono">¿Comienza activa?</div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -365,14 +365,14 @@ export function StageManagement({ eventId }: StageManagementProps) {
                   type="button" 
                   variant="ghost" 
                   onClick={() => setIsDialogOpen(false)}
-                  className="rounded-none border-2 border-transparent hover:border-black font-bold uppercase text-xs"
+                  className="rounded-none border-2 border-transparent hover:border-black dark:hover:border-white font-bold uppercase text-xs text-foreground"
                 >
                   Cancelar
                 </Button>
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="rounded-none border-2 border-black bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all px-8"
+                  className="rounded-none border-2 border-black dark:border-white bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all px-8"
                 >
                   {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   {selectedStage ? 'Actualizar' : 'Guardar'}
@@ -385,7 +385,7 @@ export function StageManagement({ eventId }: StageManagementProps) {
 
       {/* DELETE CONFIRMATION MODAL */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent className="rounded-none border-4 border-black p-0 overflow-hidden max-w-sm shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
+        <DialogContent className="rounded-none border-4 border-black dark:border-white p-0 overflow-hidden max-w-sm shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] dark:shadow-[10px_10px_0px_0px_rgba(255,255,255,1)] bg-card">
           <div className="bg-destructive p-6 flex flex-col items-center text-center text-white gap-4">
             <XCircle className="w-12 h-12" />
             <div>
@@ -394,14 +394,14 @@ export function StageManagement({ eventId }: StageManagementProps) {
             </div>
           </div>
           <div className="p-6 flex flex-col gap-4">
-            <p className="text-sm font-bold text-center">
+            <p className="text-sm font-bold text-center text-foreground">
               Estás a punto de eliminar la etapa <span className="underline italic">"{selectedStage?.name}"</span>.
             </p>
             <div className="grid grid-cols-2 gap-4 pt-2">
               <Button 
                 variant="outline" 
                 onClick={() => setIsDeleteModalOpen(false)}
-                className="rounded-none border-2 border-black font-black uppercase tracking-widest hover:bg-muted"
+                className="rounded-none border-2 border-black dark:border-white font-black uppercase tracking-widest hover:bg-muted text-foreground"
               >
                 No, volver
               </Button>
@@ -409,7 +409,7 @@ export function StageManagement({ eventId }: StageManagementProps) {
                 variant="destructive"
                 onClick={onDelete}
                 disabled={isSubmitting}
-                className="rounded-none border-2 border-black bg-destructive text-destructive-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+                className="rounded-none border-2 border-black dark:border-white bg-destructive text-destructive-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               >
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sí, eliminar'}
               </Button>

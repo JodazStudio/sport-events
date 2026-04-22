@@ -76,11 +76,16 @@ export async function GET(request: Request) {
     }
 
     if (id || slug) {
-      const { data, error } = await query.single();
-      if (error) {
-        if (error.code === 'PGRST116') return NextResponse.json({ error: 'Event not found' }, { status: 404 });
-        throw error;
+      const { data, error } = await query.maybeSingle();
+      if (error) throw error;
+      
+      if (!data) {
+        return NextResponse.json({ 
+          status: 'error', 
+          message: 'Event not found' 
+        }, { status: 404 });
       }
+      
       return NextResponse.json({ status: 'success', data });
     }
 

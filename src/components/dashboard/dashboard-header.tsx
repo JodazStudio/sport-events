@@ -27,6 +27,7 @@ import { Badge } from "../ui/badge";
 import { useAuthStore } from "@/store";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { ThemeToggle } from "./theme-toggle";
 
 interface ExchangeRate {
   id: string;
@@ -86,7 +87,7 @@ export function DashboardHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 flex h-16 w-full items-center border-b bg-white/95 backdrop-blur px-4 md:px-8">
+      <header className="sticky top-0 z-50 flex h-16 w-full items-center border-b bg-background/95 backdrop-blur px-4 md:px-8">
         {/* Logo Section */}
         <Link href="/dashboard" className="flex items-center gap-3 mr-8 shrink-0">
           <div className="h-9 w-9 bg-black flex items-center justify-center font-black text-white italic shadow-[3px_3px_0px_0px_hsl(var(--primary))]">
@@ -145,9 +146,11 @@ export function DashboardHeader() {
             />
           </Badge>
 
+          <ThemeToggle />
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-none border-2 border-black p-0 bg-muted hover:bg-muted/80 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <Button variant="ghost" className="relative h-9 w-9 rounded-none border-2 border-black dark:border-white p-0 bg-muted hover:bg-muted/80 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]">
                 <Avatar className="h-8 w-8 rounded-none">
                   <AvatarFallback className="rounded-none bg-primary text-primary-foreground font-black text-[10px] italic">
                     {role === 'superadmin' ? 'SA' : 'AD'}
@@ -155,8 +158,8 @@ export function DashboardHeader() {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 rounded-none border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-0 overflow-hidden">
-              <DropdownMenuLabel className="font-satoshi uppercase italic font-black bg-black text-white p-3">Mi Cuenta</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-64 rounded-none border-2 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] p-0 overflow-hidden">
+              <DropdownMenuLabel className="font-satoshi uppercase italic font-black bg-black dark:bg-white text-white dark:text-black p-3">Mi Cuenta</DropdownMenuLabel>
               <div className="p-1">
                 <DropdownMenuItem className="cursor-pointer font-bold italic py-2">
                   <User className="mr-2 h-4 w-4" />
@@ -195,7 +198,7 @@ export function DashboardHeader() {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 top-16 z-40 lg:hidden animate-in slide-in-from-top duration-300">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
-          <nav className="relative bg-white border-b shadow-xl p-4 flex flex-col gap-2">
+          <nav className="relative bg-background border-b shadow-xl p-4 flex flex-col gap-2">
             {currentNavItems.map((item) => {
               const isActive = pathname === item.url;
               return (

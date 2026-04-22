@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { 
   Plus, 
   MoreHorizontal, 
@@ -51,8 +52,16 @@ import { es } from "date-fns/locale";
 import type { Manager } from "@/app/api/managers/route";
 
 export default function ManagersPage() {
+  const router = useRouter();
+  const { session, role, isLoading: authLoading } = useAuthStore();
   const [managers, setManagers] = useState<Manager[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading && role !== 'superadmin') {
+      router.replace('/dashboard/overview');
+    }
+  }, [authLoading, role, router]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -61,8 +70,6 @@ export default function ManagersPage() {
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
-
-  const { session } = useAuthStore();
 
   const fetchManagers = useCallback(async () => {
     if (!session?.access_token) return;
@@ -90,6 +97,14 @@ export default function ManagersPage() {
   useEffect(() => {
     fetchManagers();
   }, [fetchManagers]);
+
+  if (authLoading || role !== 'superadmin') {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const handleCreateManager = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,13 +165,13 @@ export default function ManagersPage() {
 
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-black italic uppercase tracking-widest rounded-none gap-2 h-12 px-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-black italic uppercase tracking-widest rounded-none gap-2 h-12 px-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
               <Plus className="h-5 w-5" strokeWidth={3} />
               Añadir Nuevo Manager
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] rounded-none border-2 border-black p-0 overflow-hidden bg-card">
-            <div className="bg-primary p-4 border-b-2 border-black">
+          <DialogContent className="sm:max-w-[425px] rounded-none border-2 border-black dark:border-white p-0 overflow-hidden bg-card">
+            <div className="bg-primary p-4 border-b-2 border-black dark:border-white">
               <DialogTitle className="font-satoshi font-black uppercase tracking-tight italic text-2xl text-primary-foreground">
                 NUEVA <span className="text-black">CUENTA</span>
               </DialogTitle>
@@ -230,7 +245,7 @@ export default function ManagersPage() {
         </Dialog>
       </div>
 
-      <div className="bg-card border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-none overflow-hidden">
+      <div className="bg-card border-2 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] rounded-none overflow-hidden">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -247,13 +262,13 @@ export default function ManagersPage() {
         ) : (
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader className="bg-black/5">
-                <TableRow className="hover:bg-transparent border-b-2 border-black">
-                  <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-black border-r-2 border-black/10">Nombre del Manager</TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-black border-r-2 border-black/10">Identidad Digital (Email)</TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-black text-center border-r-2 border-black/10">Rol</TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-black border-r-2 border-black/10">Fecha Registro</TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-black text-right">Sistema</TableHead>
+              <TableHeader className="bg-black/5 dark:bg-white/5">
+                <TableRow className="hover:bg-transparent border-b-2 border-black dark:border-white">
+                  <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-foreground border-r-2 border-black/10 dark:border-white/10">Nombre del Manager</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-foreground border-r-2 border-black/10 dark:border-white/10">Identidad Digital (Email)</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-foreground text-center border-r-2 border-black/10 dark:border-white/10">Rol</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-foreground border-r-2 border-black/10 dark:border-white/10">Fecha Registro</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-[0.2em] py-5 px-6 font-bold text-foreground text-right">Sistema</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -269,7 +284,7 @@ export default function ManagersPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-center py-5 px-6">
-                      <Badge className="rounded-none bg-black text-white hover:bg-black font-black italic uppercase text-[9px] tracking-[0.2em] px-3 py-1 border-2 border-black box-content h-3 flex items-center justify-center shadow-[3px_3px_0px_0px_rgba(var(--primary-rgb),0.5)]">
+                      <Badge className="rounded-none bg-black dark:bg-white text-white dark:text-black hover:bg-black dark:hover:bg-white font-black italic uppercase text-[9px] tracking-[0.2em] px-3 py-1 border-2 border-black dark:border-white box-content h-3 flex items-center justify-center shadow-[3px_3px_0px_0px_rgba(var(--primary-rgb),0.5)]">
                         {manager.role === 'superadmin' ? 'SUPER' : 'ADMIN'}
                       </Badge>
                     </TableCell>
@@ -283,8 +298,8 @@ export default function ManagersPage() {
                             <MoreHorizontal className="h-5 w-5" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-none border-2 border-black w-64 p-0 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-card overflow-hidden">
-                          <DropdownMenuLabel className="font-mono text-[10px] uppercase tracking-[0.2em] px-4 py-3 bg-black text-white border-b-2 border-black">
+                        <DropdownMenuContent align="end" className="rounded-none border-2 border-black dark:border-white w-64 p-0 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] bg-card overflow-hidden">
+                          <DropdownMenuLabel className="font-mono text-[10px] uppercase tracking-[0.2em] px-4 py-3 bg-black dark:bg-white text-white dark:text-black border-b-2 border-black dark:border-white">
                             Control de Sistema
                           </DropdownMenuLabel>
                           <div className="p-1">
@@ -313,7 +328,7 @@ export default function ManagersPage() {
         )}
       </div>
       
-      <div className="flex items-center justify-between border-2 border-black bg-muted p-4 font-mono text-[10px] uppercase tracking-[0.3em] font-black">
+      <div className="flex items-center justify-between border-2 border-black dark:border-white bg-muted p-4 font-mono text-[10px] uppercase tracking-[0.3em] font-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]">
         <div className="flex items-center gap-4">
           <span>SISTEMA: ZONACRONO_OS_V1</span>
           <span className="text-primary">ESTADO: OPERACIONAL</span>

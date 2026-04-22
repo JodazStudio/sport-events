@@ -231,9 +231,9 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-2 border-black dark:border-white bg-white dark:bg-card shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]">
         <div>
-          <h2 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
+          <h2 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2 text-foreground">
             <Activity className="w-5 h-5 text-primary" />
             Gestión de Categorías
           </h2>
@@ -241,14 +241,14 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
         </div>
         <Button 
           onClick={handleOpenAdd}
-          className="rounded-none border-2 border-black bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all h-12"
+          className="rounded-none border-2 border-black dark:border-white bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all h-12"
         >
           <Plus className="w-5 h-5 mr-2" />
           Nueva Categoría
         </Button>
       </div>
 
-      <div className="border-2 border-black bg-white overflow-hidden shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+      <div className="border-2 border-black dark:border-white bg-white dark:bg-card overflow-hidden shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)]">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <Loader2 className="w-10 h-10 animate-spin text-primary" />
@@ -267,28 +267,28 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
         ) : (
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader className="bg-black">
+              <TableHeader className="bg-black dark:bg-white">
                 <TableRow className="hover:bg-transparent border-none">
-                  <TableHead className="text-white font-mono uppercase font-black text-[10px] tracking-widest h-12">Categoría</TableHead>
-                  <TableHead className="text-white font-mono uppercase font-black text-[10px] tracking-widest h-12">Género</TableHead>
-                  <TableHead className="text-white font-mono uppercase font-black text-[10px] tracking-widest h-12 text-center">Edad</TableHead>
-                  <TableHead className="text-white font-mono uppercase font-black text-[10px] tracking-widest h-12 text-right">Acciones</TableHead>
+                  <TableHead className="text-white dark:text-black font-mono uppercase font-black text-[10px] tracking-widest h-12">Categoría</TableHead>
+                  <TableHead className="text-white dark:text-black font-mono uppercase font-black text-[10px] tracking-widest h-12">Género</TableHead>
+                  <TableHead className="text-white dark:text-black font-mono uppercase font-black text-[10px] tracking-widest h-12 text-center">Edad</TableHead>
+                  <TableHead className="text-white dark:text-black font-mono uppercase font-black text-[10px] tracking-widest h-12 text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {categories.map((category) => (
-                  <TableRow key={category.id} className="hover:bg-muted/50 border-b-2 border-black/10">
+                  <TableRow key={category.id} className="hover:bg-muted/50 border-b-2 border-black/10 dark:border-white/10">
                     <TableCell className="font-bold py-4">
                       <div className="flex flex-col">
-                        <span className="uppercase tracking-tight">{category.name}</span>
+                        <span className="uppercase tracking-tight text-foreground">{category.name}</span>
                       </div>
                     </TableCell>
                     <TableCell>{getGenderBadge(category.gender)}</TableCell>
                     <TableCell className="text-center font-mono font-bold">
                       <div className="flex items-center justify-center gap-2">
-                        <span className="bg-black text-white px-1.5 py-0.5 text-[10px]">{category.min_age}</span>
+                        <span className="bg-black dark:bg-white text-white dark:text-black px-1.5 py-0.5 text-[10px]">{category.min_age}</span>
                         <span className="text-xs text-muted-foreground">-</span>
-                        <span className="bg-black text-white px-1.5 py-0.5 text-[10px]">{category.max_age}</span>
+                        <span className="bg-black dark:bg-white text-white dark:text-black px-1.5 py-0.5 text-[10px]">{category.max_age}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
@@ -297,7 +297,7 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleOpenEdit(category)}
-                          className="rounded-none border-2 border-transparent hover:border-black hover:bg-white transition-all h-8 w-8"
+                          className="rounded-none border-2 border-transparent hover:border-black dark:hover:border-white hover:bg-white dark:hover:bg-card transition-all h-8 w-8"
                         >
                           <Edit2 className="w-4 h-4" />
                         </Button>
@@ -305,7 +305,7 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleOpenDelete(category)}
-                          className="rounded-none border-2 border-transparent hover:border-black hover:bg-destructive/10 hover:text-destructive transition-all h-8 w-8"
+                          className="rounded-none border-2 border-transparent hover:border-black dark:hover:border-white hover:bg-destructive/10 hover:text-destructive transition-all h-8 w-8"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -321,13 +321,13 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
 
       {/* CATEGORY FORM DIALOG */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="rounded-none border-4 border-black p-0 overflow-hidden max-w-md shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
-          <DialogHeader className="bg-black p-6">
-            <DialogTitle className="text-white font-black uppercase tracking-widest flex items-center gap-2">
+        <DialogContent className="rounded-none border-4 border-black dark:border-white p-0 overflow-hidden max-w-md shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] dark:shadow-[10px_10px_0px_0px_rgba(255,255,255,1)] bg-card">
+          <DialogHeader className="bg-black dark:bg-white p-6">
+            <DialogTitle className="text-white dark:text-black font-black uppercase tracking-widest flex items-center gap-2">
               {selectedCategory ? <Edit2 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
               {selectedCategory ? 'Editar Categoría' : 'Nueva Categoría'}
             </DialogTitle>
-            <DialogDescription className="text-gray-400 font-mono text-xs">
+            <DialogDescription className="text-gray-400 dark:text-gray-500 font-mono text-xs">
               Configura los detalles de la categoría para el evento.
             </DialogDescription>
           </DialogHeader>
@@ -403,7 +403,7 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
 
       {/* DELETE CONFIRMATION MODAL */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent className="rounded-none border-4 border-black p-0 overflow-hidden max-w-sm shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
+        <DialogContent className="rounded-none border-4 border-black dark:border-white p-0 overflow-hidden max-sm:max-w-[350px] sm:max-w-sm shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] dark:shadow-[10px_10px_0px_0px_rgba(255,255,255,1)] bg-card">
           <div className="bg-destructive p-6 flex flex-col items-center text-center text-white gap-4">
             <XCircle className="w-12 h-12" />
             <div>
@@ -413,13 +413,13 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
           </div>
           <div className="p-6 flex flex-col gap-4">
             <p className="text-sm font-bold text-center">
-              Estás a punto de eliminar la categoría <span className="underline italic">"{selectedCategory?.name}"</span>.
+              Estás a punto de eliminar la categoría <span className="underline italic text-foreground">"{selectedCategory?.name}"</span>.
             </p>
             <div className="grid grid-cols-2 gap-4 pt-2">
               <Button 
                 variant="outline" 
                 onClick={() => setIsDeleteModalOpen(false)}
-                className="rounded-none border-2 border-black font-black uppercase tracking-widest hover:bg-muted"
+                className="rounded-none border-2 border-black dark:border-white font-black uppercase tracking-widest hover:bg-muted"
               >
                 No, volver
               </Button>
@@ -427,7 +427,7 @@ export function CategoryManagement({ eventId }: CategoryManagementProps) {
                 variant="destructive"
                 onClick={onDelete}
                 disabled={isSubmitting}
-                className="rounded-none border-2 border-black bg-destructive text-destructive-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+                className="rounded-none border-2 border-black dark:border-white bg-destructive text-destructive-foreground font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               >
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sí, eliminar'}
               </Button>

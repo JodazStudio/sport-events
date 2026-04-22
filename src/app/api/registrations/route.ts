@@ -1,16 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib';
+import { registrationSchema } from '@/features/events/schemas';
 
 export async function POST(request: NextRequest) {
   try {
     if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: 'Supabase Admin client not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Supabase Admin client not configured' }, { status: 500 });
     }
 
     const body = await request.json();
+    
+    // 1. Validate with Zod
+    const result = registrationSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json({ 
+        error: 'Validation failed', 
+        details: result.error.issues 
+      }, { status: 400 });
+    }
+
     const {
       event_id,
       stage_id,
@@ -22,20 +30,10 @@ export async function POST(request: NextRequest) {
       gender,
       shirt_size,
       payment_data
-    } = body;
+    } = result.data;
 
-    // 1. Basic Validation
-    if (!event_id || !stage_id || !first_name || !last_name || !dni || !email || !birth_date || !gender) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    // 2. Map gender from frontend (M/F) to DB ENUM (MALE/FEMALE)
-    const dbGender = gender === 'M' ? 'MALE' : 'FEMALE';
-
-    // 3. Calculate Category automatically
+    // 2. Calculate Category automatically
+    // Using Age at End of Year (Standard for most races)
     const birthDate = new Date(birth_date);
     const today = new Date();
     const age = today.getFullYear() - birthDate.getFullYear();
@@ -44,86 +42,53 @@ export async function POST(request: NextRequest) {
       .from('categories')
       .select('id')
       .eq('event_id', event_id)
-      .eq('gender', dbGender)
+      .eq('gender', gender)
       .lte('min_age', age)
       .gte('max_age', age)
       .single();
 
     if (categoryError || !category) {
       console.error('Error finding category:', categoryError);
-      return NextResponse.json(
-        { error: 'No suitable category found for your age and gender.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ 
+        error: 'No suitable category found for your age and gender.' 
+      }, { status: 400 });
     }
 
-    // 4. Set Expiration: Today at 23:59:59 (11:59:59 PM)
+    // 3. Set Expiration: Today at 23:59:59
     const expiresAt = new Date();
     expiresAt.setHours(23, 59, 59, 999);
 
-    // 5. Insert Registration
-    const { data: registration, error: regError } = await supabaseAdmin
-      .from('registrations')
-      .insert([
-        {
-          event_id,
-          stage_id,
-          category_id: category.id,
-          first_name,
-          last_name,
-          dni,
-          email,
-          birth_date,
-          gender: dbGender,
-          shirt_size,
-          status: payment_data ? 'REPORTED' : 'PENDING',
-          expires_at: expiresAt.toISOString()
-        }
-      ])
-      .select('id')
-      .single();
+    // 4. Call Atomic Postgres Function (RPC)
+    const { data: registrationId, error: rpcError } = await supabaseAdmin
+      .rpc('register_athlete', {
+        p_event_id: event_id,
+        p_stage_id: stage_id,
+        p_category_id: category.id,
+        p_first_name: first_name,
+        p_last_name: last_name,
+        p_dni: dni,
+        p_email: email,
+        p_birth_date: birth_date,
+        p_gender: gender,
+        p_shirt_size: shirt_size,
+        p_status: payment_data ? 'REPORTED' : 'PENDING',
+        p_expires_at: expiresAt.toISOString(),
+        p_payment_data: payment_data || null
+      });
 
-    if (regError || !registration) {
-      console.error('Error creating registration:', regError);
-      return NextResponse.json(
-        { error: 'Failed to process registration' },
-        { status: 400 }
-      );
-    }
-
-    // 6. Process Payment if provided
-    if (payment_data) {
-      const { receipt_url, reference_number, amount_ves, exchange_rate_bcv, amount_usd } = payment_data;
-      
-      const { error: paymentError } = await supabaseAdmin
-        .from('payments')
-        .insert([
-          {
-            registration_id: registration.id,
-            amount_usd: amount_usd,
-            exchange_rate_bcv: exchange_rate_bcv,
-            amount_ves: amount_ves,
-            reference_number: reference_number,
-            receipt_url: receipt_url
-          }
-        ]);
-
-      if (paymentError) {
-        console.error('Error inserting payment:', paymentError);
-        // We don't fail the whole request here, but we should log it
-        // The registration is already created.
-      }
+    if (rpcError) {
+      console.error('Error in register_athlete RPC:', rpcError);
+      return NextResponse.json({ 
+        error: rpcError.message || 'Failed to process registration' 
+      }, { status: 400 });
     }
 
     return NextResponse.json({
-      registration_id: registration.id
+      registration_id: registrationId
     }, { status: 201 });
 
   } catch (err) {
     console.error('Unexpected error in POST /api/registrations:', err);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

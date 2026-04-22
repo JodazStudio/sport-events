@@ -16,7 +16,9 @@ import {
   Save,
   Loader2,
   ImageIcon,
-  Activity
+  Activity,
+  CreditCard,
+  User
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { 
@@ -46,6 +48,7 @@ import { useAuthStore } from "@/store";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CategoryManagement } from "./category-management";
 import { StageManagement } from "./stage-management";
+import { RegistrationManagement } from "./registration-management";
 
 // --- ZOD SCHEMA ---
 const configSchema = z.object({
@@ -69,6 +72,12 @@ const configSchema = z.object({
     twitter: z.string().url('URL inválida').or(z.literal('')).optional(),
     threads: z.string().url('URL inválida').or(z.literal('')).optional(),
     tiktok: z.string().url('URL inválida').or(z.literal('')).optional(),
+  }).optional(),
+  payment_info: z.object({
+    bank_name: z.string().min(1, 'El nombre del banco es requerido').or(z.literal('')),
+    account_number: z.string().min(1, 'El número de cuenta es requerido').or(z.literal('')),
+    id_number: z.string().min(1, 'La cédula/RIF es requerida').or(z.literal('')),
+    phone_number: z.string().min(1, 'El número de teléfono es requerido').or(z.literal('')),
   }).optional(),
 });
 
@@ -120,6 +129,12 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
         twitter: '',
         threads: '',
         tiktok: '',
+      },
+      payment_info: {
+        bank_name: '',
+        account_number: '',
+        id_number: '',
+        phone_number: '',
       }
     },
   });
@@ -156,6 +171,12 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
             twitter: '',
             threads: '',
             tiktok: '',
+          },
+          payment_info: event.payment_info || {
+            bank_name: '',
+            account_number: '',
+            id_number: '',
+            phone_number: '',
           }
         });
       }
@@ -244,30 +265,38 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="bg-muted p-1 rounded-none border-2 border-black h-auto mb-8 grid grid-cols-2 lg:grid-cols-4 lg:inline-flex">
-          <TabsTrigger value="general" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
+        <TabsList className="bg-muted p-1 rounded-none border-2 border-black dark:border-white h-auto mb-8 grid grid-cols-2 lg:grid-cols-4 lg:inline-flex">
+          <TabsTrigger value="general" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
             <Info className="mr-2 size-4 hidden sm:inline" />
             General
           </TabsTrigger>
-          <TabsTrigger value="media" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
+          <TabsTrigger value="media" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
             <ImageIcon className="mr-2 size-4 hidden sm:inline" />
             Media
           </TabsTrigger>
-          <TabsTrigger value="categories" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
+          <TabsTrigger value="categories" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
             <Tag className="mr-2 size-4 hidden sm:inline" />
             Categorías
           </TabsTrigger>
-          <TabsTrigger value="stages" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
+          <TabsTrigger value="stages" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
             <Layers className="mr-2 size-4 hidden sm:inline" />
             Etapas
+          </TabsTrigger>
+          <TabsTrigger value="registrations" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
+            <User className="mr-2 size-4 hidden sm:inline" />
+            Inscritos
+          </TabsTrigger>
+          <TabsTrigger value="payments" className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black font-black uppercase italic px-4 md:px-6 py-3 tracking-tight text-xs md:text-sm">
+            <CreditCard className="mr-2 size-4 hidden sm:inline" />
+            Pagos
           </TabsTrigger>
         </TabsList>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <TabsContent value="general" className="space-y-8">
-              <Card className="border-2 border-black rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <CardHeader className="bg-muted/30 border-b-2 border-black">
+              <Card className="border-2 border-black dark:border-white rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] bg-card">
+                <CardHeader className="bg-muted/30 border-b-2 border-black dark:border-white">
                   <CardTitle className="font-satoshi font-black italic uppercase text-xl">Información General</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
@@ -321,8 +350,8 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
             </TabsContent>
 
             <TabsContent value="media" className="space-y-8">
-              <Card className="border-2 border-black rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <CardHeader className="bg-muted/30 border-b-2 border-black">
+              <Card className="border-2 border-black dark:border-white rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] bg-card">
+                <CardHeader className="bg-muted/30 border-b-2 border-black dark:border-white">
                   <CardTitle className="font-satoshi font-black italic uppercase text-xl">Media y Ruta</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
@@ -403,14 +432,14 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
               </Card>
             </TabsContent>
 
-            {/* Sticky/Fixed Actions Bar for General/Media tabs */}
-            {(activeTab === 'general' || activeTab === 'media') && (
+            {/* Sticky/Fixed Actions Bar for General/Media/Payments tabs */}
+            {(activeTab === 'general' || activeTab === 'media' || activeTab === 'payments') && (
               <div className="flex items-center justify-between gap-4 pt-4">
                 <Button 
                   type="button" 
                   variant="destructive" 
                   onClick={onDelete}
-                  className="rounded-none border-2 border-black font-black uppercase italic tracking-widest py-6 px-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+                  className="rounded-none border-2 border-black dark:border-white font-black uppercase italic tracking-widest py-6 px-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
                 >
                   <Trash2 className="w-5 h-5 mr-2" />
                   Eliminar Evento
@@ -419,13 +448,52 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="rounded-none border-2 border-black bg-black text-white font-black uppercase italic tracking-widest py-6 px-12 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+                  className="rounded-none border-2 border-black dark:border-white bg-black dark:bg-white text-white dark:text-black font-black uppercase italic tracking-widest py-6 px-12 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
                 >
                   {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : <Save className="w-5 h-5 mr-2" />}
                   Guardar Cambios
                 </Button>
               </div>
             )}
+            <TabsContent value="payments" className="space-y-8">
+              <Card className="border-2 border-black dark:border-white rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] bg-card">
+                <CardHeader className="bg-muted/30 border-b-2 border-black dark:border-white">
+                  <CardTitle className="font-satoshi font-black italic uppercase text-xl">Datos Bancarios para Inscripciones</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6 pt-6">
+                  <p className="text-xs font-mono text-muted-foreground uppercase mb-4">
+                    Estos datos se mostrarán a los atletas durante el proceso de pago.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormInput
+                      control={form.control}
+                      name="payment_info.bank_name"
+                      label="Nombre del Banco"
+                      placeholder="Ej: Bancamiga"
+                    />
+                    <FormInput
+                      control={form.control}
+                      name="payment_info.phone_number"
+                      label="Número de Teléfono (Pago Móvil)"
+                      placeholder="Ej: 0424-0000000"
+                    />
+                    <FormInput
+                      control={form.control}
+                      name="payment_info.id_number"
+                      label="Cédula / RIF"
+                      placeholder="Ej: V-12345678"
+                    />
+                    <FormInput
+                      control={form.control}
+                      name="payment_info.account_number"
+                      label="Número de Cuenta (Opcional)"
+                      placeholder="0123..."
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </form>
         </Form>
 
@@ -435,6 +503,10 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
 
         <TabsContent value="stages" className="space-y-6">
           <StageManagement eventId={form.getValues('id') || eventId} />
+        </TabsContent>
+
+        <TabsContent value="registrations" className="space-y-6">
+          <RegistrationManagement eventId={form.getValues('id') || eventId} />
         </TabsContent>
       </Tabs>
     </div>
