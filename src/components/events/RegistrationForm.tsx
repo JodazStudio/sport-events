@@ -14,7 +14,8 @@ import {
   CheckCircle, 
   Upload,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Copy
 } from "lucide-react";
 import { cn } from "@/lib";
 import { 
@@ -33,6 +34,7 @@ import {
 import { FormInput } from "@/components/ui/forms";
 import { toast } from "sonner";
 import { registrationSchema, type Registration } from "@/features/events/schemas";
+import { getBankByCode, getBankName } from "@/lib/banks";
 
 // --- Types ---
 interface EventData {
@@ -44,6 +46,7 @@ interface EventData {
   description?: string;
   payment_info?: {
     bank_name: string;
+    bank_code?: string | null;
     account_number: string;
     id_number: string;
     phone_number: string;
@@ -181,6 +184,19 @@ export function RegistrationForm({ event, activeStage, bcvRate, slug }: Registra
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleCopyBankDetails = () => {
+    if (!event.payment_info) return;
+    
+    const bankName = getBankName(event.payment_info.bank_code) || event.payment_info.bank_name;
+    const details = `Banco: ${bankName}
+Teléfono: ${event.payment_info.phone_number || 'N/A'}
+Cédula: ${event.payment_info.id_number || 'N/A'}
+${event.payment_info.account_number ? `Cuenta: ${event.payment_info.account_number}` : ''}`;
+
+    navigator.clipboard.writeText(details);
+    toast.success("Datos copiados");
   };
 
   const priceVes = (activeStage.price_usd * bcvRate).toLocaleString('es-VE', { minimumFractionDigits: 2 });
@@ -387,12 +403,33 @@ export function RegistrationForm({ event, activeStage, bcvRate, slug }: Registra
                 <div className="grid gap-8 md:grid-cols-2">
                   {/* Bank Info */}
                   <div className="space-y-4">
-                    <div className="p-4 bg-muted/30 border-2 border-black">
+                    <div className="p-4 bg-muted/30 border-2 border-black relative group">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={handleCopyBankDetails}
+                        className="absolute top-2 right-2 h-7 w-7 rounded-none border-black hover:bg-primary hover:text-white transition-colors"
+                        title="Copiar datos"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
                       <h4 className="font-mono text-[10px] uppercase font-bold text-muted-foreground mb-3 tracking-widest">Datos del Organizador</h4>
-                      <div className="space-y-2 font-mono text-xs">
-                        <p><span className="text-muted-foreground uppercase">Banco:</span> <span className="font-bold">{event.payment_info?.bank_name || "Bancamiga"}</span></p>
-                        <p><span className="text-muted-foreground uppercase">Teléfono:</span> <span className="font-bold">{event.payment_info?.phone_number || "0424-777-7777"}</span></p>
-                        <p><span className="text-muted-foreground uppercase">Cédula:</span> <span className="font-bold">{event.payment_info?.id_number || "V-12.345.678"}</span></p>
+                      <div className="space-y-2 font-mono text-xs text-balance pr-6">
+                        <p>
+                          <span className="text-muted-foreground uppercase">Banco:</span>{" "}
+                          <span className="font-bold">
+                            {event.payment_info?.bank_code && event.payment_info?.phone_number ? (
+                              <span className="text-primary mr-1">[{event.payment_info.bank_code}]</span>
+                            ) : null}
+                            {getBankName(event.payment_info?.bank_code) || event.payment_info?.bank_name || "No especificado"}
+                          </span>
+                        </p>
+                        <p><span className="text-muted-foreground uppercase">Teléfono:</span> <span className="font-bold">{event.payment_info?.phone_number || "No especificado"}</span></p>
+                        <p><span className="text-muted-foreground uppercase">Cédula:</span> <span className="font-bold">{event.payment_info?.id_number || "No especificada"}</span></p>
+                        {event.payment_info?.account_number && (
+                          <p><span className="text-muted-foreground uppercase">Cuenta:</span> <span className="font-bold break-all">{event.payment_info.account_number}</span></p>
+                        )}
                       </div>
                     </div>
 

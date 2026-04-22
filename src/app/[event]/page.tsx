@@ -25,7 +25,9 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
   }
 
   return {
-    title: `${event.name} | ZonaCrono`,
+    title: event.organization?.name 
+      ? `${event.name} | Organizado por ${event.organization.name} | ZonaCrono`
+      : `${event.name} | ZonaCrono`,
     description: event.description || `Inscríbete en ${event.name} a través de ZonaCrono.`,
     openGraph: {
       title: event.name,
@@ -91,7 +93,7 @@ export default async function EventPage({ params }: EventPageProps) {
     eventDetails: {
       route: {
         title: "Ruta del Evento",
-        description: "Mapa oficial de la ruta.",
+        description: event.route_description || "Mapa oficial de la ruta.",
         image: event.route_image_url || '',
         stravaLinks: event.strava_url ? [{ label: "Segmento Strava", url: event.strava_url }] : []
       },
@@ -107,6 +109,7 @@ export default async function EventPage({ params }: EventPageProps) {
       ogTitle: event.name,
       ogDescription: event.description || ''
     },
+    organization: (event as any).organization,
     social_media: (event as any).social_media
   };
 

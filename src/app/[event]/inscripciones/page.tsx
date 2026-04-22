@@ -87,7 +87,8 @@ export default async function InscripcionPage({ params }: InscripcionPageProps) 
     has_inventory: event.has_inventory,
     banner_url: event.banner_url || undefined,
     description: event.description || undefined,
-    categories: event.categories || []
+    categories: event.categories || [],
+    payment_info: event.payment_info
   };
 
   const clientStage = {

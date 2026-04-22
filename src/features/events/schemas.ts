@@ -37,6 +37,16 @@ export const categorySchema = z.object({
 });
 
 /**
+ * Schema for organization details
+ */
+export const organizationSchema = z.object({
+  name: z.string().min(1, 'El nombre de la organización es requerido'),
+  logo_url: z.string().optional().nullable(),
+  email: z.string().email('Email inválido').optional().nullable(),
+  phone: z.string().optional().nullable(),
+});
+
+/**
  * Main Event Schema
  */
 export const eventSchema = z.object({
@@ -52,10 +62,13 @@ export const eventSchema = z.object({
   logo_url: z.string().optional().nullable(),
   city: z.string().optional().nullable(),
   route_image_url: z.string().optional().nullable(),
+  route_description: z.string().optional().nullable(),
   strava_url: z.string().optional().nullable(),
   social_media: z.record(z.string(), z.any()).optional().nullable(),
+  organization: organizationSchema.optional().nullable(),
   payment_info: z.object({
     bank_name: z.string(),
+    bank_code: z.string().optional().nullable(),
     account_number: z.string(),
     id_number: z.string(),
     phone_number: z.string(),

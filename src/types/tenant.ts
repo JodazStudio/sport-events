@@ -75,6 +75,12 @@ export interface TenantData {
     threads?: string;
     tiktok?: string;
   };
+  organization?: {
+    name: string;
+    logo_url?: string;
+    email?: string;
+    phone?: string;
+  };
   contact?: {
     whatsapp?: string;
     email?: string;

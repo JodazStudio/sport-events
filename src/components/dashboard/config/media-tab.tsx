@@ -54,6 +54,14 @@ export function MediaTab({ eventId }: MediaTabProps) {
           />
         </div>
 
+        <FormTextarea
+          control={control}
+          name="route_description"
+          label="Descripción de la Ruta"
+          description="Información detallada sobre el recorrido, altimetría, puntos de interés, etc."
+          className="min-h-[100px]"
+        />
+
         <div className="pt-4 border-t-2 border-black/5 space-y-6">
           <h3 className="font-black italic uppercase text-lg text-primary">Redes Sociales</h3>
           

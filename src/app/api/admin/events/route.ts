@@ -102,9 +102,12 @@ export async function POST(request: NextRequest) {
       logo_url,
       banner_url,
       route_image_url,
+      route_description,
       strava_url,
       rules_text,
-      has_inventory
+      has_inventory,
+      organization,
+      payment_info
     } = body;
 
     if (!manager_id || !name || !slug || !event_date || !event_time || !city) {
@@ -126,9 +129,18 @@ export async function POST(request: NextRequest) {
           logo_url: logo_url || '',
           banner_url: banner_url || '',
           route_image_url: route_image_url || '',
+          route_description: route_description || '',
           strava_url: strava_url || '',
           rules_text: rules_text || '',
-          has_inventory: !!has_inventory
+          has_inventory: !!has_inventory,
+          organization: organization || null,
+          payment_info: payment_info || {
+            bank_name: '',
+            bank_code: '',
+            account_number: '',
+            id_number: '',
+            phone_number: '',
+          }
         }
       ])
       .select()
@@ -195,8 +207,8 @@ export async function PATCH(request: NextRequest) {
     // Filter allowed fields to avoid errors with non-existent columns (like 'managers' or 'id')
     const allowedFields = [
       'manager_id', 'name', 'slug', 'description', 'banner_url', 'logo_url', 
-      'city', 'has_inventory', 'rules_text', 'route_image_url', 'strava_url', 
-      'social_media', 'payment_info', 'event_date', 'event_time', 'is_active'
+      'city', 'has_inventory', 'rules_text', 'route_image_url', 'route_description', 'strava_url', 
+      'social_media', 'payment_info', 'event_date', 'event_time', 'is_active', 'organization'
     ];
 
     const updates: any = {};

@@ -49,6 +49,7 @@ const configSchema = z.object({
   logo_url: z.string().url('URL inválida').or(z.literal('')).optional(),
   banner_url: z.string().url('URL inválida').or(z.literal('')).optional(),
   route_image_url: z.string().url('URL inválida').or(z.literal('')).optional(),
+  route_description: z.string().optional(),
   strava_url: z.string().url('URL inválida').or(z.literal('')).optional(),
   social_media: z.object({
     instagram: z.string().url('URL inválida').or(z.literal('')).optional(),
@@ -59,9 +60,16 @@ const configSchema = z.object({
   }).optional(),
   payment_info: z.object({
     bank_name: z.string().min(1, 'El nombre del banco es requerido').or(z.literal('')),
+    bank_code: z.string().optional().nullable(),
     account_number: z.string().min(1, 'El número de cuenta es requerido').or(z.literal('')),
     id_number: z.string().min(1, 'La cédula/RIF es requerida').or(z.literal('')),
     phone_number: z.string().min(1, 'El número de teléfono es requerido').or(z.literal('')),
+  }).optional(),
+  organization: z.object({
+    name: z.string().min(1, 'El nombre de la organización es requerido').or(z.literal('')),
+    logo_url: z.string().url('URL inválida').or(z.literal('')).optional(),
+    email: z.string().email('Email inválido').or(z.literal('')).optional(),
+    phone: z.string().optional(),
   }).optional(),
 });
 
@@ -109,6 +117,7 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
       logo_url: '',
       banner_url: '',
       route_image_url: '',
+      route_description: '',
       strava_url: '',
       social_media: {
         instagram: '',
@@ -119,9 +128,16 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
       },
       payment_info: {
         bank_name: '',
+        bank_code: '',
         account_number: '',
         id_number: '',
         phone_number: '',
+      },
+      organization: {
+        name: '',
+        logo_url: '',
+        email: '',
+        phone: '',
       }
     },
   });
@@ -146,19 +162,30 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
           logo_url: event.logo_url || '',
           banner_url: event.banner_url || '',
           route_image_url: event.route_image_url || '',
+          route_description: event.route_description || '',
           strava_url: event.strava_url || '',
-          social_media: event.social_media || {
+          social_media: {
             instagram: '',
             facebook: '',
             twitter: '',
             threads: '',
             tiktok: '',
+            ...(event.social_media || {})
           },
-          payment_info: event.payment_info || {
+          payment_info: {
             bank_name: '',
+            bank_code: '',
             account_number: '',
             id_number: '',
             phone_number: '',
+            ...(event.payment_info || {})
+          },
+          organization: {
+            name: '',
+            logo_url: '',
+            email: '',
+            phone: '',
+            ...(event.organization || {})
           }
         });
       }
@@ -197,10 +224,18 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
         toast.success('Configuración actualizada');
         if (onUpdate) onUpdate();
       },
-      onError: () => {
-        toast.error('Error al actualizar');
+      onError: (error) => {
+        toast.error('Error al actualizar: ' + (error instanceof Error ? error.message : 'Error desconocido'));
       }
     });
+  };
+
+  const onInvalid = (errors: any) => {
+    console.error('Form validation errors:', errors);
+    const errorCount = Object.keys(errors).length;
+    if (errorCount > 0) {
+      toast.error(`Hay ${errorCount} error(es) en el formulario. Por favor revisa todas las pestañas.`);
+    }
   };
 
   if (isLoading) {
@@ -289,7 +324,7 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
         </TabsList>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-8">
             <TabsContent value="general" className="space-y-8">
               <GeneralTab 
                 managers={managers} 

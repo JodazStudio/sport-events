@@ -2,7 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { FormInput, FormTextarea, FormSelect, FormCombobox } from "@/components/ui/forms";
+import { FormInput, FormTextarea, FormSelect, FormCombobox, FormFileUploader } from "@/components/ui/forms";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Input } from "../../ui";
 import { VENEZUELA_CITIES } from "@/lib";
 
@@ -93,6 +93,44 @@ export function GeneralTab({ managers, onSlugify }: GeneralTabProps) {
           name="description"
           label="Descripción"
         />
+
+        <div className="pt-6 border-t-2 border-black/10 space-y-6">
+          <h3 className="font-satoshi font-black italic uppercase text-lg text-primary">Organización</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
+              <FormInput
+                control={control}
+                name="organization.name"
+                label="Nombre de la Organización"
+                placeholder="Ej: Jodaz Studio"
+              />
+              
+              <FormInput
+                control={control}
+                name="organization.email"
+                label="Email de Contacto"
+                placeholder="organizacion@ejemplo.com"
+                type="email"
+              />
+
+              <FormInput
+                control={control}
+                name="organization.phone"
+                label="Teléfono de Contacto"
+                placeholder="+58 412 0000000"
+              />
+            </div>
+
+            <FormFileUploader
+              control={control}
+              name="organization.logo_url"
+              label="Logo de la Organización"
+              description="Logo oficial de quien organiza el evento."
+              bucket="events"
+            />
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

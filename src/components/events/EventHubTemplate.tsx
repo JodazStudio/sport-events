@@ -28,7 +28,8 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
     description: tenant.description,
     bannerUrl: tenant.heroImage,
     logoUrl: tenant.logo,
-    slug: tenant.id
+    slug: tenant.id,
+    organization: tenant.organization
   };
 
   // Map sponsors
@@ -93,8 +94,10 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
           description={tenant.description}
           distances={distances}
           routeMapUrl={tenant.eventDetails?.route?.image}
+          routeDescription={tenant.eventDetails?.route?.description}
           stravaUrl={tenant.eventDetails?.route?.stravaLinks?.[0]?.url}
           logoUrl={tenant.logo}
+          organization={tenant.organization}
         />
         
         <PricingSection stages={pricingStages} bcvRate={bcvRate} />
@@ -115,7 +118,8 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
         logoUrl={tenant.logo}
         contact={{ 
           whatsapp: tenant.contact?.whatsapp || "584120000000", 
-          email: tenant.contact?.email || "info@zonacrono.com" 
+          email: tenant.organization?.email || tenant.contact?.email || "info@zonacrono.com",
+          phone: tenant.organization?.phone || tenant.contact?.phone
         }} 
         socialMedia={tenant.social_media}
         saasName="ZonaCrono"
