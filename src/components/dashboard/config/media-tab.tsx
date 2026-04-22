@@ -2,27 +2,50 @@
 
 import { useFormContext } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { FormInput, FormTextarea, FormSwitch } from "@/components/ui/forms";
+import { FormInput, FormTextarea, FormSwitch, FormFileUploader } from "@/components/ui/forms";
+import { useUpdateEvent } from "@/hooks/queries/useEvents";
 
-export function MediaTab() {
+interface MediaTabProps {
+  eventId: string;
+}
+
+export function MediaTab({ eventId }: MediaTabProps) {
   const { control } = useFormContext();
+  const { mutate: updateEvent } = useUpdateEvent();
+
   return (
     <Card className="border-2 border-black dark:border-white rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] bg-card">
       <CardHeader className="bg-muted/30 border-b-2 border-black dark:border-white">
         <CardTitle className="font-satoshi font-black italic uppercase text-xl">Media y Ruta</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 pt-6">
-        <FormInput
-          control={control}
-          name="banner_url"
-          label="URL del Banner"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormFileUploader
+            control={control}
+            name="logo_url"
+            label="Logo del Evento"
+            description="Logo oficial del evento."
+            bucket="events"
+            onUploadSuccess={(url) => updateEvent({ id: eventId, logo_url: url })}
+          />
+          <FormFileUploader
+            control={control}
+            name="banner_url"
+            label="Banner del Evento"
+            description="Imagen principal de cabecera."
+            bucket="events"
+            onUploadSuccess={(url) => updateEvent({ id: eventId, banner_url: url })}
+          />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormInput
+          <FormFileUploader
             control={control}
             name="route_image_url"
-            label="URL Mapa de Ruta"
+            label="Mapa de Ruta"
+            description="Imagen de la ruta o circuito."
+            bucket="events"
+            onUploadSuccess={(url) => updateEvent({ id: eventId, route_image_url: url })}
           />
           <FormInput
             control={control}

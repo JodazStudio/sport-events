@@ -44,7 +44,7 @@ export function OrganizersSection({ data }: OrganizersSectionProps) {
                     Este evento es posible gracias a la pasión de nuestros organizadores.
                     <br />
                     <br />
-                    Unimos fuerzas para promover la salud, la fe y la comunidad en {data.location}. ¡Gracias por hacer realidad esta edición!
+                    Unimos fuerzas para promover la salud, la fe y la comunidad en {data.city}. ¡Gracias por hacer realidad esta edición!
                 </p>
                 <div className="flex flex-wrap justify-center items-center gap-16 md:gap-32">
                     {organizers.map((organizer, index) => (

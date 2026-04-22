@@ -49,6 +49,8 @@ export const eventSchema = z.object({
   rules_text: z.string().optional().nullable(),
   has_inventory: z.boolean().default(false),
   banner_url: z.string().optional().nullable(),
+  logo_url: z.string().optional().nullable(),
+  city: z.string().optional().nullable(),
   route_image_url: z.string().optional().nullable(),
   strava_url: z.string().optional().nullable(),
   social_media: z.record(z.string(), z.any()).optional().nullable(),

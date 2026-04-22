@@ -37,7 +37,7 @@ export function SponsorsSection({ data }: SponsorsSectionProps) {
                           />
                       </div>
                       <p className="text-center text-gray-700 text-lg mb-8 max-w-2xl mx-auto">
-                          Gracias a nuestros aliados institucionales por creer en el deporte y la comunidad. Su apoyo hace posible esta gran celebración en {data.location}. 🙌
+                          Gracias a nuestros aliados institucionales por creer en el deporte y la comunidad. Su apoyo hace posible esta gran celebración en {data.city}. 🙌
                       </p>
                       <div className="flex flex-wrap justify-center items-center gap-16 md:gap-32">
                           {institutionalSponsors.map((sponsor, index) => (

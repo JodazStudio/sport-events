@@ -43,8 +43,10 @@ const configSchema = z.object({
   description: z.string().optional(),
   event_date: z.string().min(1, 'La fecha es requerida'),
   event_time: z.string().min(1, 'La hora es requerida'),
+  city: z.string().min(1, 'La ciudad es requerida'),
   rules_text: z.string().optional(),
   has_inventory: z.boolean(),
+  logo_url: z.string().url('URL inválida').or(z.literal('')).optional(),
   banner_url: z.string().url('URL inválida').or(z.literal('')).optional(),
   route_image_url: z.string().url('URL inválida').or(z.literal('')).optional(),
   strava_url: z.string().url('URL inválida').or(z.literal('')).optional(),
@@ -100,9 +102,11 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
       slug: '',
       event_date: '',
       event_time: '',
+      city: '',
       description: '',
       rules_text: '',
       has_inventory: false,
+      logo_url: '',
       banner_url: '',
       route_image_url: '',
       strava_url: '',
@@ -133,11 +137,13 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
           manager_id: event.manager_id,
           name: event.name || '',
           slug: event.slug || '',
-          description: event.description || '',
           event_date: event.event_date || '',
           event_time: event.event_time || '',
+          city: event.city || '',
+          description: event.description || '',
           rules_text: event.rules_text || '',
           has_inventory: !!event.has_inventory,
+          logo_url: event.logo_url || '',
           banner_url: event.banner_url || '',
           route_image_url: event.route_image_url || '',
           strava_url: event.strava_url || '',
@@ -292,7 +298,7 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
             </TabsContent>
 
             <TabsContent value="media" className="space-y-8">
-              <MediaTab />
+              <MediaTab eventId={form.getValues('id') || eventId} />
             </TabsContent>
 
             <TabsContent value="payments" className="space-y-8">

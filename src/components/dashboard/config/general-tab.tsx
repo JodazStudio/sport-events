@@ -2,8 +2,9 @@
 
 import { useFormContext } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { FormInput, FormTextarea, FormSelect } from "@/components/ui/forms";
+import { FormInput, FormTextarea, FormSelect, FormCombobox } from "@/components/ui/forms";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Input } from "../../ui";
+import { VENEZUELA_CITIES } from "@/lib";
 
 interface GeneralTabProps {
   managers: any[];
@@ -21,41 +22,51 @@ export function GeneralTab({ managers, onSlugify }: GeneralTabProps) {
         <FormSelect
           control={control}
           name="manager_id"
-          label="Organizador / Dueño"
+          label="Organizador"
           placeholder="Seleccionar organizador"
-          options={managers.map((m: any) => ({ value: m.id, label: m.name, email: m.email }))}
+          options={managers.map((m: any) => ({
+            value: m.id,
+            label: m.name,
+            email: m.email,
+          }))}
         />
 
-        <FormField
-          control={control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="font-mono text-[10px] uppercase tracking-widest">Nombre del Evento</FormLabel>
-              <FormControl>
-                <Input 
-                  {...field} 
-                  className="rounded-none border-2 border-black h-11 italic font-bold"
-                  onChange={(e) => {
-                    field.onChange(e);
-                    const slug = onSlugify(e.target.value);
-                    setValue('slug', slug, { shouldValidate: true });
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="space-y-2">
+                <FormLabel className="font-mono text-[10px] uppercase tracking-widest font-bold">
+                  Nombre del Evento
+                </FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field}
+                    placeholder="Ej: Maratón de Caracas"
+                    className="rounded-none border-2 border-black h-11 font-bold italic"
+                    onChange={(e) => {
+                      field.onChange(e);
+                      const slug = onSlugify(e.target.value);
+                      setValue('slug', slug);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage className="text-[10px] font-bold uppercase" />
+              </FormItem>
+            )}
+          />
 
-        <FormInput
-          control={control}
-          name="slug"
-          label="Slug URL"
-          inputClassName="font-mono text-sm"
-        />
+          <FormInput
+            control={control}
+            name="slug"
+            label="Slug (URL)"
+            placeholder="maraton-caracas"
+            disabled
+          />
+        </div>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <FormInput
             control={control}
             name="event_date"
@@ -67,6 +78,13 @@ export function GeneralTab({ managers, onSlugify }: GeneralTabProps) {
             name="event_time"
             label="Hora"
             type="time"
+          />
+          <FormCombobox
+            control={control}
+            name="city"
+            label="Ciudad"
+            placeholder="Seleccionar ciudad"
+            options={VENEZUELA_CITIES}
           />
         </div>
 

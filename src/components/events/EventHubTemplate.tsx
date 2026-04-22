@@ -23,9 +23,11 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
     name: tenant.title || tenant.name,
     date: tenant.eventDate,
     time: tenant.eventTime || "07:00 AM",
-    location: tenant.location,
+    location: tenant.city,
+    city: tenant.city,
     description: tenant.description,
     bannerUrl: tenant.heroImage,
+    logoUrl: tenant.logo,
     slug: tenant.id
   };
 
@@ -54,7 +56,7 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
       description: cat.description || (hasGenderInfo ? "Masculino / Femenino" : `Categoría para participantes de ${cat.range}.`)
     };
   }) || [
-    { id: "main", name: "Ruta Principal", label: tenant.location, description: tenant.description }
+    { id: "main", name: "Ruta Principal", label: tenant.city, description: tenant.description }
   ];
 
   // Map pricing stages from tenant data
@@ -92,6 +94,7 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
           distances={distances}
           routeMapUrl={tenant.eventDetails?.route?.image}
           stravaUrl={tenant.eventDetails?.route?.stravaLinks?.[0]?.url}
+          logoUrl={tenant.logo}
         />
         
         <PricingSection stages={pricingStages} bcvRate={bcvRate} />
@@ -109,6 +112,7 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
 
       <Footer 
         isEvent
+        logoUrl={tenant.logo}
         contact={{ 
           whatsapp: tenant.contact?.whatsapp || "584120000000", 
           email: tenant.contact?.email || "info@zonacrono.com" 

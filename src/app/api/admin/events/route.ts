@@ -90,10 +90,25 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { manager_id, name, slug, event_date, event_time, description, social_media } = body;
+    const { 
+      manager_id, 
+      name, 
+      slug, 
+      event_date, 
+      event_time, 
+      city,
+      description, 
+      social_media,
+      logo_url,
+      banner_url,
+      route_image_url,
+      strava_url,
+      rules_text,
+      has_inventory
+    } = body;
 
-    if (!manager_id || !name || !slug || !event_date || !event_time) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!manager_id || !name || !slug || !event_date || !event_time || !city) {
+      return NextResponse.json({ error: 'Missing required fields (manager_id, name, slug, date, time, city)' }, { status: 400 });
     }
 
     const { data, error } = await supabaseAdmin!
@@ -105,11 +120,15 @@ export async function POST(request: NextRequest) {
           slug,
           event_date,
           event_time,
+          city,
           description: description || '',
           social_media: social_media || {},
-          // Genesis defaults
-          has_inventory: false,
-          rules_text: ''
+          logo_url: logo_url || '',
+          banner_url: banner_url || '',
+          route_image_url: route_image_url || '',
+          strava_url: strava_url || '',
+          rules_text: rules_text || '',
+          has_inventory: !!has_inventory
         }
       ])
       .select()
@@ -167,11 +186,25 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, ...updates } = body;
+    const { id, ...bodyUpdates } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Event ID is required' }, { status: 400 });
     }
+
+    // Filter allowed fields to avoid errors with non-existent columns (like 'managers' or 'id')
+    const allowedFields = [
+      'manager_id', 'name', 'slug', 'description', 'banner_url', 'logo_url', 
+      'city', 'has_inventory', 'rules_text', 'route_image_url', 'strava_url', 
+      'social_media', 'payment_info', 'event_date', 'event_time', 'is_active'
+    ];
+
+    const updates: any = {};
+    allowedFields.forEach(field => {
+      if (field in bodyUpdates) {
+        updates[field] = bodyUpdates[field];
+      }
+    });
 
     const { data, error } = await supabaseAdmin!
       .from('events')

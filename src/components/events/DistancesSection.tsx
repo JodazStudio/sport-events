@@ -7,15 +7,25 @@ interface DistancesSectionProps {
   distances?: Distance[];
   routeMapUrl?: string;
   stravaUrl?: string;
+  logoUrl?: string;
 }
 
-export const DistancesSection = ({ description, distances, routeMapUrl, stravaUrl }: DistancesSectionProps) => {
+export const DistancesSection = ({ description, distances, routeMapUrl, stravaUrl, logoUrl }: DistancesSectionProps) => {
   return (
     <>
       {/* Detalles */}
       <section id="detalles" className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <AnimatedContent>
+            {logoUrl && (
+              <div className="mb-10 flex justify-center">
+                <img 
+                  src={logoUrl} 
+                  alt="Logo del Evento" 
+                  className="h-20 sm:h-28 w-auto object-contain filter grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
+                />
+              </div>
+            )}
             <h2 className="font-satoshi font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-foreground mb-12 text-center italic uppercase tracking-tighter">
               Detalles del Evento
             </h2>

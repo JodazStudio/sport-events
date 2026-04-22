@@ -82,7 +82,24 @@ export const EventHero = ({ event, countdownTarget }: HeroSectionProps) => {
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
         <AnimatedContent>
+          {event?.logoUrl && (
+            <div className="mb-8 flex justify-center">
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-ember/20 blur-xl group-hover:bg-ember/30 transition-all rounded-full" />
+                <img 
+                  src={event.logoUrl} 
+                  alt={`${event.name} Logo`} 
+                  className="relative h-24 sm:h-32 md:h-40 w-auto object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]"
+                />
+              </div>
+            </div>
+          )}
           <h1 className="font-satoshi font-black text-4xl sm:text-6xl md:text-8xl lg:text-9xl text-white leading-none mb-6 tracking-tight italic uppercase">
+            {event?.city && (
+              <span className="block text-ember text-sm sm:text-base md:text-xl tracking-[0.3em] mb-2 font-black not-italic">
+                {event.city}
+              </span>
+            )}
             {event?.name || "Nombre del Evento"}
           </h1>
         </AnimatedContent>
@@ -99,10 +116,6 @@ export const EventHero = ({ event, countdownTarget }: HeroSectionProps) => {
             <span className="flex items-center gap-2">
               <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-ember" />
               {event?.time || "Hora por confirmar"}
-            </span>
-            <span className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-ember" />
-              {event?.location || "Ubicación por confirmar"}
             </span>
           </div>
         </AnimatedContent>
@@ -161,9 +174,9 @@ export const EventHero = ({ event, countdownTarget }: HeroSectionProps) => {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      {/* <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
         <ChevronDown className="w-6 h-6 text-white/50" />
-      </div>
+      </div> */}
     </section>
   );
 };

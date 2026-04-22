@@ -72,12 +72,12 @@ export default async function EventPage({ params }: EventPageProps) {
     title: event.name,
     description: event.description || '',
     heroImage: event.banner_url || 'https://images.unsplash.com/photo-1530549387074-d76f964b3489?q=80&w=2072&auto=format&fit=crop',
-    logo: '/logo.png', // Default logo
+    logo: event.logo_url || '/logo.png',
     primaryColor: '#6d28d9', // Standard purple
     registrationLink: `/${event.slug}/inscripciones`,
     eventDate: event.event_date || '',
     eventTime: event.event_time || undefined,
-    location: "Venezuela",
+    city: event.city || "Venezuela",
     pricingStages: event.registration_stages?.map((stage: any) => ({
       id: stage.id,
       name: stage.name,

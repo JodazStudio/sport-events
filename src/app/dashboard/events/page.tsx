@@ -97,6 +97,7 @@ export default function EventsPage() {
       .regex(/^[a-z0-9-]+$/, 'El slug solo puede contener minúsculas, números y guiones'),
     event_date: z.string().min(1, 'La fecha es requerida'),
     event_time: z.string().min(1, 'La hora es requerida'),
+    city: z.string().min(1, 'La ciudad es requerida'),
   });
 
   type EventFormValues = z.infer<typeof eventSchema>;
@@ -108,7 +109,8 @@ export default function EventsPage() {
       name: '',
       slug: '',
       event_date: '',
-      event_time: ''
+      event_time: '',
+      city: ''
     }
   });
 
@@ -233,6 +235,13 @@ export default function EventsPage() {
                         type="time"
                       />
                     </div>
+
+                    <FormInput
+                      control={form.control}
+                      name="city"
+                      label="Ciudad"
+                      placeholder="Ej. Caracas"
+                    />
                   </div>
 
                   <DialogFooter className="p-6 bg-muted/30 border-t-2 border-black/5">

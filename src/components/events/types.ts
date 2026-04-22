@@ -3,8 +3,10 @@ export interface EventData {
   date: string;
   time: string;
   location: string;
+  city?: string;
   description: string;
   bannerUrl?: string;
+  logoUrl?: string;
   slug: string;
 }
 

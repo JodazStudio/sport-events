@@ -62,7 +62,7 @@ export interface TenantData {
   registrationLink: string;
   eventDate: string;
   eventTime?: string;
-  location: string;
+    city: string;
   infoCards?: TenantInfoCard[];
   sponsors?: TenantSponsor[];
   organizers?: TenantOrganizer[];

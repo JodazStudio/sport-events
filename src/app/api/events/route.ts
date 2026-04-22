@@ -162,16 +162,18 @@ export async function POST(request: Request) {
       description, 
       event_date, 
       event_time, 
+      city,
       rules_text, 
       has_inventory, 
+      logo_url,
       banner_url, 
       route_image_url, 
       strava_url,
       social_media
     } = body;
 
-    if (!name || !slug || !event_date || !event_time) {
-      return NextResponse.json({ error: 'Name, slug, date, and time are required' }, { status: 400 });
+    if (!name || !slug || !event_date || !event_time || !city) {
+      return NextResponse.json({ error: 'Name, slug, date, time, and city are required' }, { status: 400 });
     }
 
     const { data, error } = await supabase
@@ -183,8 +185,10 @@ export async function POST(request: Request) {
           description,
           event_date,
           event_time,
+          city,
           rules_text,
           has_inventory: !!has_inventory,
+          logo_url,
           banner_url,
           route_image_url,
           strava_url,
