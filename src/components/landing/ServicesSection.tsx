@@ -16,6 +16,7 @@ const services = [
     title: "Gestión de Resultados",
     description:
       "Centralización y publicación de resultados en tiempo real accesibles desde cualquier dispositivo.",
+    hidden: true,
   },
   {
     icon: Megaphone,
@@ -51,7 +52,7 @@ export const ServicesSection = () => {
           {services.map((service) => (
             <div
               key={service.title}
-              className="group relative border-l-4 border-l-primary bg-card p-8 transition-colors hover:bg-muted"
+              className={`group relative border-l-4 border-l-primary bg-card p-8 transition-colors hover:bg-muted ${service.hidden ? "hidden" : ""}`}
             >
               <service.icon
                 className="mb-4 h-8 w-8 text-primary transition-transform group-hover:scale-110"

@@ -31,7 +31,7 @@ export const Navbar = () => {
               key={link.href}
               href={link.href}
               className={`px-3 py-2 font-mono text-xs uppercase tracking-widest transition-colors hover:text-primary flex items-center gap-1.5 ${
-                link.isLive ? "text-primary font-bold" : "text-muted-foreground"
+                link.isLive ? "hidden text-primary font-bold" : "text-muted-foreground"
               }`}
             >
               {link.isLive && <Activity className="h-3 w-3 animate-pulse" />}
@@ -76,7 +76,7 @@ export const Navbar = () => {
                 href={link.href}
                 onClick={() => setOpen(false)}
                 className={`px-3 py-3 font-mono text-xs uppercase tracking-widest transition-colors hover:text-primary flex items-center gap-2 ${
-                    link.isLive ? "text-primary font-bold" : "text-muted-foreground"
+                    link.isLive ? "hidden text-primary font-bold" : "text-muted-foreground"
                 }`}
               >
                 {link.isLive && <Activity className="h-3 w-3 animate-pulse" />}

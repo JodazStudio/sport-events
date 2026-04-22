@@ -16,7 +16,7 @@ export default function OverviewPage() {
           </TabsTrigger>
           <TabsTrigger 
             value="live" 
-            className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white font-black italic uppercase text-[10px] tracking-widest px-6 py-2 transition-all gap-2"
+            className="hidden rounded-none data-[state=active]:bg-black data-[state=active]:text-white font-black italic uppercase text-[10px] tracking-widest px-6 py-2 transition-all gap-2"
           >
             <Activity className="size-3" />
             Resultados en Vivo

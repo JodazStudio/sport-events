@@ -19,7 +19,7 @@ export const StickyNav = ({
   eventName, 
   showGallery = true, 
   showSponsors = true, 
-  showResults = true 
+  showResults = false 
 }: StickyNavProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
