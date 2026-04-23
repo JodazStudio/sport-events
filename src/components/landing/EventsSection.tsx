@@ -4,7 +4,7 @@ import { eventService } from "@/features/events";
 import { EventCard } from "@/components/events/EventCard";
 
 export const EventsSection = async () => {
-  const { data: events } = await eventService.getEvents({ limit: 4 });
+  const { data: events } = await eventService.getEvents({ limit: 2 });
 
   return (
     <section id="eventos" className="py-24">
