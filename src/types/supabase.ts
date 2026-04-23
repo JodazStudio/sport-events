@@ -283,6 +283,12 @@ export type Database = {
           price_usd: number
           total_capacity: number
           used_capacity: number | null
+          end_date: string | null
+          status: string | null
+          balance_status: string | null
+          service_fee: number | null
+          is_settled: boolean | null
+          settled_at: string | null
         }
         Insert: {
           created_at?: string
@@ -293,6 +299,12 @@ export type Database = {
           price_usd: number
           total_capacity: number
           used_capacity?: number | null
+          end_date?: string | null
+          status?: string | null
+          balance_status?: string | null
+          service_fee?: number | null
+          is_settled?: boolean | null
+          settled_at?: string | null
         }
         Update: {
           created_at?: string
@@ -303,6 +315,12 @@ export type Database = {
           price_usd?: number
           total_capacity?: number
           used_capacity?: number | null
+          end_date?: string | null
+          status?: string | null
+          balance_status?: string | null
+          service_fee?: number | null
+          is_settled?: boolean | null
+          settled_at?: string | null
         }
         Relationships: [
           {

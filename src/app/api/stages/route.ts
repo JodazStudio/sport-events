@@ -192,6 +192,27 @@ export async function PUT(request: Request) {
     const { error: authError, status } = await validateOwnership(request, event_id);
     if (authError) return NextResponse.json({ error: authError }, { status });
 
+    if (is_active) {
+      const { data: stages } = await supabaseAdmin!
+        .from('registration_stages')
+        .select('*')
+        .eq('event_id', event_id)
+        .order('created_at', { ascending: true });
+
+      if (stages && stages.length > 0) {
+        const currentIndex = stages.findIndex(s => s.id === id);
+        if (currentIndex > 0) {
+          const previousStage = stages[currentIndex - 1];
+          if (previousStage.balance_status !== 'PAID') {
+            return NextResponse.json({ 
+              status: 'error', 
+              message: `No se puede activar esta etapa. La etapa anterior (${previousStage.name}) aún tiene un balance pendiente.` 
+            }, { status: 400 });
+          }
+        }
+      }
+    }
+
     const { data, error } = await supabaseAdmin!
       .from('registration_stages')
       .update({ name, price_usd, total_capacity, is_active })

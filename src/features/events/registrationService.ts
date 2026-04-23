@@ -30,6 +30,35 @@ export const registrationService = {
       payment_data
     } = data;
 
+    // 0. Validate Stage Capacity, Status and Dates
+    const { data: stage, error: stageError } = await supabaseAdmin
+      .from('registration_stages')
+      .select('*')
+      .eq('id', stage_id)
+      .single();
+
+    if (stageError || !stage) {
+      throw new Error('Etapa de inscripción no válida.');
+    }
+
+    // Preventive Locking: Check if stage should be closed by date
+    if (stage.status === 'OPEN' && stage.end_date && new Date() > new Date(stage.end_date)) {
+      await supabaseAdmin.from('registration_stages').update({ status: 'CLOSED' }).eq('id', stage_id);
+      throw new Error('La fecha límite para esta etapa ha expirado.');
+    }
+
+    if (!stage.is_active || stage.status === 'CLOSED') {
+      throw new Error('Esta etapa de inscripción está cerrada.');
+    }
+
+    if (stage.used_capacity !== null && stage.used_capacity >= stage.total_capacity) {
+      // Ensure it's marked as CLOSED if it wasn't already
+      if (stage.status === 'OPEN') {
+        await supabaseAdmin.from('registration_stages').update({ status: 'CLOSED' }).eq('id', stage_id);
+      }
+      throw new Error('Esta etapa ha alcanzado su capacidad máxima.');
+    }
+
     // 1. Check for duplicate registration by DNI for this event
     const { data: existing, error: checkError } = await supabaseAdmin
       .from('registrations')

@@ -11,6 +11,12 @@ export const registrationStageSchema = z.object({
   total_capacity: z.coerce.number().min(1, 'La capacidad debe ser al menos 1'),
   used_capacity: z.number().default(0),
   is_active: z.boolean().default(false),
+  end_date: z.string().optional().nullable(),
+  status: z.enum(['OPEN', 'CLOSED']).default('OPEN'),
+  balance_status: z.enum(['UNPAID', 'PAID']).default('UNPAID'),
+  service_fee: z.coerce.number().min(0).default(0),
+  is_settled: z.boolean().default(false),
+  settled_at: z.string().optional().nullable(),
   created_at: z.string().optional(),
 });
 
