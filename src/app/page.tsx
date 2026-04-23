@@ -27,6 +27,8 @@ export default async function LandingPage() {
     '@type': 'Organization',
     name: 'Zonacrono',
     url: 'https://zonacrono.com',
+    logo: 'https://zonacrono.com/ZONACRONO.png',
+    image: 'https://zonacrono.com/ZONACRONO.png',
     description: 'Plataforma integral para gestión, software y promoción de eventos deportivos.',
     sameAs: [
       'https://instagram.com/zonacrono',

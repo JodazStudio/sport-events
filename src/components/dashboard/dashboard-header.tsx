@@ -25,10 +25,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { useAuthStore } from "@/store";
-import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import { useExchangeRates } from "@/hooks/queries/useAkomo";
+import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 
 interface ExchangeRate {
   id: string;
@@ -82,14 +83,13 @@ export function DashboardHeader() {
       <header className="sticky top-0 z-50 flex h-16 w-full items-center border-b bg-background/95 backdrop-blur px-4 md:px-8">
         {/* Logo Section */}
         <Link href="/dashboard" className="flex items-center gap-3 mr-8 shrink-0">
-          <div className="h-9 w-9 bg-black flex items-center justify-center font-black text-white italic shadow-[3px_3px_0px_0px_hsl(var(--primary))]">
-            ZC
-          </div>
-          <div className="flex flex-col">
-            <span className="font-satoshi font-black uppercase tracking-tight text-xl italic leading-none">
-              Zona<span className="text-primary">crono</span>
-            </span>
-          </div>
+          <Image 
+            src="/ZONACRONO.png" 
+            alt="Zonacrono Logo" 
+            width={200} 
+            height={45} 
+            className="h-[40px] w-auto object-contain"
+          />
         </Link>
 
         {/* Desktop Navigation */}

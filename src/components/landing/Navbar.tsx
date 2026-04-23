@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, X, Timer, Activity } from "lucide-react";
+import { Menu, X, Activity } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const navLinks = [
   { label: "Eventos", href: "/#eventos" },
@@ -18,10 +19,14 @@ export const Navbar = () => {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <Timer className="h-6 w-6 text-primary" strokeWidth={2.5} />
-          <span className="font-satoshi text-lg font-black uppercase tracking-tight text-foreground">
-            Zona<span className="text-primary">crono</span>
-          </span>
+          <Image 
+            src="/ZONACRONO.png" 
+            alt="Zonacrono Logo" 
+            width={225} 
+            height={50} 
+            className="h-[45px] w-auto object-contain"
+            priority
+          />
         </Link>
 
         {/* Desktop links */}

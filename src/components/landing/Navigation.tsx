@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { TenantData } from "@/types";
+import Image from "next/image";
 
 interface NavigationProps {
   data: TenantData;
@@ -25,11 +26,23 @@ export const Navigation = ({ data }: NavigationProps) => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <a href="#" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              {data.name}
-            </div>
-          </a>
+          <div className="flex items-center gap-3">
+            <a href="/" className="flex items-center">
+              <Image 
+                src="/ZONACRONO.png" 
+                alt="Zonacrono Logo" 
+                width={150} 
+                height={35} 
+                className="h-[35px] w-auto object-contain"
+              />
+            </a>
+            <div className="h-4 w-px bg-border hidden sm:block" />
+            <a href="#" className="hidden sm:block">
+              <div className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                {data.name}
+              </div>
+            </a>
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">

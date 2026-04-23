@@ -5,6 +5,7 @@ import { Button, AnimatedContent } from "@/components/ui";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface StickyNavProps {
   eventSlug?: string;
@@ -77,9 +78,13 @@ export const StickyNav = ({
 
           {/* Logo & Event Name - Desktop Only */}
           <Link href="/" className="hidden lg:flex items-center gap-3 group">
-            <div className="h-8 w-8 bg-black flex items-center justify-center font-black text-white italic shadow-[2px_2px_0px_0px_rgba(255,46,0,1)] group-hover:shadow-none transition-all text-sm">
-              ZC
-            </div>
+            <Image 
+              src="/ZONACRONO.png" 
+              alt="Zonacrono Logo" 
+              width={150} 
+              height={35} 
+              className="h-[35px] w-auto object-contain"
+            />
             {eventName && (
               <AnimatedContent distance={10} direction="horizontal" delay={0.1} duration={0.6}>
                 <span className="font-satoshi font-black uppercase tracking-tight text-sm italic text-white group-hover:text-ember transition-colors">
@@ -124,9 +129,13 @@ export const StickyNav = ({
           <div className="flex flex-col p-4 bg-charcoal/40 backdrop-blur-xl">
             {eventName && (
               <div className="px-4 py-3 mb-2 border-b border-white/10 flex items-center gap-3">
-                <div className="h-6 w-6 bg-black flex items-center justify-center font-black text-white italic shadow-[2px_2px_0px_0px_rgba(255,46,0,1)] text-[10px]">
-                  ZC
-                </div>
+                <Image 
+                  src="/ZONACRONO.png" 
+                  alt="Zonacrono Logo" 
+                  width={125} 
+                  height={30} 
+                  className="h-[30px] w-auto object-contain"
+                />
                 <span className="font-satoshi font-black uppercase tracking-tight text-xs italic text-white">
                   {eventName}
                 </span>
