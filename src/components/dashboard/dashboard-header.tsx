@@ -11,7 +11,8 @@ import {
   CreditCard, 
   Activity,
   Users,
-  Globe
+  Globe,
+  HelpCircle
 } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -63,6 +64,7 @@ export function DashboardHeader() {
     { title: "Gestores", url: "/dashboard/managers", icon: Users, superadminOnly: true },
     { title: "Aprobaciones", url: "/dashboard/payments", icon: CreditCard },
     { title: "Configuración", url: "/dashboard/settings", icon: Settings2 },
+    { title: "Ayuda", url: "/dashboard/help", icon: HelpCircle },
   ];
 
   const currentNavItems = adminNavItems.filter(item => 
