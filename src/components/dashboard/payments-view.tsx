@@ -83,9 +83,6 @@ export function PaymentsView({ eventId }: PaymentsViewProps) {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight italic mb-2">
-            Control de <span className="text-primary">Finanzas</span>
-          </h2>
           <p className="text-muted-foreground font-mono text-[10px] md:text-xs uppercase tracking-wider">
             Valida los ingresos y concilia los pagos reportados por los atletas
           </p>

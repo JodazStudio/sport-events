@@ -1,25 +1,35 @@
-import { MapPin, Calendar, ArrowRight, Loader2 } from "lucide-react";
+import { Calendar, Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { eventService } from "@/features/events";
-import { formatDate } from "@/lib";
+import { EventCard } from "@/components/events/EventCard";
 
 export const EventsSection = async () => {
-  const events = await eventService.getEvents();
+  const { data: events } = await eventService.getEvents({ limit: 4 });
 
   return (
     <section id="eventos" className="py-24">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         {/* Header */}
-        <div className="mb-16">
-          <div className="mb-6 inline-flex items-center gap-2 border bg-card px-4 py-1.5">
-            <span className="h-2 w-2 bg-primary" />
-            <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              Próximos Eventos
-            </span>
+        <div className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <div>
+            <div className="mb-6 inline-flex items-center gap-2 border bg-card px-4 py-1.5">
+              <span className="h-2 w-2 bg-primary" />
+              <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                Próximos Eventos
+              </span>
+            </div>
+            <h2 className="font-satoshi text-4xl font-black text-foreground md:text-5xl">
+              CALENDARIO <span className="text-primary">ACTUAL</span>
+            </h2>
           </div>
-          <h2 className="font-satoshi text-4xl font-black text-foreground md:text-5xl">
-            CALENDARIO <span className="text-primary">ACTUAL</span>
-          </h2>
+          
+          <Link
+            href="/events"
+            className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary"
+          >
+            Ver calendario completo
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
 
         {/* Event cards */}
@@ -33,52 +43,9 @@ export const EventsSection = async () => {
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 max-w-4xl">
-            {events.map((event) => {
-              const { day, month, year } = formatDate(event.event_date || event.created_at || "");
-              const categoriesText = event.categories?.map((c) => c.name).join(" · ") || "Inscripciones Abiertas";
-              
-              return (
-                <div
-                  key={event.id}
-                  className="group flex flex-col border bg-card transition-colors hover:border-primary"
-                >
-                  {/* Date header */}
-                  <div className="flex items-center gap-4 border-b bg-muted px-6 py-4">
-                    <div className="text-center">
-                      <span className="font-mono text-3xl font-bold text-foreground">
-                        {day}
-                      </span>
-                      <div className="font-mono text-[10px] uppercase tracking-widest text-primary">
-                        {month} {year}
-                      </div>
-                    </div>
-                    <Calendar className="ml-auto h-5 w-5 text-muted-foreground" />
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex flex-1 flex-col p-6">
-                    <h3 className="font-satoshi text-lg font-black uppercase text-foreground leading-tight">
-                      {event.name}
-                    </h3>
-                    <div className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" />
-                      Venezuela
-                    </div>
-                    <div className="mt-2 font-mono text-[10px] uppercase tracking-tight text-muted-foreground">
-                      {categoriesText}
-                    </div>
-
-                    <Link
-                      href={`/${event.slug}`}
-                      className="btn-mechanical mt-6 bg-primary text-center text-primary-foreground flex items-center justify-center text-xs uppercase font-black"
-                    >
-                      Ver Evento
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </div>
-                </div>
-              );
-            })}
+            {events.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
           </div>
         )}
       </div>

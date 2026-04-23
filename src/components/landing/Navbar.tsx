@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, X, Timer, Activity } from "lucide-react";
+import { Menu, X, Activity } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const navLinks = [
-  { label: "Eventos", href: "/#eventos" },
+  { label: "Eventos", href: "/events" },
   { label: "Soluciones", href: "/#servicios" },
   { label: "Live Dashboard", href: "/dashboard", isLive: true },
 ];
@@ -18,10 +19,14 @@ export const Navbar = () => {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <Timer className="h-6 w-6 text-primary" strokeWidth={2.5} />
-          <span className="font-satoshi text-lg font-black uppercase tracking-tight text-foreground">
-            Zona<span className="text-primary">crono</span>
-          </span>
+          <Image 
+            src="/ZONACRONO.png" 
+            alt="Zonacrono Logo" 
+            width={225} 
+            height={50} 
+            className="h-[45px] w-auto object-contain"
+            priority
+          />
         </Link>
 
         {/* Desktop links */}
@@ -31,7 +36,7 @@ export const Navbar = () => {
               key={link.href}
               href={link.href}
               className={`px-3 py-2 font-mono text-xs uppercase tracking-widest transition-colors hover:text-primary flex items-center gap-1.5 ${
-                link.isLive ? "text-primary font-bold" : "text-muted-foreground"
+                link.isLive ? "hidden text-primary font-bold" : "text-muted-foreground"
               }`}
             >
               {link.isLive && <Activity className="h-3 w-3 animate-pulse" />}
@@ -76,7 +81,7 @@ export const Navbar = () => {
                 href={link.href}
                 onClick={() => setOpen(false)}
                 className={`px-3 py-3 font-mono text-xs uppercase tracking-widest transition-colors hover:text-primary flex items-center gap-2 ${
-                    link.isLive ? "text-primary font-bold" : "text-muted-foreground"
+                    link.isLive ? "hidden text-primary font-bold" : "text-muted-foreground"
                 }`}
               >
                 {link.isLive && <Activity className="h-3 w-3 animate-pulse" />}

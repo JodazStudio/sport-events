@@ -120,6 +120,12 @@ export const eventListSchema = z.lazy(() => z.array(eventSchema));
 export const eventListResponseSchema = z.object({
   status: z.enum(['success', 'error']),
   data: z.lazy(() => eventListSchema).optional(),
+  pagination: z.object({
+    total: z.number(),
+    page: z.number(),
+    limit: z.number(),
+    totalPages: z.number(),
+  }).optional(),
   message: z.string().optional(),
   details: z.string().optional(),
 });

@@ -138,34 +138,41 @@ const { data, error } = await supabase
 
 ---
 
-## 8. Telegram Bot Integration
+## 8. Telegram Bot Integration (Secondary)
 
 Zonacrono uses a Telegram Bot for real-time manager alerts.
+- **Library**: Use **`telegraf`**.
+- **Formatting**: Always use **`MarkdownV2`** with `escapeMarkdown`.
+- **Status**: Currently treated as a secondary notification channel.
+
+## 9. Email Notifications (Primary)
+
+Zonacrono uses **Resend** for all critical athlete communications.
 
 ### Core Principles
-- **Library**: Use **`telegraf`** for bot logic and webhook handling.
-- **Formatting**: Always use **`MarkdownV2`**. Use the centralized `escapeMarkdown` utility from `@/lib/telegram` to prevent API errors caused by unescaped special characters.
-- **Webhook**: Implement via Next.js API routes (e.g., `/api/telegram/webhook`). Use `bot.handleUpdate(body)` to process incoming messages.
-- **Deep Linking**: Use `t.me/bot?start=TOKEN` or verification codes to link Telegram Chat IDs to Zonacrono `manager_id`.
+- **Library**: Use **`resend`** for API interactions.
+- **Sender**: All emails must be sent from **`notificaciones@zonacrono.com`**.
+- **Templates**: Built with **`@react-email/components`** to maintain a premium, branded look.
+- **Flows**: Email notifications are triggered by state changes in the registration process (Reservation, Payment Reported, Approval).
 
-### Sending Alerts
-Notifications should be triggered asynchronously in API routes or Server Actions after critical events (e.g., successful registration).
+### Sending Emails
+Emails should be sent asynchronously to avoid blocking user interaction.
 
 ```typescript
-// Example: Asynchronous notification trigger
-(async () => {
-  try {
-    const { sendTelegramNotification, formatRegistrationAlert } = await import('@/lib/telegram');
-    const message = formatRegistrationAlert({ ...data });
-    await sendTelegramNotification(chatId, message);
-  } catch (err) {
-    console.error('Telegram notification failed', err);
-  }
-})();
+// Example: Sending a registration email
+import { sendRegistrationEmail } from '@/lib/mail';
+
+await sendRegistrationEmail({
+  to: athleteEmail,
+  athleteName: name,
+  eventName: event.name,
+  uniqueUrl: `https://zonacrono.com/status/${registrationId}`
+});
 ```
+
 ---
 
-## 9. Environment Configuration
+## 10. Environment Configuration
 
 Zonacrono uses a centralized environment variable management pattern to ensure type safety and consistent defaults across the codebase.
 

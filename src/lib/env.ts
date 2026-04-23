@@ -11,5 +11,6 @@ export const env = {
   MEGA_S4_ENDPOINT: process.env.MEGA_S4_ENDPOINT || '',
   MEGA_S4_ACCESS_KEY: process.env.MEGA_S4_ACCESS_KEY || '',
   MEGA_S4_SECRET_KEY: process.env.MEGA_S4_SECRET_KEY || '',
+  RESEND_API_KEY: process.env.RESEND_API_KEY || '',
   NODE_ENV: process.env.NODE_ENV || 'development',
 } as const;

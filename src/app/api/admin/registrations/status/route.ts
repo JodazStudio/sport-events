@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin, checkAdmin } from '@/lib';
+import { registrationService } from '@/features/events/registrationService';
 
 /**
  * @swagger
@@ -30,22 +31,31 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
-    const { registrationId, status } = await request.json();
+    const { registrationId, status, reason } = await request.json();
 
     if (!registrationId || !status) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const { data, error } = await supabaseAdmin!
-      .from('registrations')
-      .update({ status })
-      .eq('id', registrationId)
-      .select()
-      .single();
+    const { user, profile } = auth;
 
-    if (error) throw error;
+    // Verify ownership
+    if (profile.role !== 'superadmin') {
+      const { data: registration, error: regError } = await supabaseAdmin!
+        .from('registrations')
+        .select('event_id, events(manager_id)')
+        .eq('id', registrationId)
+        .single();
+      
+      const event = registration?.events as any;
+      if (regError || !registration || event?.manager_id !== user.id) {
+        return NextResponse.json({ error: 'Forbidden: You do not have access to this registration' }, { status: 403 });
+      }
+    }
 
-    return NextResponse.json({ registration: data });
+    const registration = await registrationService.updateRegistrationStatus(registrationId, status, reason);
+
+    return NextResponse.json({ registration });
 
   } catch (err) {
     console.error('Error in PATCH /api/admin/registrations/status:', err);

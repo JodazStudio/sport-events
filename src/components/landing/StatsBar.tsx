@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 const stats = [
   { icon: Signal, value: "100%", label: "Cobertura", suffix: "" },
   { icon: Laptop, value: "WEB", label: "Plataforma", suffix: "" },
-  { icon: Radio, value: "LIVE", label: "Resultados", suffix: "" },
+  { icon: Radio, value: "LIVE", label: "Resultados", suffix: "", hidden: true },
   { icon: HeadphonesIcon, value: "24/7", label: "Soporte", suffix: "" },
 ];
 
@@ -35,7 +35,7 @@ export const StatsBar = () => {
               i < stats.length - 1 ? "lg:border-r" : ""
             } ${i % 2 === 0 ? "border-r lg:border-r" : ""} ${
               i < 2 ? "border-b lg:border-b-0" : ""
-            } ${visible ? "animate-count-up" : "opacity-0"}`}
+            } ${visible ? "animate-count-up" : "opacity-0"} ${stat.hidden ? "hidden" : ""}`}
             style={{ animationDelay: `${i * 100}ms` }}
           >
             <stat.icon className="h-5 w-5 text-primary" strokeWidth={2} />

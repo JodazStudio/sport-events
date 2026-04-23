@@ -37,6 +37,10 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get('slug');
     const id = searchParams.get('id');
+    const search = searchParams.get('search');
+    const city = searchParams.get('city');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
 
     const authHeader = request.headers.get('Authorization');
     let userId: string | null = null;
@@ -62,16 +66,25 @@ export async function GET(request: Request) {
     // 2. Superadmin access (view all)
     // 3. Anonymous list requests (for the landing page)
     const client = (slug || id || isSuperadmin || !userId) ? supabaseAdmin! : supabase;
-    let query = client.from('events').select('*, categories(*), registration_stages(*)');
+    
+    // For list requests, we need the count
+    const isList = !slug && !id;
+    let query = client.from('events').select('*, categories(*), registration_stages(*)', isList ? { count: 'exact' } : {});
 
     if (id) {
       query = query.eq('id', id);
     } else if (slug) {
       query = query.eq('slug', slug);
-    } else if (userId) {
-      // Regular admins see only their own events.
-      if (!isSuperadmin) {
+    } else {
+      // Filters for list
+      if (userId && !isSuperadmin) {
         query = query.eq('manager_id', userId);
+      }
+      if (search) {
+        query = query.ilike('name', `%${search}%`);
+      }
+      if (city) {
+        query = query.ilike('city', `%${city}%`);
       }
     }
 
@@ -89,10 +102,26 @@ export async function GET(request: Request) {
       return NextResponse.json({ status: 'success', data });
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
+    // Pagination for list
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    
+    const { data, error, count } = await query
+      .order('event_date', { ascending: false })
+      .range(from, to);
+      
     if (error) throw error;
 
-    return NextResponse.json({ status: 'success', data });
+    return NextResponse.json({ 
+      status: 'success', 
+      data,
+      pagination: {
+        total: count || 0,
+        page,
+        limit,
+        totalPages: count ? Math.ceil(count / limit) : 0
+      }
+    });
 
 
   } catch (err) {

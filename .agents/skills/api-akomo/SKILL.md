@@ -40,7 +40,7 @@ Returns the most recently recorded exchange rates for tracked currencies (USD, E
     "rates": [
       {
         "id": "uuid",
-        "label": "Dólar BCV",
+        "label": "USD",
         "value": "36,25", 
         "currency": "VES"
       }

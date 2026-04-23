@@ -6,27 +6,66 @@ import { env } from '@/lib/env';
  */
 export const eventService = {
   /**
-   * Fetches a list of all events
+   * Fetches a list of events with optional filters and pagination
    */
-  async getEvents() {
+  async getEvents(options: { page?: number; limit?: number; search?: string; city?: string } = {}) {
     try {
+      const { page = 1, limit = 10, search, city } = options;
       const baseUrl = env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-      const response = await fetch(`${baseUrl}/api/events`, {
-        cache: 'no-store', // Ensure fresh data
+      
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
       });
       
-      if (!response.ok) return [];
+      if (search) params.append('search', search);
+      if (city) params.append('city', city);
+
+      const response = await fetch(`${baseUrl}/api/events?${params.toString()}`, {
+        cache: 'no-store',
+      });
+      
+      if (!response.ok) return { data: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } };
       
       const json = await response.json();
       const result = Schemas.eventListResponseSchema.safeParse(json);
       
       if (!result.success || result.data.status !== 'success') {
-        return [];
+        return { data: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } };
       }
       
-      return result.data.data || [];
+      return {
+        data: result.data.data || [],
+        pagination: result.data.pagination
+      };
     } catch (error) {
       console.error('Error fetching events:', error);
+      return { data: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } };
+    }
+  },
+
+  /**
+   * Fetches a list of all unique cities from events
+   */
+  async getCities() {
+    try {
+      const baseUrl = env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const response = await fetch(`${baseUrl}/api/events`, {
+        cache: 'no-store',
+      });
+      
+      if (!response.ok) return [];
+      
+      const json = await response.json();
+      if (json.status !== 'success' || !json.data) return [];
+      
+      const cities = (json.data as any[])
+        .map(event => event.city)
+        .filter((city): city is string => !!city);
+        
+      return [...new Set(cities)].sort();
+    } catch (error) {
+      console.error('Error fetching cities:', error);
       return [];
     }
   },

@@ -27,6 +27,8 @@ export default async function LandingPage() {
     '@type': 'Organization',
     name: 'Zonacrono',
     url: 'https://zonacrono.com',
+    logo: 'https://zonacrono.com/ZONACRONO.png',
+    image: 'https://zonacrono.com/ZONACRONO.png',
     description: 'Plataforma integral para gestión, software y promoción de eventos deportivos.',
     sameAs: [
       'https://instagram.com/zonacrono',
@@ -53,7 +55,7 @@ export default async function LandingPage() {
         <ContactCTA />
         
         {/* Resultados Section */}
-        <section id="resultados" className="bg-card py-24">
+        <section id="resultados" className="hidden bg-card py-24">
           <div className="mx-auto max-w-7xl px-4 text-center lg:px-8">
             <div className="mb-6 inline-flex items-center gap-2 border px-4 py-1.5 bg-background">
               <span className="h-2 w-2 bg-primary" />
