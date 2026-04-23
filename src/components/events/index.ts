@@ -11,6 +11,7 @@ export * from './PricingSection';
 export * from './RaceInfo';
 export * from './Registrations';
 export * from './ResultsCenter';
+export * from './EventCard';
 export * from './RulesSection';
 export * from './StickyNav';
 export * from './types';

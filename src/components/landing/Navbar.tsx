@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 const navLinks = [
-  { label: "Eventos", href: "/#eventos" },
+  { label: "Eventos", href: "/events" },
   { label: "Soluciones", href: "/#servicios" },
   { label: "Live Dashboard", href: "/dashboard", isLive: true },
 ];
