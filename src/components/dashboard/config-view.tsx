@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { 
   Form, 
 } from "../ui/form";
+import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -181,11 +182,10 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
             ...(event.payment_info || {})
           },
           organization: {
-            name: '',
-            logo_url: '',
-            email: '',
-            phone: '',
-            ...(event.organization || {})
+            name: event.organization?.name || '',
+            logo_url: event.organization?.logo_url || '',
+            email: event.organization?.email || '',
+            phone: event.organization?.phone || '',
           }
         });
       }
@@ -238,11 +238,34 @@ export function ConfigView({ eventId, onDelete, onUpdate, onLoaded, isPage = fal
     }
   };
 
+  const event = adminData?.events?.find((e: any) => e.id === eventId || e.slug === eventId);
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="w-10 h-10 animate-spin text-primary" />
         <span className="font-mono text-sm uppercase font-black">Cargando configuración...</span>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-6 border-4 border-dashed border-black/10 bg-muted/30">
+        <AlertTriangle className="w-12 h-12 text-destructive" />
+        <div className="text-center space-y-2">
+          <h3 className="font-satoshi text-2xl font-black uppercase italic">Evento no encontrado</h3>
+          <p className="text-muted-foreground font-medium italic">
+            No tienes permisos para editar este evento o no existe en nuestra base de datos.
+          </p>
+        </div>
+        <Button 
+          variant="outline" 
+          className="rounded-none border-2 border-black font-black uppercase italic h-12 px-8"
+          onClick={() => router.push('/dashboard/events')}
+        >
+          Volver a la lista
+        </Button>
       </div>
     );
   }

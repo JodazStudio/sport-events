@@ -91,7 +91,9 @@ export function GeneralTab({ managers, onSlugify }: GeneralTabProps) {
         <FormTextarea
           control={control}
           name="description"
-          label="Descripción"
+          label="Descripción del Evento"
+          placeholder="Escribe una descripción detallada del evento..."
+          rows={5}
         />
 
         <div className="pt-6 border-t-2 border-black/10 space-y-6">
