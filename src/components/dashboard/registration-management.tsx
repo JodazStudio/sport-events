@@ -58,6 +58,11 @@ interface Registration {
   created_at: string;
   category: { name: string };
   stage: { name: string };
+  phone: string;
+  blood_type: string;
+  state: string;
+  city: string;
+  club: string;
   payment?: {
     amount_usd: number;
     amount_ves: number;
@@ -268,6 +273,10 @@ export function RegistrationManagement({ eventId }: RegistrationManagementProps)
                 <p><span className="text-muted-foreground uppercase">Nombre:</span> <span className="font-bold text-foreground">{selectedReg?.first_name} {selectedReg?.last_name}</span></p>
                 <p><span className="text-muted-foreground uppercase">DNI:</span> <span className="font-bold text-foreground">{selectedReg?.dni}</span></p>
                 <p><span className="text-muted-foreground uppercase">Email:</span> <span className="font-bold lowercase text-foreground">{selectedReg?.email}</span></p>
+                <p><span className="text-muted-foreground uppercase">Teléfono:</span> <span className="font-bold text-foreground">{selectedReg?.phone}</span></p>
+                <p><span className="text-muted-foreground uppercase">Sangre:</span> <span className="font-bold text-foreground">{selectedReg?.blood_type}</span></p>
+                <p><span className="text-muted-foreground uppercase">Ubicación:</span> <span className="font-bold text-foreground">{selectedReg?.city}, {selectedReg?.state}</span></p>
+                <p><span className="text-muted-foreground uppercase">Club:</span> <span className="font-bold text-foreground">{selectedReg?.club}</span></p>
                 <p><span className="text-muted-foreground uppercase">Cat:</span> <span className="font-bold text-foreground">{selectedReg?.category?.name}</span></p>
               </div>
             </div>
