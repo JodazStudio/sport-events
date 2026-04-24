@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Search, MapPin, Calendar, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { eventService } from "@/features/events";
 import { EventCard } from "@/components/events/EventCard";
@@ -16,53 +17,86 @@ import {
 import { Event } from "@/features/events/schemas";
 import { Navbar, Footer } from "@/components/landing";
 
-export default function EventsPageContent() {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [city, setCity] = useState("all");
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalEvents, setTotalEvents] = useState(0);
-
-  const fetchEvents = async () => {
-    setLoading(true);
-    try {
-      const response = await eventService.getEvents({
-        page,
-        limit: 8,
-        search,
-        city: city === "all" ? "" : city
-      });
-      setEvents(response.data);
-      if (response.pagination) {
-        setTotalPages(response.pagination.totalPages);
-        setTotalEvents(response.pagination.total);
-      }
-    } catch (error) {
-      console.error("Error loading events:", error);
-    } finally {
-      setLoading(false);
-    }
+interface EventsPageContentProps {
+  initialEvents: Event[];
+  initialPagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
   };
+  initialCities: string[];
+  initialSearch: string;
+  initialCity: string;
+  initialPage: number;
+}
 
-  const fetchCities = async () => {
-    const cityList = await eventService.getCities();
-    setCities(cityList);
-  };
+export default function EventsPageContent({
+  initialEvents,
+  initialPagination,
+  initialCities,
+  initialSearch,
+  initialCity,
+  initialPage
+}: EventsPageContentProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  const [search, setSearch] = useState(initialSearch);
+  const [city, setCity] = useState(initialCity);
+
+  // Sync state with props if they change (e.g. via back button)
+  useEffect(() => {
+    setSearch(initialSearch);
+  }, [initialSearch]);
 
   useEffect(() => {
-    fetchCities();
-  }, []);
+    setCity(initialCity);
+  }, [initialCity]);
 
+  const updateFilters = (newFilters: { search?: string; city?: string; page?: number }) => {
+    const params = new URLSearchParams(searchParams.toString());
+    
+    if (newFilters.search !== undefined) {
+      if (newFilters.search) params.set("search", newFilters.search);
+      else params.delete("search");
+      params.set("page", "1");
+    }
+
+    if (newFilters.city !== undefined) {
+      if (newFilters.city && newFilters.city !== "all") params.set("city", newFilters.city);
+      else params.delete("city");
+      params.set("page", "1");
+    }
+
+    if (newFilters.page !== undefined) {
+      params.set("page", newFilters.page.toString());
+    }
+
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`);
+    });
+  };
+
+  // Debounced search update
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchEvents();
-    }, 300); // Debounce search
+      if (search !== initialSearch) {
+        updateFilters({ search });
+      }
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [search, city, page]);
+  }, [search]);
+
+  const loading = isPending;
+  const events = initialEvents;
+  const totalPages = initialPagination.totalPages;
+  const totalEvents = initialPagination.total;
+  const page = initialPage;
+  const cities = initialCities;
 
   return (
     <div className="min-h-screen bg-background">
@@ -90,18 +124,12 @@ export default function EventsPageContent() {
                 placeholder="Buscar por nombre de evento..."
                 className="pl-10 h-12 rounded-none border-2 focus-visible:ring-primary"
                 value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1); // Reset to first page on search
-                }}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
             
             <div className="w-full md:w-64">
-              <Select value={city} onValueChange={(val) => {
-                setCity(val);
-                setPage(1);
-              }}>
+              <Select value={city} onValueChange={(val) => updateFilters({ city: val })}>
                 <SelectTrigger className="h-12 rounded-none border-2 focus:ring-primary">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -151,8 +179,7 @@ export default function EventsPageContent() {
               className="mt-8 rounded-none font-mono uppercase text-xs tracking-widest"
               onClick={() => {
                 setSearch("");
-                setCity("all");
-                setPage(1);
+                updateFilters({ search: "", city: "all", page: 1 });
               }}
             >
               Limpiar Filtros
@@ -172,7 +199,7 @@ export default function EventsPageContent() {
             <Button
               variant="outline"
               className="rounded-none border-2 h-12 w-12 p-0 flex items-center justify-center transition-all hover:bg-primary hover:text-primary-foreground disabled:opacity-30"
-              onClick={() => setPage(p => Math.max(1, p - 1))}
+              onClick={() => updateFilters({ page: Math.max(1, page - 1) })}
               disabled={page === 1 || loading}
             >
               <ChevronLeft className="h-5 w-5" />
@@ -198,7 +225,7 @@ export default function EventsPageContent() {
                     className={`rounded-none border-2 h-12 w-12 font-mono transition-all ${
                       page === p ? "bg-primary text-primary-foreground border-primary" : "hover:border-primary hover:text-primary"
                     }`}
-                    onClick={() => setPage(p)}
+                    onClick={() => updateFilters({ page: p })}
                     disabled={loading}
                   >
                     {p}
@@ -210,7 +237,7 @@ export default function EventsPageContent() {
             <Button
               variant="outline"
               className="rounded-none border-2 h-12 w-12 p-0 flex items-center justify-center transition-all hover:bg-primary hover:text-primary-foreground disabled:opacity-30"
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              onClick={() => updateFilters({ page: Math.min(totalPages, page + 1) })}
               disabled={page === totalPages || loading}
             >
               <ChevronRight className="h-5 w-5" />

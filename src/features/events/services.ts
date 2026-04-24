@@ -24,23 +24,33 @@ export const eventService = {
       const response = await fetch(`${baseUrl}/api/events?${params.toString()}`, {
         cache: 'no-store',
       });
+
       
-      if (!response.ok) return { data: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } };
+      if (!response.ok) {
+        return { 
+          success: false, 
+          data: { events: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } } 
+        };
+      }
       
       const json = await response.json();
       const result = Schemas.eventListResponseSchema.safeParse(json);
       
-      if (!result.success || result.data.status !== 'success') {
-        return { data: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } };
-      }
-      
+      const success = result.success && result.data.status === 'success';
+
       return {
-        data: result.data.data || [],
-        pagination: result.data.pagination
+        success,
+        data: {
+          events: result.data.data || [],
+          pagination: result.data.pagination || { total: 0, page: 1, limit: 10, totalPages: 0 }
+        }
       };
     } catch (error) {
       console.error('Error fetching events:', error);
-      return { data: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } };
+      return { 
+        success: false, 
+        data: { events: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } } 
+      };
     }
   },
 
