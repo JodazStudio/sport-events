@@ -101,7 +101,6 @@ export const eventService = {
       
       const json = await response.json();
 
-      console.log(json)
 
       const result = Schemas.singleEventResponseSchema.safeParse(json);
 

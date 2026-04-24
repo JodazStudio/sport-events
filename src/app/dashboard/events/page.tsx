@@ -11,39 +11,20 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui';
-import { Button } from '@/components/ui';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from '@/components/ui';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Form, Input } from '@/components/ui';
-import { toast } from 'sonner';
+import { Button, Input } from '@/components/ui';
 import { useAuthStore } from '@/store';
 import { cn } from '@/lib';
-import { FormInput, FormSelect } from '@/components/ui/forms';
-import { ConfigView } from '@/components/dashboard/config-view';
-import { useAdminEvents, useProvisionEvent } from '@/hooks/queries/useEvents';
+import { useAdminEvents } from '@/hooks/queries/useEvents';
+import { CreateEventDialog } from '@/components/dashboard/create-event-dialog';
 import { 
-  Plus, 
   ExternalLink, 
   Settings, 
-  Trash2, 
-  Loader2,
   Calendar,
   Clock,
   Search,
   Globe,
   Activity,
   Users,
-  ArrowUpRight,
   MapPin,
   DollarSign,
   AlertTriangle
@@ -78,7 +59,6 @@ export default function EventsPage() {
   // React Query Hooks
   const { data: adminData, isLoading: isEventsLoading } = useAdminEvents();
   const { data: statsData, isLoading: isStatsLoading } = useDashboardStats();
-  const provisionMutation = useProvisionEvent();
   const { role } = useAuthStore();
   
   const events = adminData?.events || [];
@@ -86,72 +66,11 @@ export default function EventsPage() {
   
   // Local UI State
   const [search, setSearch] = useState("");
-  const [isProvisionModalOpen, setIsProvisionModalOpen] = useState(false);
-  
-  // Form State for Provisioning
-  const eventSchema = z.object({
-    manager_id: z.string().min(1, 'El organizador es requerido'),
-    name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
-    slug: z.string()
-      .min(3, 'El slug debe tener al menos 3 caracteres')
-      .regex(/^[a-z0-9-]+$/, 'El slug solo puede contener minúsculas, números y guiones'),
-    event_date: z.string().min(1, 'La fecha es requerida'),
-    event_time: z.string().min(1, 'La hora es requerida'),
-    city: z.string().min(1, 'La ciudad es requerida'),
-  });
-
-  type EventFormValues = z.infer<typeof eventSchema>;
-
-  const form = useForm<EventFormValues>({
-    resolver: zodResolver(eventSchema),
-    defaultValues: {
-      manager_id: '',
-      name: '',
-      slug: '',
-      event_date: '',
-      event_time: '',
-      city: ''
-    }
-  });
-
-  const { watch, setValue } = form;
-
-  useEffect(() => {
-    const subscription = watch((value, { name }) => {
-      if (name === 'name') {
-        setValue('slug', handleSlugify(value.name || ''), { shouldValidate: true });
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [watch, setValue]);
 
   const filteredEvents = events.filter((event: Event) => 
     event.name.toLowerCase().includes(search.toLowerCase()) || 
     event.managers?.name.toLowerCase().includes(search.toLowerCase())
   );
-
-  const handleSlugify = (text: string) => {
-    return text
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  };
-
-  const handleProvisionSubmit = async (values: EventFormValues) => {
-    provisionMutation.mutate(values, {
-      onSuccess: () => {
-        toast.success('Evento creado correctamente');
-        setIsProvisionModalOpen(false);
-        form.reset();
-      },
-      onError: (error: any) => {
-        toast.error(error.message || 'Error al crear el evento');
-      }
-    });
-  };
-
 
   const openConfigPage = (event: Event) => {
     router.push(`/dashboard/events/${event.id}/configs?tab=general`);
@@ -181,78 +100,9 @@ export default function EventsPage() {
             />
           </div>
           
-          <Dialog open={isProvisionModalOpen} onOpenChange={setIsProvisionModalOpen}>
-            <DialogTrigger asChild>
-              <Button className="h-11 rounded-none border-2 border-black bg-primary hover:bg-primary/90 text-white font-black italic uppercase text-xs tracking-widest px-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
-                <Plus className="w-4 h-4 mr-2" />
-                Provision New
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] rounded-none border-4 border-black p-0 overflow-hidden">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleProvisionSubmit)}>
-                  <DialogHeader className="bg-black p-6 text-white">
-                    <DialogTitle className="font-satoshi text-2xl font-black italic uppercase">Crear Evento</DialogTitle>
-                    <DialogDescription className="font-medium italic text-gray-400">
-                      Crea un nuevo evento y asígnalo a un organizador.
-                    </DialogDescription>
-                  </DialogHeader>
-                  
-                  <div className="p-6 space-y-6">
-                    <FormSelect
-                      control={form.control}
-                      name="manager_id"
-                      label="Organizador Responsable"
-                      placeholder="Seleccionar organizador"
-                      options={managers.map((m: Manager) => ({ value: m.id, label: m.name, email: m.email }))}
-                    />
-                    
-                    <FormInput
-                      control={form.control}
-                      name="name"
-                      label="Nombre del Evento"
-                      placeholder="Ej. Maratón de la Ciudad"
-                    />
-                    
-                    <FormInput
-                      control={form.control}
-                      name="slug"
-                      label="Slug URL"
-                      placeholder="maraton-ciudad"
-                    />
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormInput
-                        control={form.control}
-                        name="event_date"
-                        label="Fecha"
-                        type="date"
-                      />
-                      <FormInput
-                        control={form.control}
-                        name="event_time"
-                        label="Hora"
-                        type="time"
-                      />
-                    </div>
-
-                    <FormInput
-                      control={form.control}
-                      name="city"
-                      label="Ciudad"
-                      placeholder="Ej. Caracas"
-                    />
-                  </div>
-
-                  <DialogFooter className="p-6 bg-muted/30 border-t-2 border-black/5">
-                    <Button type="submit" disabled={provisionMutation.isPending} className="w-full rounded-none border-2 border-black bg-black text-white font-black italic uppercase py-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
-                      {provisionMutation.isPending ? <Loader2 className="animate-spin" /> : 'Confirmar Provisión'}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
+          {role === 'superadmin' && (
+            <CreateEventDialog managers={managers} />
+          )}
         </div>
       </div>
 
@@ -271,7 +121,7 @@ export default function EventsPage() {
           ] : [
             { label: "Recaudación Estimada", value: `$${(statsData?.stats?.revenue_estimated || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`, icon: DollarSign, color: "border-green-600" },
             { label: "Inscripciones Totales", value: statsData?.stats?.registrations_total || "0", icon: Users, color: "border-primary" },
-            { label: "Pagos Pendientes", value: statsData?.stats?.pending_payments || "0", icon: Clock, color: statsData?.stats?.pending_payments > 0 ? "border-destructive animate-pulse" : "border-muted" },
+            { label: "Pagos Pendientes", value: statsData?.stats?.pending_payments || "0", icon: Clock, color: (statsData?.stats?.pending_payments || 0) > 0 ? "border-destructive animate-pulse" : "border-muted" },
             { label: "Etapa Actual", value: statsData?.stats?.current_stage || "N/A", icon: MapPin, color: "border-orange-500" },
           ]).map((stat, i) => {
             const isComingSoon = stat.label === "Estado de Sincronización" || stat.label === "Logs de Plataforma" || stat.label === "Tasa de Conversión";

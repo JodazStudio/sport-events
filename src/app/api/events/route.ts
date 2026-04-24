@@ -70,7 +70,6 @@ export async function GET(request: Request) {
     // For list requests, we need the count
     const isList = !slug && !id;
     let query = client.from('events').select('*, categories(*), registration_stages(*)', isList ? { count: 'exact' } : {});
-
     if (id) {
       query = query.eq('id', id);
     } else if (slug) {

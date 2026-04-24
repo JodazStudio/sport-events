@@ -102,7 +102,8 @@ export default async function EventPage({ params }: EventPageProps) {
       categories: event.categories?.map((cat: any) => ({
         name: cat.name,
         range: `${cat.min_age}-${cat.max_age}`,
-        description: cat.description || ""
+        description: cat.description || "",
+        gender: cat.gender
       })) || []
     },
     metadata: {
@@ -111,15 +112,10 @@ export default async function EventPage({ params }: EventPageProps) {
       ogTitle: event.name,
       ogDescription: event.description || ''
     },
-    // @ts-ignore
     organization: event.organization ? {
-      // @ts-ignore
       name: event.organization.name,
-      // @ts-ignore
       logo_url: event.organization.logo_url ?? undefined,
-      // @ts-ignore
       email: event.organization.email ?? undefined,
-      // @ts-ignore
       phone: event.organization.phone ?? undefined,
     } : undefined,
     social_media: event.social_media ? {

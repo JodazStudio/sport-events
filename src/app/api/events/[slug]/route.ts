@@ -42,7 +42,7 @@ export async function GET(
     // 1. Fetch event details
     const { data: event, error: eventError } = await supabase
       .from('events')
-      .select('id, name, slug, description, banner_url, has_inventory, rules_text, route_image_url, strava_url, social_media')
+      .select('*, categories(*), registration_stages(*)')
       .eq('slug', slug)
       .single();
 

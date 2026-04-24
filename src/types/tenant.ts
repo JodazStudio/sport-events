@@ -27,6 +27,7 @@ export interface TenantCategory {
   name: string;
   range: string;
   description?: string;
+  gender?: 'MALE' | 'FEMALE' | 'MIXED';
 }
 
 export interface TenantAward {

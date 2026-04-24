@@ -22,6 +22,7 @@ export interface Distance {
   label: string;
   description?: string;
   icon?: string;
+  gender?: 'MALE' | 'FEMALE' | 'MIXED';
 }
 
 export interface PricingStage {
