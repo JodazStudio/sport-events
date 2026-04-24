@@ -26,6 +26,11 @@ export const registrationService = {
       email,
       birth_date,
       gender,
+      phone,
+      blood_type,
+      state,
+      city,
+      club,
       shirt_size,
       payment_data
     } = data;
@@ -81,6 +86,11 @@ export const registrationService = {
         p_email: email,
         p_birth_date: birth_date,
         p_gender: gender,
+        p_phone: phone,
+        p_blood_type: blood_type,
+        p_state: state,
+        p_city: city,
+        p_club: club || 'Independiente',
         p_shirt_size: shirt_size,
         p_status: payment_data ? 'REPORTED' : 'PENDING',
         p_expires_at: expiresAt.toISOString(),

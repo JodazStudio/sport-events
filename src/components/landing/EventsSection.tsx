@@ -4,8 +4,8 @@ import { eventService } from "@/features/events";
 import { EventCard } from "@/components/events/EventCard";
 
 export const EventsSection = async () => {
-  const { data: events } = await eventService.getEvents({ limit: 4 });
-
+  const { data } = await eventService.getEvents({ limit: 2 });
+  
   return (
     <section id="eventos" className="py-24">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
@@ -33,7 +33,7 @@ export const EventsSection = async () => {
         </div>
 
         {/* Event cards */}
-        {events.length === 0 ? (
+        {data.events.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-muted rounded-none max-w-4xl text-center px-6">
             <Calendar className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
             <h3 className="font-satoshi text-xl font-bold uppercase italic text-muted-foreground">No hay eventos próximos</h3>
@@ -43,7 +43,7 @@ export const EventsSection = async () => {
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 max-w-4xl">
-            {events.map((event) => (
+            {data.events.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>

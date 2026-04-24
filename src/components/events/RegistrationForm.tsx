@@ -35,6 +35,19 @@ import { FormInput } from "@/components/ui/forms";
 import { toast } from "sonner";
 import { registrationSchema, type Registration } from "@/features/events/schemas";
 import { getBankByCode, getBankName } from "@/lib/banks";
+import { VENEZUELA_STATES, VENEZUELA_CITIES_BY_STATE } from "@/lib/venezuela";
+import { FormSelect } from "@/components/ui/forms";
+
+const BLOOD_TYPES = [
+  { value: "O+", label: "O+" },
+  { value: "O-", label: "O-" },
+  { value: "A+", label: "A+" },
+  { value: "A-", label: "A-" },
+  { value: "B+", label: "B+" },
+  { value: "B-", label: "B-" },
+  { value: "AB+", label: "AB+" },
+  { value: "AB-", label: "AB-" },
+];
 
 // --- Types ---
 interface EventData {
@@ -100,13 +113,37 @@ export function RegistrationForm({ event, activeStage, bcvRate, slug }: Registra
       email: "",
       birth_date: "",
       gender: "MALE",
+      phone: "",
+      blood_type: "",
+      state: "",
+      city: "",
+      club: "Independiente",
       shirt_size: "",
       payment_data: null
     },
   });
 
+  const selectedStateName = form.watch("state");
+  const selectedState = VENEZUELA_STATES.find(s => s.name === selectedStateName);
+  const cityOptions = selectedState 
+    ? (VENEZUELA_CITIES_BY_STATE[selectedState.id] || []).map(c => ({ value: c, label: c }))
+    : [];
+
+  const stateOptions = VENEZUELA_STATES.map(s => ({ value: s.name, label: s.name }));
+
   const handleNextStep = async () => {
-    const fieldsToValidate = ["first_name", "last_name", "dni", "email", "birth_date", "gender"];
+    const fieldsToValidate = [
+      "first_name", 
+      "last_name", 
+      "dni", 
+      "email", 
+      "birth_date", 
+      "gender",
+      "phone",
+      "blood_type",
+      "state",
+      "city"
+    ];
     if (event.has_inventory) fieldsToValidate.push("shirt_size");
     
     const isValid = await form.trigger(fieldsToValidate as any);
@@ -343,6 +380,45 @@ ${event.payment_info.account_number ? `Cuenta: ${event.payment_info.account_numb
                         <FormMessage className="text-[10px] font-bold uppercase" />
                       </FormItem>
                     )}
+                  />
+
+                  <FormInput
+                    control={form.control}
+                    name="phone"
+                    label="Teléfono Móvil *"
+                    placeholder="04120000000"
+                  />
+
+                  <FormSelect
+                    control={form.control}
+                    name="blood_type"
+                    label="Tipo de Sangre *"
+                    placeholder="Selecciona"
+                    options={BLOOD_TYPES}
+                  />
+
+                  <FormSelect
+                    control={form.control}
+                    name="state"
+                    label="Estado *"
+                    placeholder="Selecciona Estado"
+                    options={stateOptions}
+                  />
+
+                  <FormSelect
+                    control={form.control}
+                    name="city"
+                    label="Ciudad *"
+                    placeholder="Selecciona Ciudad"
+                    options={cityOptions}
+                    disabled={!selectedStateName}
+                  />
+
+                  <FormInput
+                    control={form.control}
+                    name="club"
+                    label="Club / Equipo"
+                    placeholder="Ej: Independiente"
                   />
                 </div>
 

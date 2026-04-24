@@ -25,8 +25,10 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
   }
 
   return {
-    title: event.organization?.name 
-      ? `${event.name} | Organizado por ${event.organization.name} | ZonaCrono`
+    // @ts-ignore
+    title: event?.organization?.name 
+    // @ts-ignore
+      ? `${event.name} | Organizado por ${event?.organization?.name} | ZonaCrono`
       : `${event.name} | ZonaCrono`,
     description: event.description || `Inscríbete en ${event.name} a través de ZonaCrono.`,
     openGraph: {
@@ -109,8 +111,24 @@ export default async function EventPage({ params }: EventPageProps) {
       ogTitle: event.name,
       ogDescription: event.description || ''
     },
-    organization: (event as any).organization,
-    social_media: (event as any).social_media
+    // @ts-ignore
+    organization: event.organization ? {
+      // @ts-ignore
+      name: event.organization.name,
+      // @ts-ignore
+      logo_url: event.organization.logo_url ?? undefined,
+      // @ts-ignore
+      email: event.organization.email ?? undefined,
+      // @ts-ignore
+      phone: event.organization.phone ?? undefined,
+    } : undefined,
+    social_media: event.social_media ? {
+      instagram: (event.social_media as any).instagram,
+      facebook: (event.social_media as any).facebook,
+      twitter: (event.social_media as any).twitter,
+      threads: (event.social_media as any).threads,
+      tiktok: (event.social_media as any).tiktok,
+    } : undefined
   };
 
   return (
