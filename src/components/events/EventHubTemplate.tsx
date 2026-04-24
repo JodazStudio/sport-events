@@ -47,18 +47,44 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
     alt: `${tenant.name} - Imagen ${idx + 1}`
   })) || [];
 
-  // Map distances from tenant data
-  const distances: Distance[] = tenant.eventDetails?.categories?.map((cat, idx) => {
-    const hasGenderInfo = /masculino\/femenino/i.test(cat.name);
-    return {
-      id: `cat-${idx}`,
-      name: cat.name.replace(/\s+masculino\/femenino/i, '').trim(),
+  // Map categories grouped by gender
+  const allCategories = tenant.eventDetails?.categories || [];
+
+  const femaleDistances: Distance[] = allCategories
+    .filter(cat => (cat as any).gender === 'FEMALE' || /femenino/i.test(cat.name))
+    .map((cat, idx) => ({
+      id: `fem-${idx}`,
+      name: cat.name.replace(/\s*[\/\-]?\s*femenino\s*[\/\-]?\s*/gi, ' ').replace(/\s+/g, ' ').trim(),
       label: cat.range,
-      description: cat.description || (hasGenderInfo ? "Masculino / Femenino" : `Categoría para participantes de ${cat.range}.`)
-    };
-  }) || [
-    { id: "main", name: "Ruta Principal", label: tenant.city, description: tenant.description }
-  ];
+      description: cat.description || `Categoría femenina para participantes de ${cat.range}.`,
+      gender: 'FEMALE' as const
+    }));
+
+  const maleDistances: Distance[] = allCategories
+    .filter(cat => (cat as any).gender === 'MALE' || /masculino/i.test(cat.name))
+    .map((cat, idx) => ({
+      id: `male-${idx}`,
+      name: cat.name.replace(/\s*[\/\-]?\s*masculino\s*[\/\-]?\s*/gi, ' ').replace(/\s+/g, ' ').trim(),
+      label: cat.range,
+      description: cat.description || `Categoría masculina para participantes de ${cat.range}.`,
+      gender: 'MALE' as const
+    }));
+
+
+  const mixedDistances: Distance[] = allCategories
+    .filter(cat => (cat as any).gender === 'MIXED' || (!/femenino/i.test(cat.name) && !/masculino/i.test(cat.name)))
+    .map((cat, idx) => ({
+      id: `gen-${idx}`,
+      name: cat.name.trim(),
+      label: cat.range,
+      description: cat.description || `Categoría para participantes de ${cat.range}.`,
+      gender: 'MIXED' as const
+    }));
+
+  // Fallback if no categories defined
+  const distances: Distance[] = mixedDistances.length > 0 ? mixedDistances : (
+    allCategories.length === 0 ? [{ id: "main", name: "Ruta Principal", label: tenant.city, description: tenant.description }] : []
+  );
 
   // Map pricing stages from tenant data
   const pricingStages: PricingStage[] = tenant.pricingStages || [
@@ -93,6 +119,8 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
         <DistancesSection 
           description={tenant.description}
           distances={distances}
+          femaleDistances={femaleDistances}
+          maleDistances={maleDistances}
           routeMapUrl={tenant.eventDetails?.route?.image}
           routeDescription={tenant.eventDetails?.route?.description}
           stravaUrl={tenant.eventDetails?.route?.stravaLinks?.[0]?.url}

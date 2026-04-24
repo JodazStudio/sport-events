@@ -1,10 +1,12 @@
-import { Card, CardContent, Button, AnimatedContent } from "@/components/ui";
+import { Card, CardContent, Button, AnimatedContent, Badge } from "@/components/ui";
 import { Route, Map } from "lucide-react";
 import type { Distance } from "./types";
 
 interface DistancesSectionProps {
   description?: string;
   distances?: Distance[];
+  maleDistances?: Distance[];
+  femaleDistances?: Distance[];
   routeMapUrl?: string;
   routeDescription?: string;
   stravaUrl?: string;
@@ -18,6 +20,8 @@ interface DistancesSectionProps {
 export const DistancesSection = ({ 
   description, 
   distances, 
+  maleDistances,
+  femaleDistances,
   routeMapUrl, 
   routeDescription,
   stravaUrl, 
@@ -71,32 +75,134 @@ export const DistancesSection = ({
             )}
           </AnimatedContent>
 
-          {/* Distance cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {distances && distances.length > 0 ? (
-              distances.map((d, idx) => (
-                <AnimatedContent key={d.id} delay={0.3 + idx * 0.1} distance={30}>
-                  <Card className="bg-card border-border hover:border-ember/50 transition-colors group rounded-none h-full">
-                    <CardContent className="p-8 text-center">
-                      <Route className="w-10 h-10 text-ember mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                      <h3 className="font-satoshi font-black text-3xl text-foreground mb-2 italic uppercase">{d.name}</h3>
-                      <p className="text-sm text-muted-foreground font-satoshi">{d.label}</p>
-                      {d.description && (
-                        <p className="text-xs text-muted-foreground font-satoshi mt-2">{d.description}</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                </AnimatedContent>
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <Route className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground font-satoshi">
-                  Las distancias serán configuradas por el organizador.
-                </p>
+          {/* Contenedor de Columnas de Género */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-16 mb-20">
+            {/* Columna Masculina */}
+            {maleDistances && maleDistances.length > 0 && (
+              <div>
+                <h3 className="font-satoshi font-black text-2xl text-ember mb-8 text-center lg:text-left italic uppercase tracking-[0.2em] flex items-center justify-center lg:justify-start gap-4">
+                  <span className="w-8 h-px bg-ember/30 hidden lg:block" />
+                  Masculino
+                </h3>
+                <div className="space-y-2">
+                  {maleDistances.map((d, idx) => (
+                    <AnimatedContent key={d.id} delay={0.1 + idx * 0.05} distance={10}>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-6 border border-border/40 hover:border-ember/40 bg-card/30 backdrop-blur-sm transition-all group relative overflow-hidden h-full">
+                        <div className="absolute inset-y-0 left-0 w-1 bg-ember/0 group-hover:bg-ember transition-all" />
+                        <div className="flex items-center gap-5">
+                          <div className="w-12 h-12 flex items-center justify-center bg-background border border-border group-hover:border-ember/30 transition-colors">
+                            <Route className="w-6 h-6 text-ember/60 group-hover:text-ember transition-all" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-3">
+                              <h4 className="font-satoshi font-black text-xl text-foreground uppercase italic tracking-tight">{d.name}</h4>
+                              <Badge variant="outline" className="text-[10px] py-0 px-2 border-ember/30 text-ember bg-ember/5 rounded-none font-mono font-bold uppercase">
+                                MASC
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-ember font-mono uppercase tracking-widest mt-0.5">{d.label}</p>
+                          </div>
+                        </div>
+                        {d.description && (
+                          <p className="text-sm text-muted-foreground font-satoshi mt-3 sm:mt-0 sm:max-w-[150px] sm:text-right italic leading-relaxed">
+                            {d.description}
+                          </p>
+                        )}
+                      </div>
+                    </AnimatedContent>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Columna Femenina */}
+            {femaleDistances && femaleDistances.length > 0 && (
+              <div className="container">
+                <h3 className="font-satoshi font-black text-2xl text-ember mb-8 text-center lg:text-left italic uppercase tracking-[0.2em] flex items-center justify-center lg:justify-start gap-4">
+                  <span className="w-8 h-px bg-ember/30 hidden lg:block" />
+                  Femenino
+                </h3>
+                <div className="space-y-2">
+                  {femaleDistances.map((d, idx) => (
+                    <AnimatedContent key={d.id} delay={0.1 + idx * 0.05} distance={10}>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-6 border border-border/40 hover:border-ember/40 bg-card/30 backdrop-blur-sm transition-all group relative overflow-hidden h-full">
+                        <div className="absolute inset-y-0 left-0 w-1 bg-ember/0 group-hover:bg-ember transition-all" />
+                        <div className="flex items-center gap-5">
+                          <div className="w-12 h-12 flex items-center justify-center bg-background border border-border group-hover:border-ember/30 transition-colors">
+                            <Route className="w-6 h-6 text-ember/60 group-hover:text-ember transition-all" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-3">
+                              <h4 className="font-satoshi font-black text-xl text-foreground uppercase italic tracking-tight">{d.name}</h4>
+                              <Badge variant="outline" className="text-[10px] py-0 px-2 border-ember/30 text-ember bg-ember/5 rounded-none font-mono font-bold uppercase">
+                                FEM
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-ember font-mono uppercase tracking-widest mt-0.5">{d.label}</p>
+                          </div>
+                        </div>
+                        {d.description && (
+                          <p className="text-sm text-muted-foreground font-satoshi mt-3 sm:mt-0 sm:max-w-[150px] sm:text-right italic leading-relaxed">
+                            {d.description}
+                          </p>
+                        )}
+                      </div>
+                    </AnimatedContent>
+                  ))}
+                </div>
               </div>
             )}
           </div>
+
+          {/* Categorías Generales (Fallback / Mixtas) */}
+          {/* {distances && distances.length > 0 && (
+            <div className="mb-20 last:mb-0">
+              {((femaleDistances && femaleDistances.length > 0) || (maleDistances && maleDistances.length > 0)) && (
+                <h3 className="font-satoshi font-black text-2xl text-ember mb-10 text-center italic uppercase tracking-[0.2em]">
+                  — General —
+                </h3>
+              )}
+              <div className="max-w-4xl mx-auto space-y-2">
+                {distances.map((d, idx) => (
+                  <AnimatedContent key={d.id} delay={0.1 + idx * 0.05} distance={10}>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-6 border border-border/40 hover:border-ember/40 bg-card/30 backdrop-blur-sm transition-all group relative overflow-hidden">
+                      <div className="absolute inset-y-0 left-0 w-1 bg-ember/0 group-hover:bg-ember transition-all" />
+                      <div className="flex items-center gap-5">
+                        <div className="w-12 h-12 flex items-center justify-center bg-background border border-border group-hover:border-ember/30 transition-colors">
+                          <Route className="w-6 h-6 text-ember/60 group-hover:text-ember transition-all" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-3">
+                            <h4 className="font-satoshi font-black text-xl text-foreground uppercase italic tracking-tight">{d.name}</h4>
+                            <Badge variant="outline" className="text-[10px] py-0 px-2 border-ember/30 text-ember bg-ember/5 rounded-none font-mono font-bold uppercase">
+                              MIX
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-ember font-mono uppercase tracking-widest mt-0.5">{d.label}</p>
+                        </div>
+                      </div>
+                      {d.description && (
+                        <p className="text-xs text-muted-foreground font-satoshi mt-3 sm:mt-0 sm:max-w-[250px] sm:text-right italic">
+                          {d.description}
+                        </p>
+                      )}
+                    </div>
+                  </AnimatedContent>
+                ))}
+              </div>
+            </div>
+          )} */}
+
+          {(!femaleDistances || femaleDistances.length === 0) && 
+           (!maleDistances || maleDistances.length === 0) && 
+           (!distances || distances.length === 0) && (
+            <div className="text-center py-12">
+              <Route className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground font-satoshi">
+                Las distancias serán configuradas por el organizador.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
