@@ -36,8 +36,15 @@ export const eventService = {
       const json = await response.json();
       const result = Schemas.eventListResponseSchema.safeParse(json);
       
-      const success = result.success && result.data.status === 'success';
+      if (!result.success) {
+        return { 
+          success: false, 
+          data: { events: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } } 
+        };
+      }
 
+      const success = result.data.status === 'success';
+      
       return {
         success,
         data: {
