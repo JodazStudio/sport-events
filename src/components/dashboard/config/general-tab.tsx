@@ -19,16 +19,16 @@ export function GeneralTab({ managers, onSlugify }: GeneralTabProps) {
         <CardTitle className="font-satoshi font-black italic uppercase text-xl">Información General</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 pt-6">
-        <FormSelect
+        <FormCombobox
           control={control}
           name="manager_id"
           label="Organizador"
           placeholder="Seleccionar organizador"
-          options={managers.map((m: any) => ({
+          options={(managers || []).map((m: any) => ({
             value: m.id,
-            label: m.name,
-            email: m.email,
+            label: m.name + (m.email ? ` (${m.email})` : ""),
           }))}
+          emptyText="No se encontraron organizadores."
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
