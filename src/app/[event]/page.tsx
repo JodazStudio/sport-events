@@ -109,8 +109,19 @@ export default async function EventPage({ params }: EventPageProps) {
       ogTitle: event.name,
       ogDescription: event.description || ''
     },
-    organization: (event as any).organization,
-    social_media: (event as any).social_media
+    organization: event.organization ? {
+      name: event.organization.name,
+      logo_url: event.organization.logo_url ?? undefined,
+      email: event.organization.email ?? undefined,
+      phone: event.organization.phone ?? undefined,
+    } : undefined,
+    social_media: event.social_media ? {
+      instagram: (event.social_media as any).instagram,
+      facebook: (event.social_media as any).facebook,
+      twitter: (event.social_media as any).twitter,
+      threads: (event.social_media as any).threads,
+      tiktok: (event.social_media as any).tiktok,
+    } : undefined
   };
 
   return (
