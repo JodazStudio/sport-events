@@ -35,7 +35,7 @@ export const eventService = {
       
       const json = await response.json();
       const result = Schemas.eventListResponseSchema.safeParse(json);
-      
+
       if (!result.success) {
         return { 
           success: false, 
