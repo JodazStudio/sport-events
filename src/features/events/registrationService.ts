@@ -4,8 +4,10 @@ import {
   sendRegistrationReceivedEmail, 
   sendReservationConfirmedEmail, 
   sendPaymentReportedEmail,
-  sendPaymentRejectedEmail 
+  sendPaymentRejectedEmail,
+  sendRegistrationApprovedEmail 
 } from '@/lib/mail';
+
 import { sendTelegramNotification, formatRegistrationAlert } from '@/lib/telegram';
 
 export const registrationService = {
@@ -299,8 +301,6 @@ export const registrationService = {
   },
 
   async sendNotificationsOnStatusChange(registration: any, status: string, reason?: string) {
-    if (status !== 'REJECTED') return; // We only handle REJECTED for now as requested
-
     try {
       const athleteInfo = {
         email: registration.email,
@@ -313,8 +313,13 @@ export const registrationService = {
         slug: registration.events.slug
       };
 
-      await sendPaymentRejectedEmail(athleteInfo, eventInfo, registration.id, reason);
-      console.log(`[RegistrationService] Rejected email sent for ${registration.id}`);
+      if (status === 'REJECTED') {
+        await sendPaymentRejectedEmail(athleteInfo, eventInfo, registration.id, reason);
+        console.log(`[RegistrationService] Rejected email sent for ${registration.id}`);
+      } else if (status === 'APPROVED') {
+        await sendRegistrationApprovedEmail(athleteInfo, eventInfo, registration.id);
+        console.log(`[RegistrationService] Approved email sent for ${registration.id}`);
+      }
     } catch (e) {
       console.error('[RegistrationService] Failed to send status notification:', e);
     }

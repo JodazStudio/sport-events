@@ -11,8 +11,6 @@ import {
   Mail, 
   ShieldAlert, 
   Loader2, 
-  Eye, 
-  EyeOff,
   KeyRound,
   Trash2,
   Edit2,
@@ -60,7 +58,7 @@ import {
 import { 
   Form,
 } from "@/components/ui/form";
-import { FormInput, FormSelect, FormSwitch } from "@/components/ui/forms";
+import { FormInput, FormSelect, FormSwitch, FormPasswordInput } from "@/components/ui/forms";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -115,7 +113,6 @@ export default function ManagersPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedManager, setSelectedManager] = useState<Manager | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
 
   // Forms
   const createForm = useForm<CreateFormValues>({
@@ -371,22 +368,12 @@ export default function ManagersPage() {
                   type="email"
                   placeholder="juan@ejemplo.com"
                 />
-                <div className="relative">
-                  <FormInput 
-                    control={createForm.control}
-                    name="password"
-                    label="Contraseña Inicial"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                  />
-                  <button 
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-[38px] text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
+                <FormPasswordInput 
+                  control={createForm.control}
+                  name="password"
+                  label="Contraseña Inicial"
+                  placeholder="••••••••"
+                />
                 <FormSelect 
                   control={createForm.control}
                   name="role"
@@ -433,22 +420,12 @@ export default function ManagersPage() {
                   label="Correo Electrónico"
                   type="email"
                 />
-                <div className="relative">
-                  <FormInput 
-                    control={editForm.control}
-                    name="password"
-                    label="Nueva Contraseña (Opcional)"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Dejar en blanco para mantener actual"
-                  />
-                  <button 
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-[38px] text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
+                <FormPasswordInput 
+                  control={editForm.control}
+                  name="password"
+                  label="Nueva Contraseña (Opcional)"
+                  placeholder="Dejar en blanco para mantener actual"
+                />
                 <FormSelect 
                   control={editForm.control}
                   name="role"
