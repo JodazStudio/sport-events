@@ -3,7 +3,7 @@ import EventsPageContent from "./EventsPageContent";
 import { eventService } from "@/features/events";
 
 export const metadata: Metadata = {
-  title: "Eventos | Zonacrono",
+  title: "Eventos",
   description: "Explora todos los eventos deportivos gestionados por Zonacrono. Carreras, triatlones, ciclismo y más.",
 };
 

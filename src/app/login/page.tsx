@@ -5,7 +5,7 @@ import { useAuthStore } from "@/store";
 import { useRouter } from "next/navigation";
 import { Timer, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { Button, Logo } from "@/components/ui";
+import { Button, Logo, PasswordInput } from "@/components/ui";
 import { Input } from "@/components/ui";
 import { Label } from "@/components/ui";
 import { toast } from "sonner";
@@ -91,9 +91,8 @@ export default function LoginPage() {
                     ¿Olvidaste tu contraseña?
                   </Link>
                 </div>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

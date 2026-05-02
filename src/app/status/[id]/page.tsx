@@ -1,4 +1,5 @@
 import React from 'react';
+import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -21,12 +22,29 @@ import { es } from 'date-fns/locale';
 import { supabaseAdmin } from '@/lib';
 import { getBcvRate } from '@/lib/currency';
 import { cn } from '@/lib/utils';
-import { Button, Badge, Separator } from '@/components/ui';
+import { Button, Badge, Separator, Logo } from '@/components/ui';
 import { ThemeToggle } from '@/components/dashboard/theme-toggle';
 import { ReportPaymentForm } from '@/components/events/ReportPaymentForm';
 
 interface StatusPageProps {
   params: Promise<{ id: string }>;
+}
+
+/**
+ * Generate metadata for the status page
+ */
+export async function generateMetadata({ params }: StatusPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const registration = await getRegistration(id);
+
+  if (!registration) {
+    return { title: 'Inscripción no encontrada' };
+  }
+
+  return {
+    title: 'Estado de Inscripción',
+    description: `Consulta el estado de tu inscripción para ${registration.event?.name}.`,
+  };
 }
 
 async function getRegistration(id: string) {
@@ -102,13 +120,9 @@ export default async function RegistrationStatusPage({ params }: StatusPageProps
       <nav className="border-b-4 border-black dark:border-white bg-background sticky top-0 z-50">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 lg:px-8">
           <Link href="/" className="flex items-center gap-2">
-            <Timer className="h-8 w-8 text-primary" strokeWidth={3} />
-            <span className="font-satoshi text-2xl font-black uppercase tracking-tighter text-foreground italic">
-              Zona<span className="text-primary">crono</span>
-            </span>
+            <Logo width={160} height={36} className="h-[35px] w-auto object-contain" priority />
           </Link>
           <div className="flex items-center gap-4">
-            <ThemeToggle />
             <Link href={`/${registration.event.slug}`}>
               <Button variant="ghost" className="font-mono text-xs uppercase font-black hover:bg-foreground hover:text-background rounded-none border-2 border-transparent hover:border-foreground transition-all">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Volver al evento
@@ -228,9 +242,6 @@ export default async function RegistrationStatusPage({ params }: StatusPageProps
         {/* Footer actions */}
         <div className="mt-12 text-center space-y-6">
           <Separator className="bg-foreground/10 h-1" />
-          <p className="font-mono text-xs text-muted-foreground uppercase font-bold">
-            ID de Inscripción: <span className="text-foreground">{registration.id}</span>
-          </p>
           <div className="flex justify-center gap-4">
              <Link href={`/${registration.event.slug}`}>
               <Button variant="outline" className="rounded-none border-2 border-black dark:border-white font-black uppercase text-xs tracking-widest px-6 h-12 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">

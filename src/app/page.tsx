@@ -14,7 +14,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Zonacrono | Software y Promoción para Eventos Deportivos",
+  title: "ZonaCrono | Impulsa tus eventos deportivos",
   description: "Plataforma integral para inscripciones, gestión de resultados en tiempo real y estrategias de promoción para carreras, triatlones y eventos deportivos.",
   alternates: {
     canonical: '/',

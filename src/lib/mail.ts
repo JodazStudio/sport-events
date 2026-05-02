@@ -4,6 +4,8 @@ import { RegistrationReceivedEmail } from '@/components/emails/RegistrationRecei
 import { ReservationConfirmedEmail } from '@/components/emails/ReservationConfirmed';
 import { PaymentReportedEmail } from '@/components/emails/PaymentReported';
 import { PaymentRejectedEmail } from '@/components/emails/PaymentRejected';
+import { RegistrationApprovedEmail } from '@/components/emails/RegistrationApproved';
+
 
 let _resend: Resend | null = null;
 
@@ -148,6 +150,37 @@ export async function sendPaymentRejectedEmail(
     console.error('[Mail] Resend error (PaymentRejected):', error);
   } else {
     console.log('[Mail] Resend success (PaymentRejected)');
+  }
+
+  return { error };
+}
+
+/**
+ * Flow (Status Change): Registration approved by admin
+ */
+export async function sendRegistrationApprovedEmail(
+  athlete: AthleteInfo,
+  event: EventInfo,
+  registrationId: string
+) {
+  const statusUrl = `${env.NEXT_PUBLIC_APP_URL}/status/${registrationId}`;
+
+  console.log(`[Mail] Attempting to send RegistrationApproved email to: ${athlete.email}`);
+  const { error } = await getResend().emails.send({
+    from: FROM_ADDRESS,
+    to: athlete.email,
+    subject: `🏁 Inscripción aprobada — ${event.name}`,
+    react: RegistrationApprovedEmail({
+      athleteName: `${athlete.firstName} ${athlete.lastName}`,
+      eventName: event.name,
+      statusUrl,
+    }),
+  });
+
+  if (error) {
+    console.error('[Mail] Resend error (RegistrationApproved):', error);
+  } else {
+    console.log('[Mail] Resend success (RegistrationApproved)');
   }
 
   return { error };

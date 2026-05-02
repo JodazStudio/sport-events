@@ -19,14 +19,14 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
   const event = await eventService.getEventBySlug(eventSlug);
   if (!event) {
     return {
-      title: 'Evento no encontrado | ZonaCrono',
+      title: 'Evento no encontrado',
     };
   }
 
   return {
     title: event?.organization?.name 
-      ? `${event.name} | Organizado por ${event?.organization?.name} | ZonaCrono`
-      : `${event.name} | ZonaCrono`,
+      ? `${event.name} | Organizado por ${event.organization.name}`
+      : event.name,
     description: event.description || `Inscríbete en ${event.name} a través de ZonaCrono.`,
     openGraph: {
       title: event.name,

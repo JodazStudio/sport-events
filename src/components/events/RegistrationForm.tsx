@@ -29,7 +29,8 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
+  Logo
 } from "@/components/ui";
 import { FormInput } from "@/components/ui/forms";
 import { toast } from "sonner";
@@ -263,10 +264,7 @@ ${event.payment_info.account_number ? `Cuenta: ${event.payment_info.account_numb
       <nav className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-8">
           <Link href="/" className="flex items-center gap-2">
-            <Timer className="h-6 w-6 text-primary" strokeWidth={2.5} />
-            <span className="font-satoshi text-lg font-black uppercase tracking-tight text-foreground italic">
-              Zona<span className="text-primary">crono</span>
-            </span>
+            <Logo width={160} height={36} priority />
           </Link>
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex flex-col items-end">
