@@ -20,11 +20,11 @@ export async function generateMetadata({ params }: InscripcionPageProps): Promis
   const event = await eventService.getEventBySlug(slug);
 
   if (!event) {
-    return { title: 'Evento no encontrado | ZonaCrono' };
+    return { title: 'Evento no encontrado' };
   }
 
   return {
-    title: `Inscripción: ${event.name} | ZonaCrono`,
+    title: `Inscripción: ${event.name}`,
     description: `Inscríbete ahora en ${event.name}.`,
   };
 }

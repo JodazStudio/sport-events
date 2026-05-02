@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Zonacrono",
-    default: "Zonacrono | Software y Promoción para Eventos Deportivos",
+    template: "ZonaCrono | %s",
+    default: "ZonaCrono | Software y Promoción para Eventos Deportivos",
   },
   description: "Plataforma tecnológica y servicios de difusión para potenciar inscripciones, gestión de resultados en tiempo real y organización de eventos deportivos de clase mundial.",
   keywords: ["eventos deportivos", "inscripciones online", "gestión de resultados", "software deportivo", "Zonacrono", "organización deportiva"],
