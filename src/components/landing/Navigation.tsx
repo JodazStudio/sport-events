@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { TenantData } from "@/types";
-import Image from "next/image";
+import { Logo } from "../ui/logo";
 
 interface NavigationProps {
   data: TenantData;
@@ -28,9 +28,7 @@ export const Navigation = ({ data }: NavigationProps) => {
           {/* Logo */}
           <div className="flex items-center gap-3">
             <a href="/" className="flex items-center">
-              <Image 
-                src="/ZONACRONO.png" 
-                alt="Zonacrono Logo" 
+              <Logo 
                 width={150} 
                 height={35} 
                 className="h-[35px] w-auto object-contain"

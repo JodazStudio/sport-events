@@ -39,6 +39,7 @@ export async function GET(request: Request) {
     const id = searchParams.get('id');
     const search = searchParams.get('search');
     const city = searchParams.get('city');
+    const onlyFilled = searchParams.get('only_filled') === 'true';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
 
@@ -85,6 +86,9 @@ export async function GET(request: Request) {
       if (city) {
         query = query.ilike('city', `%${city}%`);
       }
+      if (onlyFilled) {
+        query = query.not('organization', 'is', null).neq('organization->>name', '');
+      }
     }
 
     if (id || slug) {
@@ -108,8 +112,8 @@ export async function GET(request: Request) {
     const { data, error, count } = await query
       .order('event_date', { ascending: false })
       .range(from, to);
-      
-    if (error) throw error;
+
+      if (error) throw error;
 
     return NextResponse.json({ 
       status: 'success', 

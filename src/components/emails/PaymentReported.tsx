@@ -6,6 +6,7 @@ import {
   Heading,
   Hr,
   Html,
+  Img,
   Preview,
   Section,
   Text,
@@ -31,9 +32,13 @@ export function PaymentReportedEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={headerSection}>
-            <Heading style={logo}>
-              Zona<span style={logoAccent}>crono</span>
-            </Heading>
+            <Img
+              src="https://zonacrono.com/zonacrono_dark.png"
+              width="180"
+              height="40"
+              alt="Zonacrono"
+              style={logoImage}
+            />
           </Section>
 
           <Section style={contentSection}>
@@ -94,17 +99,8 @@ const headerSection: React.CSSProperties = {
   textAlign: 'center' as const,
 };
 
-const logo: React.CSSProperties = {
-  color: '#ffffff',
-  fontSize: '28px',
-  fontWeight: 900,
-  fontStyle: 'italic',
-  letterSpacing: '-0.05em',
-  margin: 0,
-};
-
-const logoAccent: React.CSSProperties = {
-  color: '#d50f17', // brand-red
+const logoImage: React.CSSProperties = {
+  margin: '0 auto',
 };
 
 const contentSection: React.CSSProperties = {

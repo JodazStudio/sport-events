@@ -52,3 +52,4 @@ export * from './toggle';
 export * from './tooltip';
 export * from './use-toast';
 export * from './forms';
+export * from './logo';

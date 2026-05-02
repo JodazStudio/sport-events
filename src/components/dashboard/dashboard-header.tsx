@@ -25,6 +25,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
+import { Logo } from "../ui";
 import { useAuthStore } from "@/store";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
@@ -85,9 +86,7 @@ export function DashboardHeader() {
       <header className="sticky top-0 z-50 flex h-16 w-full items-center border-b bg-background/95 backdrop-blur px-4 md:px-8">
         {/* Logo Section */}
         <Link href="/dashboard" className="flex items-center gap-3 mr-8 shrink-0">
-          <Image 
-            src="/ZONACRONO.png" 
-            alt="Zonacrono Logo" 
+          <Logo 
             width={200} 
             height={45} 
             className="h-[40px] w-auto object-contain"

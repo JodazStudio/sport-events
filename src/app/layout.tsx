@@ -23,9 +23,9 @@ export const metadata: Metadata = {
   creator: "Zonacrono",
   metadataBase: new URL('https://zonacrono.com'),
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/ZONACRONO.png',
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
   },
   openGraph: {
     type: "website",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     siteName: "Zonacrono",
     images: [
       {
-        url: "/ZONACRONO.png",
+        url: "/zonacrono_light.png",
         width: 1200,
         height: 630,
         alt: "Zonacrono Logo",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Zonacrono | Software y Promoción para Eventos Deportivos",
     description: "Plataforma tecnológica y servicios de difusión para potenciar inscripciones, gestión de resultados en tiempo real y organización de eventos deportivos de clase mundial.",
-    images: ["/ZONACRONO.png"],
+    images: ["/zonacrono_light.png"],
   },
   robots: {
     index: true,
