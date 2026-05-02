@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Menu, X, Activity } from "lucide-react";
+import { Logo } from "@/components/ui";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -19,9 +20,7 @@ export const Navbar = () => {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <Image 
-            src="/ZONACRONO.png" 
-            alt="Zonacrono Logo" 
+          <Logo 
             width={225} 
             height={50} 
             className="h-[45px] w-auto object-contain"

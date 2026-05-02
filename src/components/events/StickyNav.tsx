@@ -79,7 +79,7 @@ export const StickyNav = ({
           {/* Logo & Event Name - Desktop Only */}
           <Link href="/" className="hidden lg:flex items-center gap-3 group">
             <Image 
-              src="/ZONACRONO.png" 
+              src="/zonacrono_dark.png" 
               alt="Zonacrono Logo" 
               width={150} 
               height={35} 
@@ -130,7 +130,7 @@ export const StickyNav = ({
             {eventName && (
               <div className="px-4 py-3 mb-2 border-b border-white/10 flex items-center gap-3">
                 <Image 
-                  src="/ZONACRONO.png" 
+                  src="/zonacrono_dark.png" 
                   alt="Zonacrono Logo" 
                   width={125} 
                   height={30} 

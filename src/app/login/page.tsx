@@ -5,7 +5,7 @@ import { useAuthStore } from "@/store";
 import { useRouter } from "next/navigation";
 import { Timer, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui";
+import { Button, Logo } from "@/components/ui";
 import { Input } from "@/components/ui";
 import { Label } from "@/components/ui";
 import { toast } from "sonner";
@@ -42,11 +42,12 @@ export default function LoginPage() {
       <div className="w-full max-w-[400px] space-y-8">
         {/* Logo & Header */}
         <div className="flex flex-col items-center text-center space-y-2">
-          <Link href="/" className="flex items-center gap-2 mb-4 group">
-            <Timer className="h-10 w-10 text-primary transition-transform group-hover:rotate-12" strokeWidth={2.5} />
-            <span className="font-satoshi text-3xl font-black uppercase tracking-tight italic">
-              Zona<span className="text-primary">crono</span>
-            </span>
+          <Link href="/" className="mb-4 group">
+            <Logo 
+              width={240} 
+              height={55} 
+              className="h-[50px] w-auto object-contain transition-transform group-hover:scale-105"
+            />
           </Link>
           <h1 className="font-satoshi text-2xl font-black uppercase tracking-tight text-foreground italic">
             Bienvenido de <span className="text-primary">Nuevo</span>
