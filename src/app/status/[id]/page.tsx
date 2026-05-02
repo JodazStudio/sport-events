@@ -242,9 +242,6 @@ export default async function RegistrationStatusPage({ params }: StatusPageProps
         {/* Footer actions */}
         <div className="mt-12 text-center space-y-6">
           <Separator className="bg-foreground/10 h-1" />
-          <p className="font-mono text-xs text-muted-foreground uppercase font-bold">
-            ID de Inscripción: <span className="text-foreground">{registration.id}</span>
-          </p>
           <div className="flex justify-center gap-4">
              <Link href={`/${registration.event.slug}`}>
               <Button variant="outline" className="rounded-none border-2 border-black dark:border-white font-black uppercase text-xs tracking-widest px-6 h-12 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
