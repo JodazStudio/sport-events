@@ -27,7 +27,8 @@ export default async function EventsPage({ searchParams }: PageProps) {
       page,
       limit: 8,
       search,
-      city: city === "all" ? "" : city
+      city: city === "all" ? "" : city,
+      onlyFilled: true
     }),
     eventService.getCities()
   ]);

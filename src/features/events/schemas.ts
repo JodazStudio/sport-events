@@ -65,6 +65,7 @@ export const eventSchema = z.object({
   route_description: z.string().optional().nullable(),
   strava_url: z.string().optional().nullable(),
   social_media: z.record(z.string(), z.any()).optional().nullable(),
+  organization: organizationSchema.optional().nullable(),
   payment_info: z.object({
     bank_name: z.string(),
     bank_code: z.string().optional().nullable(),
