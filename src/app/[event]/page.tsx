@@ -17,7 +17,6 @@ interface EventPageProps {
 export async function generateMetadata({ params }: EventPageProps): Promise<Metadata> {
   const { event: eventSlug } = await params;
   const event = await eventService.getEventBySlug(eventSlug);
-
   if (!event) {
     return {
       title: 'Evento no encontrado | ZonaCrono',
@@ -25,9 +24,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
   }
 
   return {
-    // @ts-ignore
     title: event?.organization?.name 
-    // @ts-ignore
       ? `${event.name} | Organizado por ${event?.organization?.name} | ZonaCrono`
       : `${event.name} | ZonaCrono`,
     description: event.description || `Inscríbete en ${event.name} a través de ZonaCrono.`,

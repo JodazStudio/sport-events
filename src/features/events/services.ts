@@ -8,9 +8,9 @@ export const eventService = {
   /**
    * Fetches a list of events with optional filters and pagination
    */
-  async getEvents(options: { page?: number; limit?: number; search?: string; city?: string } = {}) {
+  async getEvents(options: { page?: number; limit?: number; search?: string; city?: string; onlyFilled?: boolean } = {}) {
     try {
-      const { page = 1, limit = 10, search, city } = options;
+      const { page = 1, limit = 10, search, city, onlyFilled } = options;
       const baseUrl = env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
       
       const params = new URLSearchParams({
@@ -20,6 +20,7 @@ export const eventService = {
       
       if (search) params.append('search', search);
       if (city) params.append('city', city);
+      if (onlyFilled) params.append('only_filled', 'true');
 
       const response = await fetch(`${baseUrl}/api/events?${params.toString()}`, {
         cache: 'no-store',
@@ -35,7 +36,7 @@ export const eventService = {
       
       const json = await response.json();
       const result = Schemas.eventListResponseSchema.safeParse(json);
-      
+
       if (!result.success) {
         return { 
           success: false, 
@@ -100,10 +101,9 @@ export const eventService = {
       if (!response.ok) return null;
       
       const json = await response.json();
-
-
+      console.log(json)
       const result = Schemas.singleEventResponseSchema.safeParse(json);
-
+      console.log(result.data)
       if (!result.success || result.data.status !== 'success') {
         return null;
       }
