@@ -37,7 +37,7 @@ export const Footer = ({
                 <img 
                   src={logoUrl} 
                   alt="Evento Logo" 
-                  className="h-16 w-auto object-contain brightness-0 invert opacity-40 hover:opacity-100 transition-opacity duration-300" 
+                  className="h-16 w-auto object-contain " 
                 />
               </div>
             )}
