@@ -154,6 +154,7 @@
   --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
   --animate-needle: needle-sweep 2s ease-in-out infinite;
   --animate-count-up: count-up 0.6s ease-out forwards;
+  --animate-progress-line: progress-line 2s infinite ease-in-out;
 
   --background-image-gradient-hero: var(--gradient-hero);
   --background-image-gradient-card: var(--gradient-card);
@@ -197,6 +198,10 @@
   @keyframes count-up {
     0% { opacity: 0; transform: translateY(20px); }
     100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes progress-line {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
   }
 }
 
