@@ -1,8 +1,9 @@
 import { Card, CardContent, Button, AnimatedContent, Badge } from "@/components/ui";
 import { Route, Map } from "lucide-react";
-import type { Distance } from "./types";
+import type { EventData, Distance } from "./types";
 
 interface DistancesSectionProps {
+  event?: EventData;
   description?: string;
   distances?: Distance[];
   maleDistances?: Distance[];
@@ -18,6 +19,7 @@ interface DistancesSectionProps {
 }
 
 export const DistancesSection = ({ 
+  event,
   description, 
   distances, 
   maleDistances,
@@ -28,10 +30,23 @@ export const DistancesSection = ({
   logoUrl,
   organization
 }: DistancesSectionProps) => {
+  const eventLogo = logoUrl || organization?.logo_url;
+
   return (
-    <>
+    <div className="relative overflow-hidden bg-background">
+      {/* Event Logo Watermark - Absolute positioned top-left, covering half component area */}
+      {eventLogo && (
+        <div className="absolute top-0 left-0 w-1/2 h-1/2 pointer-events-none opacity-[0.04] select-none z-0">
+          <img 
+            src={eventLogo} 
+            alt="" 
+            className="w-full h-full object-contain object-left-top filter grayscale"
+          />
+        </div>
+      )}
+
       {/* Detalles */}
-      <section id="detalles" className="py-20 bg-background">
+      <section id="detalles" className="relative z-10 py-20 bg-transparent">
         <div className="container mx-auto px-4">
           <AnimatedContent>
             {organization?.name && (
@@ -40,7 +55,7 @@ export const DistancesSection = ({
                   <img 
                     src={organization.logo_url} 
                     alt={organization.name} 
-                    className="h-12 w-auto object-contain opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all"
+                    className="h-40 w-auto object-contain "
                   />
                 )}
                 <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-black">
@@ -48,26 +63,17 @@ export const DistancesSection = ({
                 </span>
               </div>
             )}
-            
-            {!organization?.name && logoUrl && (
-              <div className="mb-10 flex justify-center">
-                <img 
-                  src={logoUrl} 
-                  alt="Logo del Evento" 
-                  className="h-20 sm:h-28 w-auto object-contain filter grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
-                />
-              </div>
-            )}
             <h2 className="font-satoshi font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-foreground mb-12 text-center italic uppercase tracking-tighter">
-              Detalles del Evento
+              {event?.name}
             </h2>
           </AnimatedContent>
 
           <AnimatedContent delay={0.2}>
             {description ? (
-              <p className="text-muted-foreground font-satoshi text-base sm:text-lg md:text-xl max-w-3xl mx-auto text-center mb-16 leading-relaxed">
-                {description}
-              </p>
+              <div 
+                className="text-muted-foreground font-satoshi text-base sm:text-lg md:text-xl max-w-3xl mx-auto text-center mb-16 leading-relaxed [&_p]:mb-4 last:[&_p]:mb-0"
+                dangerouslySetInnerHTML={{ __html: description }}
+              />
             ) : (
               <p className="text-muted-foreground font-satoshi text-base sm:text-lg md:text-xl max-w-3xl mx-auto text-center mb-16 italic">
                 Descripción del evento pendiente por configurar.
@@ -207,7 +213,7 @@ export const DistancesSection = ({
       </section>
 
       {/* Ruta */}
-      <section id="ruta" className="py-20 bg-card">
+      <section id="ruta" className="relative z-10 py-20 bg-transparent">
         <div className="container mx-auto px-4">
           <AnimatedContent>
             <h2 className="font-satoshi font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-foreground mb-12 text-center italic uppercase tracking-tighter">
@@ -217,9 +223,10 @@ export const DistancesSection = ({
 
           {routeDescription && (
             <AnimatedContent delay={0.1} distance={20}>
-              <p className="text-muted-foreground font-satoshi text-base sm:text-lg md:text-xl max-w-3xl mx-auto text-center mb-12 leading-relaxed">
-                {routeDescription}
-              </p>
+              <div 
+                className="text-muted-foreground font-satoshi text-base sm:text-lg md:text-xl max-w-3xl mx-auto text-center mb-12 leading-relaxed [&_p]:mb-4 last:[&_p]:mb-0"
+                dangerouslySetInnerHTML={{ __html: routeDescription }}
+              />
             </AnimatedContent>
           )}
 
@@ -259,7 +266,7 @@ export const DistancesSection = ({
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 };
 

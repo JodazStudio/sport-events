@@ -117,6 +117,7 @@ export const EventHubTemplate = ({ tenant, bcvRate }: EventHubTemplateProps) => 
         />
         
         <DistancesSection 
+          event={eventData}
           description={tenant.description}
           distances={distances}
           femaleDistances={femaleDistances}
