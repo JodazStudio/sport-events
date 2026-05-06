@@ -68,6 +68,7 @@ import QueryProvider from "@/components/providers/QueryProvider";
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { env } from "@/lib/env";
 import { ChunkErrorListener } from "@/components/common/ChunkErrorListener";
+import NextTopLoader from "nextjs-toploader";
 
 export default function RootLayout({
   children,
@@ -79,6 +80,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <NextTopLoader color="#f2260d" showSpinner={false} shadow="none" height={3} />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
