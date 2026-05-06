@@ -67,6 +67,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { env } from "@/lib/env";
+import { ChunkErrorListener } from "@/components/common/ChunkErrorListener";
 
 export default function RootLayout({
   children,
@@ -94,6 +95,7 @@ export default function RootLayout({
         {env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={env.NEXT_PUBLIC_GA_ID} />
         )}
+        <ChunkErrorListener />
       </body>
     </html>
   );
